@@ -19,7 +19,7 @@ export default function MainLayout() {
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="min-h-screen flex" style={{ background: 'var(--bg-base)', direction: 'rtl' }}>
+    <div className="h-screen w-full flex overflow-hidden" style={{ background: 'var(--bg-base)', direction: 'rtl' }}>
 
       {/* ── Sidebar ── */}
       <aside
@@ -107,8 +107,8 @@ export default function MainLayout() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="min-h-full p-6" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+          <div className="min-h-full p-6 w-full max-w-7xl mx-auto" style={{ boxSizing: 'border-box' }}>
             <Outlet />
           </div>
         </div>
