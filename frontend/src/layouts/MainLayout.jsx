@@ -107,8 +107,10 @@ export default function MainLayout() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
-          <Outlet />
+        <div className="flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="min-h-full p-6" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>
