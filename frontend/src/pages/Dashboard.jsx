@@ -1,126 +1,123 @@
-import { TrendingUp, TrendingDown, CalendarDays, Users, Banknote, Megaphone, ArrowLeft, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, CalendarDays, Users, Banknote, Megaphone, Clock, ArrowLeft } from 'lucide-react';
+
+const stats = [
+  { label: 'תורים היום',     value: '8',       change: '+2 מאתמול',  up: true,  icon: CalendarDays, color: 'var(--accent)',  bg: 'var(--accent-light)',  bdr: 'var(--accent-border)'  },
+  { label: 'הכנסות החודש',   value: '₪24,500', change: '+12%',       up: true,  icon: Banknote,     color: 'var(--teal)',    bg: 'var(--teal-light)',    bdr: 'var(--teal-border)'    },
+  { label: 'לקוחות פעילים',  value: '147',     change: '+14 החודש',  up: true,  icon: Users,        color: 'var(--violet)', bg: 'var(--violet-light)', bdr: 'var(--violet-border)' },
+  { label: 'קמפיינים פעילים',value: '2',       change: '42 ייצאו בקרוב', up: null, icon: Megaphone, color: 'var(--amber)',   bg: 'var(--amber-light)',   bdr: 'var(--amber-border)'   },
+];
+
+const appointments = [
+  { time: '09:00', client: 'דנה ישראלי',   treatment: 'טיפול פנים קלאסי',  therapist: 'שירלי', status: 'confirmed' },
+  { time: '10:30', client: 'מיכל לוי',     treatment: 'לייזר שיער — רגליים', therapist: 'נועה',  status: 'confirmed' },
+  { time: '12:00', client: 'אורית כהן',    treatment: 'ניקוי פנים עמוק',    therapist: 'שירלי', status: 'pending'   },
+  { time: '14:30', client: 'רחל אברמוב',   treatment: 'טיפול פנים זוהר',    therapist: 'דנה',   status: 'confirmed' },
+];
+
+const quickActions = [
+  { label: 'שלח תזכורות ללקוחות', sub: '12 לקוחות לא ביקרו חודש+', emoji: '📩', color: 'var(--accent)'  },
+  { label: 'צור קמפיין חדש',       sub: 'WhatsApp + אינסטגרם',       emoji: '🚀', color: 'var(--teal)'   },
+  { label: 'הוסף סוג טיפול',        sub: 'הגדר מחיר ומשך',           emoji: '✨', color: 'var(--violet)' },
+];
 
 export default function Dashboard() {
-  const stats = [
-    { label: 'תורים היום', value: '8', change: '+2 מאתמול', positive: true, icon: CalendarDays, color: '#e8b830' },
-    { label: 'הכנסות החודש', value: '₪24,500', change: '+12%', positive: true, icon: Banknote, color: '#34d399' },
-    { label: 'לקוחות פעילים', value: '147', change: '+14 החודש', positive: true, icon: Users, color: '#60a5fa' },
-    { label: 'קמפיינים פעילים', value: '2', change: '42 ייצאו בקרוב', positive: null, icon: Megaphone, color: '#f87171' },
-  ];
-
-  const upcomingAppointments = [
-    { time: '09:00', client: 'דנה ישראלי', treatment: 'טיפול פנים קלאסי', therapist: 'שירלי', duration: '60 דק\'', status: 'confirmed' },
-    { time: '10:30', client: 'מיכל לוי', treatment: 'לייזר שיער - רגליים', therapist: 'נועה', duration: '45 דק\'', status: 'confirmed' },
-    { time: '12:00', client: 'אורית כהן', treatment: 'ניקוי פנים עמוק', therapist: 'שירלי', duration: '60 דק\'', status: 'pending' },
-    { time: '14:30', client: 'רחל אברמוב', treatment: 'טיפול פנים זוהר', therapist: 'דנה', duration: '45 דק\'', status: 'confirmed' },
-  ];
-
-  const quickActions = [
-    { label: 'שלח תזכורות ללקוחות', desc: '12 לקוחות לא ביקרו חודש+', color: '#e8b830', emoji: '📩' },
-    { label: 'צור קמפיין חדש', desc: 'WhatsApp + אינסטגרם', color: '#34d399', emoji: '🚀' },
-    { label: 'הוסף סוג טיפול', desc: 'הגדר מחיר ומשך', color: '#60a5fa', emoji: '✨' },
-  ];
-
   return (
-    <div className="space-y-6" dir="rtl">
+    <div dir="rtl" className="space-y-6">
 
-      {/* Stats */}
+      {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, idx) => (
-          <div key={idx} className="stat-card group cursor-default">
+        {stats.map((s, i) => (
+          <div key={i} className="stat-card">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" 
-                style={{ background: `${stat.color}15`, border: `1px solid ${stat.color}25` }}>
-                <stat.icon size={18} style={{ color: stat.color }} />
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: s.bg, border: `1px solid ${s.bdr}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <s.icon size={17} style={{ color: s.color }} />
               </div>
-              {stat.positive !== null && (
-                stat.positive 
-                  ? <TrendingUp size={16} style={{ color: '#34d399' }} />
-                  : <TrendingDown size={16} style={{ color: '#f87171' }} />
+              {s.up !== null && (s.up
+                ? <TrendingUp size={15} style={{ color: 'var(--green)' }} />
+                : <TrendingDown size={15} style={{ color: 'var(--accent)' }} />
               )}
             </div>
-            <h3 className="text-2xl font-black mb-1" style={{ color: '#fdf8f5' }}>{stat.value}</h3>
-            <p className="text-sm font-medium mb-1" style={{ color: '#8a7060' }}>{stat.label}</p>
-            <p className="text-xs font-medium" style={{ color: stat.positive ? '#34d399' : stat.positive === false ? '#f87171' : '#e8b830' }}>
-              {stat.change}
-            </p>
+            <p className="text-2xl font-black mb-1" style={{ color: 'var(--text-primary)' }}>{s.value}</p>
+            <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>{s.label}</p>
+            <p className="text-xs font-semibold" style={{ color: s.up ? 'var(--green)' : s.up === false ? 'var(--accent)' : 'var(--amber)' }}>{s.change}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Upcoming appointments */}
+        {/* Appointments */}
         <div className="lg:col-span-2 card p-6">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="font-bold text-lg" style={{ color: '#fdf8f5' }}>התורים הקרובים היום</h3>
-            <button className="flex items-center gap-1 text-sm font-medium" style={{ color: '#e8b830' }}>
+            <h3 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>התורים הקרובים היום</h3>
+            <button className="flex items-center gap-1 text-sm font-semibold" style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}>
               לכל היומן <ArrowLeft size={14} />
             </button>
           </div>
 
           <div className="space-y-3">
-            {upcomingAppointments.map((appt, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 rounded-xl transition-all group"
-                style={{ background: '#1a1410', border: '1px solid rgba(255,255,255,0.05)' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(232,184,48,0.2)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'}>
-                
-                <div className="text-center flex-shrink-0">
-                  <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center"
-                    style={{ background: 'rgba(232,184,48,0.1)', border: '1px solid rgba(232,184,48,0.2)' }}>
-                    <Clock size={12} style={{ color: '#e8b830', marginBottom: '2px' }} />
-                    <span className="font-black text-sm" style={{ color: '#e8b830' }}>{appt.time}</span>
-                  </div>
+            {appointments.map((a, i) => (
+              <div
+                key={i}
+                className="flex items-center rounded-xl transition-all"
+                style={{ gap: 14, padding: '12px 14px', background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-hover)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+              >
+                {/* Time chip */}
+                <div className="flex items-center justify-center flex-shrink-0" style={{
+                  width: 54, height: 46, borderRadius: 10,
+                  background: 'var(--accent-light)', border: '1px solid var(--accent-border)',
+                  flexDirection: 'column',
+                }}>
+                  <Clock size={10} style={{ color: 'var(--accent)', marginBottom: 1 }} />
+                  <span className="font-black text-xs" style={{ color: 'var(--accent)' }}>{a.time}</span>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold truncate" style={{ color: '#fdf8f5' }}>{appt.client}</p>
-                  <p className="text-sm truncate" style={{ color: '#8a7060' }}>{appt.treatment} · {appt.therapist}</p>
+                  <p className="font-bold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{a.client}</p>
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{a.treatment} · {a.therapist}</p>
                 </div>
 
-                <div className="flex-shrink-0 flex flex-col items-end gap-2">
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)', color: '#5a4a40' }}>
-                    {appt.duration}
-                  </span>
-                  <span className={appt.status === 'confirmed' ? 'badge-green' : 'badge-gold'}>
-                    {appt.status === 'confirmed' ? 'מאושר' : 'ממתין'}
-                  </span>
-                </div>
+                <span className={`badge ${a.status === 'confirmed' ? 'badge-green' : 'badge-amber'}`}>
+                  {a.status === 'confirmed' ? 'מאושר' : 'ממתין'}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Quick Actions + Alerts */}
+        {/* Sidebar widgets */}
         <div className="space-y-4">
+
           {/* Quick actions */}
           <div className="card p-5">
-            <h3 className="font-bold mb-4" style={{ color: '#fdf8f5' }}>פעולות מהירות</h3>
+            <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>פעולות מהירות</h3>
             <div className="space-y-2">
-              {quickActions.map((action, i) => (
-                <button key={i} className="w-full flex items-center gap-3 p-3 rounded-xl text-right transition-all"
-                  style={{ background: '#1a1410', border: '1px solid rgba(255,255,255,0.05)' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = `${action.color}30`; e.currentTarget.style.background = `${action.color}08`; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.background = '#1a1410'; }}>
-                  <span className="text-xl">{action.emoji}</span>
+              {quickActions.map((q, i) => (
+                <button
+                  key={i}
+                  className="w-full flex items-center rounded-xl text-right transition-all"
+                  style={{ gap: 12, padding: '10px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', cursor: 'pointer' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border-hover)'; e.currentTarget.style.background = 'var(--bg-hover)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+                >
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>{q.emoji}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate" style={{ color: '#fdf8f5' }}>{action.label}</p>
-                    <p className="text-xs truncate" style={{ color: '#5a4a40' }}>{action.desc}</p>
+                    <p className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>{q.label}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{q.sub}</p>
                   </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Alert card */}
-          <div className="p-5 rounded-2xl relative overflow-hidden" 
-            style={{ background: 'linear-gradient(135deg, #1a1208 0%, #1e1509 100%)', border: '1px solid rgba(232,184,48,0.2)' }}>
-            <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: 'linear-gradient(90deg, transparent, #e8b830, transparent)' }}></div>
-            <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#e8b830' }}>⚡ התראה</p>
-            <p className="font-semibold text-sm mb-1" style={{ color: '#fdf8f5' }}>12 לקוחות לא ביקרו</p>
-            <p className="text-xs mb-4" style={{ color: '#8a7060' }}>מעל חודש ללא ביקור, מומלץ לשלוח תזכורת</p>
-            <button className="btn-primary text-xs py-2 px-4 w-full">שלח תזכורת עכשיו</button>
+          {/* Alert */}
+          <div className="card p-5" style={{ background: 'var(--accent-light)', borderColor: 'var(--accent-border)' }}>
+            <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--accent)' }}>⚡ התראה</p>
+            <p className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>12 לקוחות לא ביקרו</p>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>מעל חודש ללא ביקור. מומלץ לשלוח תזכורת.</p>
+            <button className="btn-primary w-full justify-center text-xs py-2">שלח תזכורת עכשיו</button>
           </div>
         </div>
       </div>

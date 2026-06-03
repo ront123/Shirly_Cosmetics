@@ -1,68 +1,62 @@
 import { useState } from 'react';
 import { Search, Plus, Phone, Calendar, MoreVertical, TrendingUp } from 'lucide-react';
 
+const clients = [
+  { id: 1, name: 'דנה ישראלי',  initials: 'ד', phone: '050-1234567', lastVisit: '2026-05-10', visits: 5,  spent: '₪1,750', status: 'active',   hue: 340 },
+  { id: 2, name: 'מיכל לוי',    initials: 'מ', phone: '052-9876543', lastVisit: '2026-04-22', visits: 12, spent: '₪4,200', status: 'inactive', hue: 200 },
+  { id: 3, name: 'אורית כהן',   initials: 'א', phone: '054-5555555', lastVisit: '2026-06-01', visits: 2,  spent: '₪700',   status: 'active',   hue: 270 },
+  { id: 4, name: 'רחל אברמוב',  initials: 'ר', phone: '053-1111111', lastVisit: '2026-05-28', visits: 7,  spent: '₪2,450', status: 'active',   hue: 160 },
+  { id: 5, name: 'שרה ברגמן',   initials: 'ש', phone: '050-9999999', lastVisit: '2026-03-15', visits: 20, spent: '₪7,000', status: 'inactive', hue: 40  },
+];
+
+const FILTERS = [
+  { key: 'all',      label: 'כולן'    },
+  { key: 'active',   label: 'פעילות'  },
+  { key: 'inactive', label: 'רדומות'  },
+];
+
 export default function ClientsList() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [search, setSearch]   = useState('');
+  const [filter, setFilter]   = useState('all');
 
-  const clients = [
-    { id: 1, name: 'דנה ישראלי', phone: '050-1234567', lastVisit: '2026-05-10', totalVisits: 5, totalSpent: '₪1,750', status: 'active' },
-    { id: 2, name: 'מיכל לוי', phone: '052-9876543', lastVisit: '2026-04-22', totalVisits: 12, totalSpent: '₪4,200', status: 'inactive' },
-    { id: 3, name: 'אורית כהן', phone: '054-5555555', lastVisit: '2026-06-01', totalVisits: 2, totalSpent: '₪700', status: 'active' },
-    { id: 4, name: 'רחל אברמוב', phone: '053-1111111', lastVisit: '2026-05-28', totalVisits: 7, totalSpent: '₪2,450', status: 'active' },
-    { id: 5, name: 'שרה ברגמן', phone: '050-9999999', lastVisit: '2026-03-15', totalVisits: 20, totalSpent: '₪7,000', status: 'inactive' },
-  ];
-
-  const filtered = clients.filter(c => {
-    const matchSearch = c.name.includes(searchTerm) || c.phone.includes(searchTerm);
-    const matchFilter = activeFilter === 'all' || c.status === activeFilter;
-    return matchSearch && matchFilter;
-  });
-
-  const filters = [
-    { key: 'all', label: 'כולן' },
-    { key: 'active', label: 'פעילות' },
-    { key: 'inactive', label: 'רדומות' },
-  ];
+  const visible = clients.filter(c =>
+    (c.name.includes(search) || c.phone.includes(search)) &&
+    (filter === 'all' || c.status === filter)
+  );
 
   return (
-    <div dir="rtl" className="flex flex-col h-full rounded-2xl overflow-hidden" style={{ background: '#111009', border: '1px solid rgba(255,255,255,0.07)' }}>
-      
+    <div dir="rtl" className="flex flex-col h-full rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+
       {/* Header */}
-      <div className="p-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className="p-5 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-black" style={{ color: '#fdf8f5' }}>לקוחות</h2>
-            <p className="text-sm mt-0.5" style={{ color: '#5a4a40' }}>{clients.length} לקוחות רשומות</p>
+            <h2 className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>לקוחות</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{clients.length} לקוחות רשומות</p>
           </div>
-          <button className="btn-primary flex items-center gap-2 text-sm">
-            <Plus size={16} />
-            לקוחה חדשה
-          </button>
+          <button className="btn-primary"><Plus size={15} /> לקוחה חדשה</button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center" style={{ gap: 10 }}>
           {/* Search */}
           <div className="relative flex-1">
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: '#5a4a40' }} />
-            <input 
-              className="input-dark pr-9"
-              placeholder="חיפוש לפי שם או טלפון..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Search size={15} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-faint)', pointerEvents: 'none' }} />
+            <input className="input-dark" style={{ paddingRight: 36 }} placeholder="חיפוש לפי שם או טלפון…" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
 
-          {/* Filters */}
-          <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#1a1410' }}>
-            {filters.map(f => (
-              <button key={f.key} onClick={() => setActiveFilter(f.key)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
-                style={activeFilter === f.key 
-                  ? { background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09' }
-                  : { color: '#5a4a40' }}>
-                {f.label}
-              </button>
+          {/* Filter tabs */}
+          <div className="flex" style={{ gap: 3, background: 'var(--bg-elevated)', borderRadius: 10, padding: 4 }}>
+            {FILTERS.map(f => (
+              <button key={f.key} onClick={() => setFilter(f.key)}
+                className="font-bold text-xs"
+                style={{
+                  padding: '6px 12px', borderRadius: 7, border: 'none', cursor: 'pointer',
+                  fontFamily: 'Heebo, sans-serif',
+                  background: filter === f.key ? 'var(--accent)'  : 'transparent',
+                  color:      filter === f.key ? '#fff'            : 'var(--text-muted)',
+                  transition: 'all 0.15s ease',
+                }}
+              >{f.label}</button>
             ))}
           </div>
         </div>
@@ -71,63 +65,66 @@ export default function ClientsList() {
       {/* Table */}
       <div className="flex-1 overflow-auto">
         <table className="w-full" dir="rtl">
-          <thead className="sticky top-0 z-10" style={{ background: '#111009', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <thead className="sticky top-0 z-10" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border)' }}>
             <tr>
-              <th className="text-right py-3 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: '#3a2e29' }}>לקוחה</th>
-              <th className="text-right py-3 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: '#3a2e29' }}>טלפון</th>
-              <th className="text-right py-3 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: '#3a2e29' }}>ביקור אחרון</th>
-              <th className="text-right py-3 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: '#3a2e29' }}>ביקורים</th>
-              <th className="text-right py-3 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: '#3a2e29' }}>סה"כ הוצאה</th>
-              <th className="text-right py-3 px-5 text-xs font-bold uppercase tracking-wider" style={{ color: '#3a2e29' }}>סטטוס</th>
-              <th className="py-3 px-5"></th>
+              {['לקוחה','טלפון','ביקור אחרון','ביקורים','סה"כ הוצאה','סטטוס',''].map((h, i) => (
+                <th key={i} className="text-right text-xs font-bold uppercase tracking-wider py-3 px-5" style={{ color: 'var(--text-faint)' }}>{h}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {filtered.map((client, i) => (
-              <tr key={client.id} className="group cursor-pointer transition-colors"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(232,184,48,0.03)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                
+            {visible.map(c => (
+              <tr key={c.id} className="group"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.15s ease' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                {/* Name */}
                 <td className="py-4 px-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                      style={{ background: `hsl(${i * 40 + 30}, 70%, 15%)`, color: `hsl(${i * 40 + 30}, 70%, 65%)`, border: `1px solid hsl(${i * 40 + 30}, 40%, 20%)` }}>
-                      {client.name[0]}
+                  <div className="flex items-center" style={{ gap: 10 }}>
+                    <div className="flex items-center justify-center font-black text-sm flex-shrink-0"
+                      style={{ width: 36, height: 36, borderRadius: 9, background: `hsl(${c.hue},55%,14%)`, color: `hsl(${c.hue},70%,65%)`, border: `1px solid hsl(${c.hue},40%,20%)` }}>
+                      {c.initials}
                     </div>
-                    <span className="font-bold text-sm" style={{ color: '#fdf8f5' }}>{client.name}</span>
+                    <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{c.name}</span>
                   </div>
                 </td>
+                {/* Phone */}
                 <td className="py-4 px-5">
-                  <div className="flex items-center gap-2">
-                    <Phone size={13} style={{ color: '#5a4a40' }} />
-                    <span className="text-sm" dir="ltr" style={{ color: '#8a7060' }}>{client.phone}</span>
+                  <div className="flex items-center" style={{ gap: 6 }}>
+                    <Phone size={13} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
+                    <span className="text-sm" dir="ltr" style={{ color: 'var(--text-secondary)' }}>{c.phone}</span>
                   </div>
                 </td>
+                {/* Last visit */}
                 <td className="py-4 px-5">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={13} style={{ color: '#5a4a40' }} />
-                    <span className="text-sm" style={{ color: '#8a7060' }}>{client.lastVisit}</span>
+                  <div className="flex items-center" style={{ gap: 6 }}>
+                    <Calendar size={13} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
+                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{c.lastVisit}</span>
                   </div>
                 </td>
+                {/* Visits */}
                 <td className="py-4 px-5">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp size={13} style={{ color: '#5a4a40' }} />
-                    <span className="font-bold text-sm" style={{ color: '#fdf8f5' }}>{client.totalVisits}</span>
+                  <div className="flex items-center" style={{ gap: 6 }}>
+                    <TrendingUp size={13} style={{ color: 'var(--text-faint)', flexShrink: 0 }} />
+                    <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{c.visits}</span>
                   </div>
                 </td>
+                {/* Spent */}
                 <td className="py-4 px-5">
-                  <span className="font-bold text-sm" style={{ color: '#e8b830' }}>{client.totalSpent}</span>
+                  <span className="font-bold text-sm" style={{ color: 'var(--violet)' }}>{c.spent}</span>
                 </td>
+                {/* Status */}
                 <td className="py-4 px-5">
-                  <span className={client.status === 'active' ? 'badge-green' : 'badge-red'}>
-                    {client.status === 'active' ? 'פעילה' : 'רדומה'}
+                  <span className={`badge ${c.status === 'active' ? 'badge-green' : 'badge-red'}`}>
+                    {c.status === 'active' ? 'פעילה' : 'רדומה'}
                   </span>
                 </td>
+                {/* Actions */}
                 <td className="py-4 px-5">
-                  <button className="p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                    style={{ color: '#5a4a40', background: '#1a1410' }}>
-                    <MoreVertical size={16} />
+                  <button className="flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                    <MoreVertical size={14} />
                   </button>
                 </td>
               </tr>

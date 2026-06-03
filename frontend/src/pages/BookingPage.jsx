@@ -3,153 +3,160 @@ import { ChevronLeft, Clock, Check } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 
+const TREATMENTS = [
+  { id: 1, name: 'טיפול פנים קלאסי', duration: 60, price: 350, emoji: '✨' },
+  { id: 2, name: 'טיפול פנים זוהר',   duration: 45, price: 280, emoji: '🌟' },
+  { id: 3, name: 'ניקוי פנים עמוק',   duration: 60, price: 320, emoji: '💎' },
+  { id: 4, name: 'הסרת שיער לייזר',   duration: 30, price: 150, emoji: '⚡' },
+];
+
+const SLOTS = ['09:00', '10:00', '11:30', '13:00', '15:00', '16:30', '17:00'];
+const STEPS = ['בחירת טיפול', 'בחירת מועד', 'אישור'];
+
+const upcomingDates = Array.from({ length: 14 }).map((_, i) => addDays(new Date(), i + 1));
+
 export default function BookingPage() {
-  const [step, setStep] = useState(1);
-  const [selectedTreatment, setSelectedTreatment] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [step,      setStep]      = useState(1);
+  const [treatment, setTreatment] = useState(null);
+  const [date,      setDate]      = useState(null);
+  const [time,      setTime]      = useState(null);
+  const [done,      setDone]      = useState(false);
 
-  const treatments = [
-    { id: 1, name: 'טיפול פנים קלאסי', duration: 60, price: 350, emoji: '✨' },
-    { id: 2, name: 'טיפול פנים זוהר', duration: 45, price: 280, emoji: '🌟' },
-    { id: 3, name: 'ניקוי פנים עמוק', duration: 60, price: 320, emoji: '💎' },
-    { id: 4, name: 'הסרת שיער - לייזר', duration: 30, price: 150, emoji: '⚡' },
-  ];
-
-  const upcomingDates = Array.from({ length: 14 }).map((_, i) => addDays(new Date(), i + 1));
-  const availableSlots = ['09:00', '10:00', '11:30', '13:00', '15:00', '16:30', '17:00'];
-
-  const steps = ['בחירת טיפול', 'בחירת מועד', 'אישור'];
-
-  if (submitted) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-          style={{ background: 'linear-gradient(135deg, #e8b830, #c99a20)', boxShadow: '0 0 40px rgba(232,184,48,0.4)' }}>
-          <Check size={40} color="#0d0a09" strokeWidth={3} />
-        </div>
-        <h2 className="text-2xl font-black mb-2" style={{ color: '#fdf8f5' }}>התור נקבע! 🎉</h2>
-        <p className="text-sm mb-1" style={{ color: '#8a7060' }}>
-          {selectedTreatment?.name}
-        </p>
-        <p className="text-sm" style={{ color: '#8a7060' }}>
-          {selectedDate && format(selectedDate, 'EEEE, d בMMMM', { locale: he })} · {selectedTime}
-        </p>
-        <p className="text-xs mt-4 px-6" style={{ color: '#5a4a40' }}>
-          נשלח לך אישור בוואטסאפ בקרוב
-        </p>
+  if (done) return (
+    <div className="flex flex-col items-center justify-center text-center" style={{ paddingTop: 80 }}>
+      <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 40px rgba(244,63,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+        <Check size={36} color="#fff" strokeWidth={3} />
       </div>
-    );
-  }
+      <h2 className="font-black text-2xl mb-2" style={{ color: 'var(--text-primary)' }}>התור נקבע! 🎉</h2>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 4 }}>{treatment?.name}</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+        {date && format(date, 'EEEE, d בMMMM', { locale: he })} · {time}
+      </p>
+      <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 16 }}>
+        אישור יישלח אליך בוואטסאפ בקרוב ✉️
+      </p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 pt-4">
-      
+    <div className="space-y-6" style={{ paddingTop: 16 }}>
+
       {/* Step indicator */}
-      <div className="flex items-center justify-center gap-2 mb-6">
-        {steps.map((s, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all`}
-                style={step > i + 1 
-                  ? { background: '#34d399', color: '#0d0a09' }
-                  : step === i + 1 
-                    ? { background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09' }
-                    : { background: '#1a1410', color: '#3a2e29', border: '1px solid rgba(255,255,255,0.07)' }}>
-                {step > i + 1 ? <Check size={12} strokeWidth={3} /> : i + 1}
+      <div className="flex items-center justify-center" style={{ gap: 8, marginBottom: 8 }}>
+        {STEPS.map((s, i) => {
+          const num = i + 1;
+          const active = step === num;
+          const done   = step > num;
+          return (
+            <div key={i} className="flex items-center" style={{ gap: 6 }}>
+              <div className="flex items-center" style={{ gap: 6 }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 800,
+                  background: done ? 'var(--green)' : active ? 'var(--accent)' : 'var(--bg-elevated)',
+                  color:      done || active ? '#fff' : 'var(--text-faint)',
+                  border:     done || active ? 'none' : '1px solid var(--border)',
+                  boxShadow:  active ? '0 2px 10px rgba(244,63,94,0.4)' : 'none',
+                  transition: 'all 0.2s ease',
+                }}>
+                  {done ? <Check size={12} strokeWidth={3} /> : num}
+                </div>
+                <span className="hidden sm:block text-xs font-semibold" style={{ color: active ? 'var(--text-primary)' : 'var(--text-faint)' }}>{s}</span>
               </div>
-              <span className="text-xs font-medium hidden sm:block" style={{ color: step === i + 1 ? '#e8b830' : '#3a2e29' }}>
-                {s}
-              </span>
+              {i < STEPS.length - 1 && (
+                <div style={{ width: 24, height: 1, background: step > num ? 'var(--green)' : 'var(--border)' }} />
+              )}
             </div>
-            {i < steps.length - 1 && (
-              <div className="w-8 h-px" style={{ background: step > i + 1 ? '#34d399' : '#1a1410' }}></div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Step 1: Treatment */}
+      {/* ── Step 1: Treatment ── */}
       {step === 1 && (
         <div className="space-y-3">
-          <h2 className="text-xl font-black mb-5" style={{ color: '#fdf8f5' }}>איזה טיפול תרצי? ✨</h2>
-          {treatments.map((t) => (
-            <button key={t.id} onClick={() => { setSelectedTreatment(t); setStep(2); }}
-              className="w-full flex items-center justify-between p-4 rounded-2xl text-right transition-all"
-              style={{ background: '#161210', border: '1px solid rgba(255,255,255,0.07)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,184,48,0.35)'; e.currentTarget.style.background = '#1a1410'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = '#161210'; }}>
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">{t.emoji}</span>
+          <h2 className="font-black text-xl" style={{ color: 'var(--text-primary)', marginBottom: 16 }}>איזה טיפול תרצי? ✨</h2>
+          {TREATMENTS.map(t => (
+            <button key={t.id} onClick={() => { setTreatment(t); setStep(2); }}
+              className="w-full flex items-center justify-between rounded-2xl text-right transition-all"
+              style={{ padding: '14px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', cursor: 'pointer', gap: 14 }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg-surface)'; }}
+            >
+              <div className="flex items-center" style={{ gap: 14 }}>
+                <span style={{ fontSize: 28, lineHeight: 1 }}>{t.emoji}</span>
                 <div>
-                  <h3 className="font-bold" style={{ color: '#fdf8f5' }}>{t.name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Clock size={12} style={{ color: '#5a4a40' }} />
-                    <span className="text-xs" style={{ color: '#5a4a40' }}>{t.duration} דקות</span>
+                  <p className="font-bold text-base" style={{ color: 'var(--text-primary)', marginBottom: 3 }}>{t.name}</p>
+                  <div className="flex items-center" style={{ gap: 5 }}>
+                    <Clock size={11} style={{ color: 'var(--text-faint)' }} />
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.duration} דקות</span>
                   </div>
                 </div>
               </div>
-              <span className="font-black text-lg" style={{ color: '#e8b830' }}>₪{t.price}</span>
+              <span className="font-black text-lg" style={{ color: 'var(--accent)', flexShrink: 0 }}>₪{t.price}</span>
             </button>
           ))}
         </div>
       )}
 
-      {/* Step 2: Date & Time */}
+      {/* ── Step 2: Date & Time ── */}
       {step === 2 && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black" style={{ color: '#fdf8f5' }}>בחרי מועד 📅</h2>
-            <button onClick={() => setStep(1)} className="flex items-center gap-1 text-sm font-medium" style={{ color: '#e8b830' }}>
-              <ChevronLeft size={16} />
-              חזור
+            <h2 className="font-black text-xl" style={{ color: 'var(--text-primary)' }}>בחרי מועד 📅</h2>
+            <button onClick={() => setStep(1)} className="flex items-center font-semibold text-sm" style={{ gap: 4, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <ChevronLeft size={15} />חזור
             </button>
           </div>
 
-          {/* Recap */}
-          <div className="p-3 rounded-xl flex items-center gap-3" style={{ background: 'rgba(232,184,48,0.08)', border: '1px solid rgba(232,184,48,0.2)' }}>
-            <span className="text-xl">{selectedTreatment?.emoji}</span>
+          {/* Recap chip */}
+          <div className="flex items-center rounded-xl" style={{ gap: 10, padding: '10px 14px', background: 'var(--accent-light)', border: '1px solid var(--accent-border)' }}>
+            <span style={{ fontSize: 20 }}>{treatment?.emoji}</span>
             <div>
-              <p className="font-bold text-sm" style={{ color: '#fdf8f5' }}>{selectedTreatment?.name}</p>
-              <p className="text-xs" style={{ color: '#8a7060' }}>{selectedTreatment?.duration} דקות · ₪{selectedTreatment?.price}</p>
+              <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{treatment?.name}</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{treatment?.duration} דקות · ₪{treatment?.price}</p>
             </div>
           </div>
 
-          {/* Dates */}
+          {/* Date scroller */}
           <div>
-            <p className="text-sm font-semibold mb-3" style={{ color: '#8a7060' }}>בחרי תאריך:</p>
-            <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-              {upcomingDates.map((date, i) => {
-                const isSelected = selectedDate && format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+            <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>בחרי תאריך:</p>
+            <div className="flex" style={{ gap: 10, overflowX: 'auto', paddingBottom: 6, scrollbarWidth: 'none' }}>
+              {upcomingDates.map((d, i) => {
+                const sel = date && format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
                 return (
-                  <button key={i} onClick={() => setSelectedDate(date)}
-                    className="flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center transition-all"
-                    style={isSelected 
-                      ? { background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09', boxShadow: '0 4px 15px rgba(232,184,48,0.4)' }
-                      : { background: '#161210', border: '1px solid rgba(255,255,255,0.07)', color: '#8a7060' }}>
-                    <span className="text-xs font-bold uppercase">{format(date, 'EEE', { locale: he })}</span>
-                    <span className="text-xl font-black">{format(date, 'd')}</span>
-                    <span className="text-xs">{format(date, 'MMM', { locale: he })}</span>
+                  <button key={i} onClick={() => setDate(d)}
+                    className="flex-shrink-0 flex flex-col items-center justify-center rounded-2xl transition-all"
+                    style={{
+                      width: 58, height: 76,
+                      background: sel ? 'var(--accent)' : 'var(--bg-surface)',
+                      border: `1px solid ${sel ? 'var(--accent)' : 'var(--border)'}`,
+                      color: sel ? '#fff' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      boxShadow: sel ? '0 4px 14px rgba(244,63,94,0.4)' : 'none',
+                      gap: 2,
+                    }}
+                  >
+                    <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{format(d, 'EEE', { locale: he })}</span>
+                    <span style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{format(d, 'd')}</span>
+                    <span style={{ fontSize: 10, opacity: 0.7 }}>{format(d, 'MMM', { locale: he })}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Times */}
-          {selectedDate && (
+          {/* Time slots */}
+          {date && (
             <div>
-              <p className="text-sm font-semibold mb-3" style={{ color: '#8a7060' }}>שעות פנויות:</p>
-              <div className="grid grid-cols-4 gap-2">
-                {availableSlots.map((time, i) => (
-                  <button key={i} onClick={() => { setSelectedTime(time); setStep(3); }}
-                    className="py-3 rounded-xl font-bold text-sm transition-all"
-                    style={{ background: '#161210', border: '1px solid rgba(255,255,255,0.07)', color: '#fdf8f5' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,184,48,0.5)'; e.currentTarget.style.color = '#e8b830'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#fdf8f5'; }}>
-                    {time}
-                  </button>
+              <p className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>שעות פנויות:</p>
+              <div className="grid grid-cols-4" style={{ gap: 8 }}>
+                {SLOTS.map((t, i) => (
+                  <button key={i} onClick={() => { setTime(t); setStep(3); }}
+                    className="font-bold text-sm rounded-xl transition-all"
+                    style={{ padding: '11px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', cursor: 'pointer' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                  >{t}</button>
                 ))}
               </div>
             </div>
@@ -157,45 +164,40 @@ export default function BookingPage() {
         </div>
       )}
 
-      {/* Step 3: Details */}
+      {/* ── Step 3: Confirm ── */}
       {step === 3 && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black" style={{ color: '#fdf8f5' }}>פרטים אחרונים 🌸</h2>
-            <button onClick={() => setStep(2)} className="flex items-center gap-1 text-sm font-medium" style={{ color: '#e8b830' }}>
-              <ChevronLeft size={16} />
-              חזור
+            <h2 className="font-black text-xl" style={{ color: 'var(--text-primary)' }}>פרטים אחרונים 🌸</h2>
+            <button onClick={() => setStep(2)} className="flex items-center font-semibold text-sm" style={{ gap: 4, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <ChevronLeft size={15} />חזור
             </button>
           </div>
 
           {/* Summary */}
-          <div className="p-4 rounded-2xl" style={{ background: 'rgba(232,184,48,0.07)', border: '1px solid rgba(232,184,48,0.2)' }}>
-            <p className="font-bold" style={{ color: '#fdf8f5' }}>{selectedTreatment?.name}</p>
-            <p className="text-sm mt-1" style={{ color: '#8a7060' }}>
-              {selectedDate && format(selectedDate, 'EEEE, d בMMMM', { locale: he })} · {selectedTime}
+          <div className="rounded-2xl" style={{ padding: '14px 16px', background: 'var(--accent-light)', border: '1px solid var(--accent-border)' }}>
+            <p className="font-bold" style={{ color: 'var(--text-primary)' }}>{treatment?.name}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 3 }}>
+              {date && format(date, 'EEEE, d בMMMM', { locale: he })} · {time}
             </p>
-            <p className="font-black text-lg mt-2" style={{ color: '#e8b830' }}>₪{selectedTreatment?.price}</p>
+            <p className="font-black text-xl" style={{ color: 'var(--accent)', marginTop: 8 }}>₪{treatment?.price}</p>
           </div>
 
           {/* Form */}
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
+          <form className="space-y-4" onSubmit={e => { e.preventDefault(); setDone(true); }}>
             <div>
-              <label className="block text-sm font-bold mb-2" style={{ color: '#8a7060' }}>שם מלא *</label>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שם מלא *</label>
               <input type="text" required className="input-dark" placeholder="לדוגמא: דנה ישראלי" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-2" style={{ color: '#8a7060' }}>מספר טלפון *</label>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מספר טלפון *</label>
               <input type="tel" required className="input-dark" placeholder="050-0000000" dir="ltr" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-2" style={{ color: '#8a7060' }}>הערות (אופציונלי)</label>
-              <textarea className="input-dark resize-none" rows="2" placeholder="יש משהו שכדאי שנדע?"></textarea>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>הערות (אופציונלי)</label>
+              <textarea className="input-dark resize-none" rows={2} placeholder="יש משהו שכדאי שנדע?" />
             </div>
-
-            <button type="submit" className="w-full py-4 rounded-2xl font-black text-lg mt-2 transition-all"
-              style={{ background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09', boxShadow: '0 6px 25px rgba(232,184,48,0.4)' }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <button type="submit" className="btn-primary w-full justify-center text-base" style={{ padding: '14px 0', marginTop: 4, fontSize: 15 }}>
               אשרי את התור ✨
             </button>
           </form>
