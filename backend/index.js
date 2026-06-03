@@ -8,6 +8,13 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Routes
+const treatmentsRoutes = require('./routes/treatments');
+const appointmentsRoutes = require('./routes/appointments');
+
+app.use('/api/treatments', treatmentsRoutes);
+app.use('/api/appointments', appointmentsRoutes);
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Shirly Cosmetics API is running' });
 });

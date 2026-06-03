@@ -8,6 +8,16 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Working Hours for therapists
+CREATE TABLE IF NOT EXISTS working_hours (
+    id SERIAL PRIMARY KEY,
+    therapist_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    UNIQUE(therapist_id, day_of_week)
+);
+
 -- Clients Table
 CREATE TABLE IF NOT EXISTS clients (
     id SERIAL PRIMARY KEY,
