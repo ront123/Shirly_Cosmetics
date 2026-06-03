@@ -110,24 +110,28 @@ export default function MainLayout() {
       </aside>
 
       {/* ── Main ── */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0" style={{ minWidth: 0 }}>
         {/* Top bar */}
         <header
-          className="flex items-center justify-between px-6 flex-shrink-0"
+          className="flex items-center justify-between flex-shrink-0"
           style={{
             height: 56,
+            padding: '0 24px',
             borderBottom: '1px solid var(--border)',
-            background: 'rgba(13,13,18,0.85)',
+            background: 'rgba(13,13,18,0.9)',
             backdropFilter: 'blur(16px)',
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
           }}
         >
           <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
             {new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
 
-          <div className="flex items-center" style={{ gap: 10 }}>
+          <div className="flex items-center flex-shrink-0" style={{ gap: 10 }}>
             <button
-              className="relative flex items-center justify-center"
+              className="relative flex items-center justify-center flex-shrink-0"
               style={{
                 width: 36, height: 36, borderRadius: 9,
                 background: 'var(--bg-elevated)',
@@ -148,7 +152,7 @@ export default function MainLayout() {
                 }}
               />
             </button>
-            <button className="btn-primary">
+            <button className="btn-primary flex-shrink-0">
               + תור חדש
             </button>
           </div>
