@@ -35,42 +35,32 @@ const INIT_AUTOS = [
 
 const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳'];
 
-function AutoCard({ auto, onToggle, onDelete }) {
+function AutoRow({ auto, onToggle, onDelete }) {
   const trigger = TRIGGER_OPTIONS.find(t => t.key === auto.trigger);
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="card overflow-hidden" style={{ transition: 'all 0.2s ease' }}>
-      <div className="p-5 flex items-center" style={{ gap: 14 }}>
-        {/* Icon */}
-        <div className="flex-shrink-0 flex items-center justify-center"
-          style={{ width: 42, height: 42, borderRadius: 12, background: `color-mix(in srgb, ${trigger?.color} 15%, transparent)` }}>
-          {trigger && <trigger.icon size={18} style={{ color: trigger.color }} />}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center" style={{ gap: 8, marginBottom: 4 }}>
-            <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{auto.name}</h3>
-            <span className={`badge ${auto.active ? 'badge-green' : ''}`}
-              style={!auto.active ? { background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border)' } : {}}>
-              {auto.active ? 'פעילה' : 'מושהית'}
-            </span>
+    <>
+      <tr className="hover-bg-elevated transition-colors" style={{ borderBottom: expanded ? 'none' : '1px solid var(--border)' }}>
+        <td className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 flex items-center justify-center"
+              style={{ width: 34, height: 34, borderRadius: 10, background: `color-mix(in srgb, ${trigger?.color} 15%, transparent)` }}>
+              {trigger && <trigger.icon size={15} style={{ color: trigger.color }} />}
+            </div>
+            <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{auto.name}</span>
           </div>
-          <div className="flex flex-wrap items-center" style={{ gap: 10 }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              🔔 {trigger?.label}{auto.days ? ` (${auto.days})` : ''}
-            </span>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>🕐 {auto.hour}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-              📤 <strong style={{ color: 'var(--green)' }}>{auto.sent}</strong> נשלחו
-            </span>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center flex-shrink-0" style={{ gap: 8 }}>
-          {/* Toggle */}
+        </td>
+        <td className="p-4" style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+          {trigger?.label}{auto.days ? ` (${auto.days})` : ''}
+        </td>
+        <td className="p-4" style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+          {auto.hour}
+        </td>
+        <td className="p-4" style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700 }}>
+          {auto.sent}
+        </td>
+        <td className="p-4">
           <button onClick={() => onToggle(auto.id)}
             style={{
               width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', position: 'relative',
@@ -82,26 +72,28 @@ function AutoCard({ auto, onToggle, onDelete }) {
               right: auto.active ? 3 : 23,
             }} />
           </button>
-
-          <button onClick={() => setExpanded(!expanded)} className="btn-ghost" style={{ padding: '6px 10px', fontSize: 12 }}>
-            {expanded ? 'סגור' : 'פרטים'}
-          </button>
-
-          <button onClick={() => onDelete(auto.id)}
-            style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', color: 'var(--accent)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Trash2 size={13} />
-          </button>
-        </div>
-      </div>
-
-      {/* Expanded: message preview */}
+        </td>
+        <td className="p-4 text-left">
+          <div className="flex items-center justify-end gap-2">
+            <button onClick={() => setExpanded(!expanded)} className="btn-ghost" style={{ padding: '6px 12px', fontSize: 13 }}>
+              {expanded ? 'סגור' : 'פרטים'}
+            </button>
+            <button onClick={() => onDelete(auto.id)}
+              style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', color: 'var(--accent)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </td>
+      </tr>
       {expanded && (
-        <div style={{ borderTop: '1px solid var(--border)', padding: '14px 20px', background: 'var(--bg-elevated)' }}>
-          <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-faint)' }}>תוכן ההודעה</p>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{auto.message}</p>
-        </div>
+        <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+          <td colSpan={6} className="p-4 text-right">
+            <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-faint)' }}>תוכן ההודעה</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{auto.message}</p>
+          </td>
+        </tr>
       )}
-    </div>
+    </>
   );
 }
 
@@ -267,25 +259,25 @@ export default function Automations() {
         </p>
       </div>
 
-      {/* Active */}
-      {active.length > 0 && (
-        <div>
-          <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-muted)' }}>פעילות ({active.length})</h3>
-          <div className="space-y-3">
-            {active.map(a => <AutoCard key={a.id} auto={a} onToggle={toggle} onDelete={deleteAuto} />)}
-          </div>
-        </div>
-      )}
-
-      {/* Inactive */}
-      {inactive.length > 0 && (
-        <div>
-          <h3 className="font-bold text-sm mb-3" style={{ color: 'var(--text-muted)' }}>מושהיות ({inactive.length})</h3>
-          <div className="space-y-3">
-            {inactive.map(a => <AutoCard key={a.id} auto={a} onToggle={toggle} onDelete={deleteAuto} />)}
-          </div>
-        </div>
-      )}
+      <div className="card p-0 overflow-x-auto">
+        <table className="w-full text-right border-collapse whitespace-nowrap">
+          <thead>
+            <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+              <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>שם האוטומציה</th>
+              <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>תנאי מפעיל</th>
+              <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>שעת שליחה</th>
+              <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>הודעות שנשלחו</th>
+              <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>סטטוס</th>
+              <th className="font-bold p-4 text-sm w-1"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {autos.map(a => (
+              <AutoRow key={a.id} auto={a} onToggle={toggle} onDelete={deleteAuto} />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {autos.length === 0 && (
         <div className="card flex flex-col items-center justify-center py-20">

@@ -267,38 +267,53 @@ export default function Campaigns() {
           <p className="font-semibold" style={{ color: 'var(--text-muted)' }}>אין קמפיינים בקטגוריה זו</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {visible.map(c => {
-            const st = STATUS_MAP[c.status];
-            const openRate = c.status === 'sent' ? Math.round(((c.opened || 0) / c.count) * 100) : null;
-            return (
-              <div key={c.id} className="card p-5 flex items-center" style={{ gap: 16 }}>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center" style={{ gap: 8, marginBottom: 6 }}>
-                    <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>{c.name}</h3>
-                    <span className={`badge ${st.badge}`}>{st.label}</span>
-                  </div>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: c.status === 'sent' ? 8 : 0 }}>
-                    {c.audience} · {c.count} נמענות · {c.date}
-                  </p>
-                  {c.status === 'sent' && (
-                    <div className="flex items-center" style={{ gap: 16 }}>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>נשלח: <strong style={{ color: 'var(--text-primary)' }}>{c.count}</strong></span>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>נפתח: <strong style={{ color: 'var(--green)' }}>{c.opened}</strong></span>
-                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>אחוז פתיחה: <strong style={{ color: 'var(--teal)' }}>{openRate}%</strong></span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center flex-shrink-0" style={{ gap: 8 }}>
-                  {c.status !== 'sent' && <button className="btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }}><Edit2 size={13} /> ערוך</button>}
-                  <button onClick={() => setCampaigns(p => p.filter(x => x.id !== c.id))}
-                    style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', color: 'var(--accent)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className="card p-0 overflow-x-auto">
+          <table className="w-full text-right border-collapse whitespace-nowrap">
+            <thead>
+              <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>שם הקמפיין</th>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>סוג/קהל</th>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>תאריך</th>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>מספר נמענים</th>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>נפתח</th>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>אחוז פתיחה</th>
+                <th className="font-bold p-4 text-sm" style={{ color: 'var(--text-secondary)' }}>סטטוס</th>
+                <th className="font-bold p-4 text-sm w-1"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map(c => {
+                const st = STATUS_MAP[c.status];
+                const openRate = c.status === 'sent' ? Math.round(((c.opened || 0) / c.count) * 100) : null;
+                return (
+                  <tr key={c.id} className="hover-bg-elevated transition-colors" style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td className="p-4 font-bold" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
+                    <td className="p-4" style={{ color: 'var(--text-muted)', fontSize: 13 }}>{c.audience}</td>
+                    <td className="p-4" style={{ color: 'var(--text-muted)', fontSize: 13 }}>{c.date}</td>
+                    <td className="p-4" style={{ color: 'var(--text-primary)', fontSize: 13 }}>{c.count}</td>
+                    <td className="p-4" style={{ color: c.status === 'sent' ? 'var(--green)' : 'var(--text-muted)', fontSize: 13 }}>
+                      {c.status === 'sent' ? c.opened : '-'}
+                    </td>
+                    <td className="p-4" style={{ color: c.status === 'sent' ? 'var(--teal)' : 'var(--text-muted)', fontSize: 13 }}>
+                      {c.status === 'sent' ? `${openRate}%` : '-'}
+                    </td>
+                    <td className="p-4">
+                      <span className={`badge ${st.badge}`}>{st.label}</span>
+                    </td>
+                    <td className="p-4 text-left">
+                      <div className="flex items-center justify-end gap-2">
+                        {c.status !== 'sent' && <button className="btn-ghost" style={{ padding: '6px 12px', fontSize: 13 }}><Edit2 size={13} /> ערוך</button>}
+                        <button onClick={() => setCampaigns(p => p.filter(x => x.id !== c.id))}
+                          style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', color: 'var(--accent)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
