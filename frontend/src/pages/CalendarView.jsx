@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight, ChevronLeft, Plus, Clock } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { he } from 'date-fns/locale';
 
@@ -28,26 +28,21 @@ export default function CalendarView() {
     <div dir="rtl" className="flex flex-col h-full rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
 
       {/* Header */}
-      <div className="flex items-center justify-between p-5 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="flex items-center" style={{ gap: 14 }}>
-          <h2 className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>
-            {format(currentDate, 'MMMM yyyy', { locale: he })}
-          </h2>
-          <div className="flex items-center" style={{ gap: 2, background: 'var(--bg-elevated)', borderRadius: 10, padding: 3 }}>
-            <button onClick={() => setCurrentDate(addDays(currentDate, -7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
-              <ChevronRight size={16} />
-            </button>
-            <button onClick={() => setCurrentDate(new Date())} className="btn-ghost" style={{ padding: '5px 10px', border: 'none', borderRadius: 7, fontSize: 12 }}>
-              היום
-            </button>
-            <button onClick={() => setCurrentDate(addDays(currentDate, 7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
-              <ChevronLeft size={16} />
-            </button>
-          </div>
+      <div className="flex items-center p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)', gap: 12 }}>
+        <h2 className="font-black text-base" style={{ color: 'var(--text-primary)' }}>
+          {format(currentDate, 'MMMM yyyy', { locale: he })}
+        </h2>
+        <div className="flex items-center" style={{ gap: 2, background: 'var(--bg-elevated)', borderRadius: 10, padding: 3 }}>
+          <button onClick={() => setCurrentDate(addDays(currentDate, -7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
+            <ChevronRight size={16} />
+          </button>
+          <button onClick={() => setCurrentDate(new Date())} className="btn-ghost" style={{ padding: '5px 10px', border: 'none', borderRadius: 7, fontSize: 12 }}>
+            היום
+          </button>
+          <button onClick={() => setCurrentDate(addDays(currentDate, 7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
+            <ChevronLeft size={16} />
+          </button>
         </div>
-        <button className="btn-primary">
-          <Plus size={15} /> תור חדש
-        </button>
       </div>
 
       {/* Grid */}
