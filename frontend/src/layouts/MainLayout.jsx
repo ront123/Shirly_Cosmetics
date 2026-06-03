@@ -1,17 +1,18 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { CalendarDays, Users, MessageCircle, BarChart3, Settings, Menu, Sparkles, Bell, Package, TrendingDown, UserCheck } from 'lucide-react';
+import { CalendarDays, Users, MessageCircle, BarChart3, Settings, Menu, Sparkles, Bell, Package, TrendingDown, UserCheck, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 const navItems = [
-  { name: 'דשבורד',        icon: BarChart3,    path: '/' },
-  { name: 'יומן תורים',   icon: CalendarDays, path: '/calendar' },
-  { name: 'לקוחות',        icon: Users,         path: '/clients' },
-  { name: 'עובדים',        icon: UserCheck,     path: '/staff' },
-  { name: 'מוצרים',        icon: Package,       path: '/products' },
-  { name: 'קמפיינים',      icon: MessageCircle, path: '/campaigns' },
-  { name: 'הוצאות',        icon: TrendingDown,  path: '/expenses' },
-  { name: 'דוחות',         icon: BarChart3,     path: '/reports' },
-  { name: 'הגדרות',        icon: Settings,      path: '/settings' },
+  { name: 'דשבורד',        icon: BarChart3,    path: '/'           },
+  { name: 'יומן תורים',   icon: CalendarDays, path: '/calendar'   },
+  { name: 'לקוחות',        icon: Users,        path: '/clients'    },
+  { name: 'עובדים',        icon: UserCheck,    path: '/staff'      },
+  { name: 'מוצרים',        icon: Package,      path: '/products'   },
+  { name: 'קמפיינים',      icon: MessageCircle,path: '/campaigns'  },
+  { name: 'אוטומציות',     icon: Zap,          path: '/automations'},
+  { name: 'הוצאות',        icon: TrendingDown, path: '/expenses'   },
+  { name: 'דוחות',         icon: BarChart3,    path: '/reports'    },
+  { name: 'הגדרות',        icon: Settings,     path: '/settings'   },
 ];
 
 export default function MainLayout() {

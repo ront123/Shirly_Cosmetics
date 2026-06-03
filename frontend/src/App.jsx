@@ -6,6 +6,7 @@ import CalendarView from './pages/CalendarView';
 import BookingPage from './pages/BookingPage';
 import ClientsList from './pages/ClientsList';
 import Campaigns from './pages/Campaigns';
+import Automations from './pages/Automations';
 import Reports from './pages/Reports';
 import Products from './pages/Products';
 import Expenses from './pages/Expenses';
@@ -21,6 +22,7 @@ function App() {
           <Route path="calendar" element={<CalendarView />} />
           <Route path="clients" element={<ClientsList />} />
           <Route path="campaigns" element={<Campaigns />} />
+          <Route path="automations" element={<Automations />} />
           <Route path="reports" element={<Reports />} />
           <Route path="products" element={<Products />} />
           <Route path="expenses" element={<Expenses />} />
