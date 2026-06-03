@@ -121,7 +121,7 @@ function NewAutoModal({ onClose, onSave }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full" style={{ maxWidth: 520, margin: '0 16px' }}>
+      <div className="w-full" style={{ maxWidth: 640, margin: '0 16px' }}>
         <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)' }}>
 
           <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -129,7 +129,7 @@ function NewAutoModal({ onClose, onSave }) {
             <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
           </div>
 
-          <div className="px-6 py-5 space-y-4" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          <div className="px-6 py-5 space-y-5" style={{ maxHeight: '75vh', overflowY: 'auto' }}>
 
             <div>
               <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שם האוטומציה</label>
@@ -138,21 +138,32 @@ function NewAutoModal({ onClose, onSave }) {
 
             <div>
               <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>תנאי הפעלה</label>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
                 {TRIGGER_OPTIONS.map(t => (
                   <button key={t.key} onClick={() => setForm({...form, trigger: t.key})}
-                    className="w-full flex items-center text-right rounded-xl transition-all"
-                    style={{ gap: 12, padding: '10px 14px', cursor: 'pointer',
+                    className="flex flex-col items-start rounded-xl transition-all"
+                    style={{ padding: '12px 14px', cursor: 'pointer',
                       background: form.trigger === t.key ? `color-mix(in srgb, ${t.color} 12%, var(--bg-elevated))` : 'var(--bg-elevated)',
                       border: `1.5px solid ${form.trigger === t.key ? t.color : 'var(--border)'}` }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `color-mix(in srgb, ${t.color} 15%, transparent)`, flexShrink: 0 }}>
-                      <t.icon size={15} style={{ color: t.color }} />
+                    <div style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `color-mix(in srgb, ${t.color} 15%, transparent)`, marginBottom: 8 }}>
+                      <t.icon size={14} style={{ color: t.color }} />
                     </div>
                     <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{t.label}</span>
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Dynamic Trigger Explanations */}
+            {form.trigger && (
+              <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                {form.trigger === 'inactive' && <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>💡 המערכת תסרוק מדי יום לקוחות שלא הגיעו לטיפול יותר מ-{form.days} ימים ותשלח להן הודעה. יש לבחור באילו ימים בשבוע מותר לשלוח הודעות.</p>}
+                {form.trigger === 'birthday' && <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>💡 המערכת שולפת אוטומטית את תאריך הלידה מטופס הלקוחה, ושולחת הודעת מזל טוב בבוקר יום ההולדת (לפי השעה שמוגדרת למטה). ניתן לראות מי חוגגת בעמוד הלקוחות.</p>}
+                {form.trigger === 'before' && <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>💡 שליחת תזכורת אוטומטית {form.days} ימים לפני מועד התור שנקבע ביומן.</p>}
+                {form.trigger === 'after' && <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>💡 שליחת הודעת פולו-אפ (מעקב) {form.days} ימים לאחר סיום הטיפול.</p>}
+                {form.trigger === 'new' && <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>💡 נשלח אוטומטית מיד כשלקוחה חדשה מוזנת למערכת.</p>}
+              </div>
+            )}
 
             {(form.trigger === 'inactive' || form.trigger === 'before' || form.trigger === 'after') && (
               <div>
