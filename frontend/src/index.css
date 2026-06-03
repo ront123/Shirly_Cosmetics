@@ -1,21 +1,231 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Assistant:wght@300;400;600;700&display=swap');
 
 @theme {
-  --color-primary: #fdf2f8; /* pink-50 */
-  --color-primary-dark: #fbcfe8; /* pink-200 */
-  --color-accent: #db2777; /* pink-600 */
+  --color-surface-900: #0d0a09;
+  --color-surface-800: #161210;
+  --color-surface-700: #211b18;
+  --color-surface-600: #2d2420;
+  --color-surface-500: #3a2e29;
+  --color-gold-400: #f5c842;
+  --color-gold-500: #e8b830;
+  --color-gold-600: #c99a20;
+  --color-rose-400: #f87171;
+  --color-rose-500: #ef4444;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-copper: #b87333;
+  --color-warm-white: #fdf8f5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #0d0a09;
 }
 
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Heebo', 'Assistant', sans-serif;
+  background-color: #0d0a09;
+  color: #fdf8f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #161210;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a2e29;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e8b830;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-warm {
+  background: rgba(232, 184, 48, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(232, 184, 48, 0.15);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #f5c842 0%, #e8b830 50%, #b87333 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 20px rgba(232, 184, 48, 0.3), 0 0 60px rgba(232, 184, 48, 0.1);
+}
+
+.glow-rose {
+  box-shadow: 0 0 20px rgba(248, 113, 113, 0.3), 0 0 60px rgba(248, 113, 113, 0.1);
+}
+
+/* Card styles */
+.card {
+  background: #161210;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(232, 184, 48, 0.25);
+  background: #1a1410;
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #e8b830 0%, #c99a20 100%);
+  color: #0d0a09;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(232, 184, 48, 0.3);
+  font-family: 'Heebo', sans-serif;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(232, 184, 48, 0.4);
+  background: linear-gradient(135deg, #f5c842 0%, #e8b830 100%);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Sidebar nav item */
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #8a7060;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: rgba(232, 184, 48, 0.08);
+  color: #f5c842;
+}
+
+.nav-item.active {
+  background: rgba(232, 184, 48, 0.12);
+  color: #f5c842;
+  border: 1px solid rgba(232, 184, 48, 0.2);
+}
+
+/* Status badges */
+.badge-green {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-red {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-gold {
+  background: rgba(232, 184, 48, 0.1);
+  color: #e8b830;
+  border: 1px solid rgba(232, 184, 48, 0.2);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Input styles */
+.input-dark {
+  background: #211b18;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fdf8f5;
+  padding: 10px 14px;
+  border-radius: 12px;
+  outline: none;
+  width: 100%;
+  font-family: 'Heebo', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.input-dark::placeholder {
+  color: #5a4a40;
+}
+
+.input-dark:focus {
+  border-color: rgba(232, 184, 48, 0.5);
+  box-shadow: 0 0 0 3px rgba(232, 184, 48, 0.1);
+  background: #261f1b;
+}
+
+/* Stat card */
+.stat-card {
+  background: #161210;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e8b830, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card:hover {
+  border-color: rgba(232, 184, 48, 0.2);
+  transform: translateY(-2px);
 }

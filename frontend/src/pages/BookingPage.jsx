@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, User, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Clock, Check } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { he } from 'date-fns/locale';
 
@@ -8,91 +8,146 @@ export default function BookingPage() {
   const [selectedTreatment, setSelectedTreatment] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
 
-  // Dummy data
   const treatments = [
-    { id: 1, name: 'טיפול פנים קלאסי', duration: 60, price: 350 },
-    { id: 2, name: 'טיפול פנים זוהר', duration: 45, price: 280 },
-    { id: 3, name: 'הסרת שיער בלייזר - רגליים', duration: 30, price: 150 },
+    { id: 1, name: 'טיפול פנים קלאסי', duration: 60, price: 350, emoji: '✨' },
+    { id: 2, name: 'טיפול פנים זוהר', duration: 45, price: 280, emoji: '🌟' },
+    { id: 3, name: 'ניקוי פנים עמוק', duration: 60, price: 320, emoji: '💎' },
+    { id: 4, name: 'הסרת שיער - לייזר', duration: 30, price: 150, emoji: '⚡' },
   ];
 
   const upcomingDates = Array.from({ length: 14 }).map((_, i) => addDays(new Date(), i + 1));
-  const availableSlots = ['10:00', '11:30', '13:00', '15:45', '17:00'];
+  const availableSlots = ['09:00', '10:00', '11:30', '13:00', '15:00', '16:30', '17:00'];
+
+  const steps = ['בחירת טיפול', 'בחירת מועד', 'אישור'];
+
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+          style={{ background: 'linear-gradient(135deg, #e8b830, #c99a20)', boxShadow: '0 0 40px rgba(232,184,48,0.4)' }}>
+          <Check size={40} color="#0d0a09" strokeWidth={3} />
+        </div>
+        <h2 className="text-2xl font-black mb-2" style={{ color: '#fdf8f5' }}>התור נקבע! 🎉</h2>
+        <p className="text-sm mb-1" style={{ color: '#8a7060' }}>
+          {selectedTreatment?.name}
+        </p>
+        <p className="text-sm" style={{ color: '#8a7060' }}>
+          {selectedDate && format(selectedDate, 'EEEE, d בMMMM', { locale: he })} · {selectedTime}
+        </p>
+        <p className="text-xs mt-4 px-6" style={{ color: '#5a4a40' }}>
+          נשלח לך אישור בוואטסאפ בקרוב
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Step Indicator */}
-      <div className="flex items-center justify-between text-sm font-medium text-slate-400 mb-8 px-4">
-        <span className={step >= 1 ? 'text-pink-600' : ''}>1. בחירת טיפול</span>
-        <span className="text-slate-300"><ChevronLeft size={16} /></span>
-        <span className={step >= 2 ? 'text-pink-600' : ''}>2. מועד פנוי</span>
-        <span className="text-slate-300"><ChevronLeft size={16} /></span>
-        <span className={step >= 3 ? 'text-pink-600' : ''}>3. פרטים</span>
+    <div className="space-y-6 pt-4">
+      
+      {/* Step indicator */}
+      <div className="flex items-center justify-center gap-2 mb-6">
+        {steps.map((s, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all`}
+                style={step > i + 1 
+                  ? { background: '#34d399', color: '#0d0a09' }
+                  : step === i + 1 
+                    ? { background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09' }
+                    : { background: '#1a1410', color: '#3a2e29', border: '1px solid rgba(255,255,255,0.07)' }}>
+                {step > i + 1 ? <Check size={12} strokeWidth={3} /> : i + 1}
+              </div>
+              <span className="text-xs font-medium hidden sm:block" style={{ color: step === i + 1 ? '#e8b830' : '#3a2e29' }}>
+                {s}
+              </span>
+            </div>
+            {i < steps.length - 1 && (
+              <div className="w-8 h-px" style={{ background: step > i + 1 ? '#34d399' : '#1a1410' }}></div>
+            )}
+          </div>
+        ))}
       </div>
 
+      {/* Step 1: Treatment */}
       {step === 1 && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">איזה טיפול תרצי לקבוע?</h2>
+        <div className="space-y-3">
+          <h2 className="text-xl font-black mb-5" style={{ color: '#fdf8f5' }}>איזה טיפול תרצי? ✨</h2>
           {treatments.map((t) => (
-            <div 
-              key={t.id}
-              onClick={() => { setSelectedTreatment(t); setStep(2); }}
-              className="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm hover:border-pink-300 hover:shadow-md transition-all cursor-pointer flex justify-between items-center"
-            >
-              <div>
-                <h3 className="font-bold text-slate-800 text-lg">{t.name}</h3>
-                <p className="text-sm text-slate-500 mt-1">{t.duration} דקות</p>
+            <button key={t.id} onClick={() => { setSelectedTreatment(t); setStep(2); }}
+              className="w-full flex items-center justify-between p-4 rounded-2xl text-right transition-all"
+              style={{ background: '#161210', border: '1px solid rgba(255,255,255,0.07)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,184,48,0.35)'; e.currentTarget.style.background = '#1a1410'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = '#161210'; }}>
+              <div className="flex items-center gap-4">
+                <span className="text-3xl">{t.emoji}</span>
+                <div>
+                  <h3 className="font-bold" style={{ color: '#fdf8f5' }}>{t.name}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Clock size={12} style={{ color: '#5a4a40' }} />
+                    <span className="text-xs" style={{ color: '#5a4a40' }}>{t.duration} דקות</span>
+                  </div>
+                </div>
               </div>
-              <span className="font-semibold text-pink-600">₪{t.price}</span>
-            </div>
+              <span className="font-black text-lg" style={{ color: '#e8b830' }}>₪{t.price}</span>
+            </button>
           ))}
         </div>
       )}
 
+      {/* Step 2: Date & Time */}
       {step === 2 && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-800">בחירת מועד</h2>
-            <button onClick={() => setStep(1)} className="text-sm text-pink-600 font-medium">חזור</button>
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black" style={{ color: '#fdf8f5' }}>בחרי מועד 📅</h2>
+            <button onClick={() => setStep(1)} className="flex items-center gap-1 text-sm font-medium" style={{ color: '#e8b830' }}>
+              <ChevronLeft size={16} />
+              חזור
+            </button>
           </div>
 
-          <div>
-            <p className="text-sm font-medium text-slate-600 mb-3 flex items-center gap-2">
-              <CalendarIcon size={16} /> בחר/י תאריך:
-            </p>
-            <div className="flex overflow-x-auto gap-3 pb-4 snap-x">
-              {upcomingDates.map((date, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedDate(date)}
-                  className={`snap-center flex-shrink-0 w-20 h-24 rounded-2xl border flex flex-col items-center justify-center transition-all ${
-                    selectedDate === date 
-                      ? 'bg-pink-600 border-pink-600 text-white shadow-md shadow-pink-200' 
-                      : 'bg-white border-pink-100 text-slate-600 hover:border-pink-300'
-                  }`}
-                >
-                  <span className="text-xs font-medium uppercase mb-1 opacity-80">
-                    {format(date, 'EEEE', { locale: he })}
-                  </span>
-                  <span className="text-2xl font-bold">{format(date, 'd')}</span>
-                  <span className="text-xs mt-1 opacity-80">{format(date, 'MMM', { locale: he })}</span>
-                </button>
-              ))}
+          {/* Recap */}
+          <div className="p-3 rounded-xl flex items-center gap-3" style={{ background: 'rgba(232,184,48,0.08)', border: '1px solid rgba(232,184,48,0.2)' }}>
+            <span className="text-xl">{selectedTreatment?.emoji}</span>
+            <div>
+              <p className="font-bold text-sm" style={{ color: '#fdf8f5' }}>{selectedTreatment?.name}</p>
+              <p className="text-xs" style={{ color: '#8a7060' }}>{selectedTreatment?.duration} דקות · ₪{selectedTreatment?.price}</p>
             </div>
           </div>
 
+          {/* Dates */}
+          <div>
+            <p className="text-sm font-semibold mb-3" style={{ color: '#8a7060' }}>בחרי תאריך:</p>
+            <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+              {upcomingDates.map((date, i) => {
+                const isSelected = selectedDate && format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
+                return (
+                  <button key={i} onClick={() => setSelectedDate(date)}
+                    className="flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center transition-all"
+                    style={isSelected 
+                      ? { background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09', boxShadow: '0 4px 15px rgba(232,184,48,0.4)' }
+                      : { background: '#161210', border: '1px solid rgba(255,255,255,0.07)', color: '#8a7060' }}>
+                    <span className="text-xs font-bold uppercase">{format(date, 'EEE', { locale: he })}</span>
+                    <span className="text-xl font-black">{format(date, 'd')}</span>
+                    <span className="text-xs">{format(date, 'MMM', { locale: he })}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Times */}
           {selectedDate && (
-            <div className="animate-in fade-in">
-              <p className="text-sm font-medium text-slate-600 mb-3 flex items-center gap-2">
-                <Clock size={16} /> שעות פנויות:
-              </p>
-              <div className="grid grid-cols-3 gap-3">
+            <div>
+              <p className="text-sm font-semibold mb-3" style={{ color: '#8a7060' }}>שעות פנויות:</p>
+              <div className="grid grid-cols-4 gap-2">
                 {availableSlots.map((time, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setSelectedTime(time); setStep(3); }}
-                    className="bg-white py-3 rounded-xl border border-pink-100 text-slate-700 font-medium hover:border-pink-600 hover:text-pink-600 transition-colors"
-                  >
+                  <button key={i} onClick={() => { setSelectedTime(time); setStep(3); }}
+                    className="py-3 rounded-xl font-bold text-sm transition-all"
+                    style={{ background: '#161210', border: '1px solid rgba(255,255,255,0.07)', color: '#fdf8f5' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,184,48,0.5)'; e.currentTarget.style.color = '#e8b830'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#fdf8f5'; }}>
                     {time}
                   </button>
                 ))}
@@ -102,36 +157,46 @@ export default function BookingPage() {
         </div>
       )}
 
+      {/* Step 3: Details */}
       {step === 3 && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-800">פרטים אחרונים</h2>
-            <button onClick={() => setStep(2)} className="text-sm text-pink-600 font-medium">חזור</button>
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black" style={{ color: '#fdf8f5' }}>פרטים אחרונים 🌸</h2>
+            <button onClick={() => setStep(2)} className="flex items-center gap-1 text-sm font-medium" style={{ color: '#e8b830' }}>
+              <ChevronLeft size={16} />
+              חזור
+            </button>
           </div>
 
-          <div className="bg-pink-50/50 p-4 rounded-xl border border-pink-100 mb-6">
-            <p className="font-semibold text-slate-800">{selectedTreatment?.name}</p>
-            <p className="text-sm text-slate-600 mt-1">
-              {selectedDate ? format(selectedDate, 'EEEE, d בMMMM', { locale: he }) : ''} בשעה {selectedTime}
+          {/* Summary */}
+          <div className="p-4 rounded-2xl" style={{ background: 'rgba(232,184,48,0.07)', border: '1px solid rgba(232,184,48,0.2)' }}>
+            <p className="font-bold" style={{ color: '#fdf8f5' }}>{selectedTreatment?.name}</p>
+            <p className="text-sm mt-1" style={{ color: '#8a7060' }}>
+              {selectedDate && format(selectedDate, 'EEEE, d בMMMM', { locale: he })} · {selectedTime}
             </p>
+            <p className="font-black text-lg mt-2" style={{ color: '#e8b830' }}>₪{selectedTreatment?.price}</p>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('התור נקבע בהצלחה!'); }}>
+          {/* Form */}
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">שם מלא</label>
-              <input type="text" required className="w-full p-3 rounded-xl border border-slate-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all" placeholder="לדוגמא: דנה ישראלי" />
+              <label className="block text-sm font-bold mb-2" style={{ color: '#8a7060' }}>שם מלא *</label>
+              <input type="text" required className="input-dark" placeholder="לדוגמא: דנה ישראלי" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">מספר טלפון (לשליחת אישור)</label>
-              <input type="tel" required className="w-full p-3 rounded-xl border border-slate-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all" placeholder="050-0000000" />
+              <label className="block text-sm font-bold mb-2" style={{ color: '#8a7060' }}>מספר טלפון *</label>
+              <input type="tel" required className="input-dark" placeholder="050-0000000" dir="ltr" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">הערות (אופציונלי)</label>
-              <textarea className="w-full p-3 rounded-xl border border-slate-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all" rows="2" placeholder="יש משהו שכדאי שנדע?"></textarea>
+              <label className="block text-sm font-bold mb-2" style={{ color: '#8a7060' }}>הערות (אופציונלי)</label>
+              <textarea className="input-dark resize-none" rows="2" placeholder="יש משהו שכדאי שנדע?"></textarea>
             </div>
-            
-            <button type="submit" className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg py-4 rounded-xl shadow-lg shadow-pink-200 transition-transform active:scale-[0.98] mt-6">
-              אשרי את התור
+
+            <button type="submit" className="w-full py-4 rounded-2xl font-black text-lg mt-2 transition-all"
+              style={{ background: 'linear-gradient(135deg, #e8b830, #c99a20)', color: '#0d0a09', boxShadow: '0 6px 25px rgba(232,184,48,0.4)' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+              אשרי את התור ✨
             </button>
           </form>
         </div>

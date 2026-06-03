@@ -1,90 +1,130 @@
 import { useState } from 'react';
-import { MessageCircle, Image as ImageIcon, Send, Filter, Users } from 'lucide-react';
+import { Send, Upload, Users, Sparkles } from 'lucide-react';
 
 export default function Campaigns() {
   const [message, setMessage] = useState('');
-  
+  const [audience, setAudience] = useState('inactive');
+
+  const audiences = [
+    { key: 'inactive', label: 'לקוחות רדומות', desc: 'לא ביקרו מעל חודשיים', count: 42, emoji: '😴' },
+    { key: 'all', label: 'כל הלקוחות', desc: 'שליחה לכולן', count: 147, emoji: '📣' },
+    { key: 'recent', label: 'ביקרו לאחרונה', desc: 'ביקרו בחודש האחרון', count: 38, emoji: '⭐' },
+  ];
+
+  const pastCampaigns = [
+    { name: 'מבצע קיץ 2026', sent: 85, opened: 72, date: '2026-05-01', status: 'sent' },
+    { name: 'חזרי אלינו - אפריל', sent: 40, opened: 31, date: '2026-04-15', status: 'sent' },
+  ];
+
   return (
-    <div className="flex flex-col h-full space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-pink-100">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">קמפיינים שיווקיים (WhatsApp)</h2>
-          <p className="text-slate-500 text-sm mt-1">שליחת הודעות תזכורת ומבצעים אוטומטית ללקוחות</p>
-        </div>
-        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm shadow-emerald-200">
-          <Send size={18} />
-          שליחת קמפיין
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
-        {/* Campaign Builder */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-6">
-            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <Filter size={18} className="text-pink-600" />
-              1. למי לשלוח? (קהל יעד)
+    <div dir="rtl" className="space-y-6">
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Builder */}
+        <div className="lg:col-span-2 space-y-4">
+          
+          {/* Audience selector */}
+          <div className="card p-5">
+            <h3 className="font-bold mb-4 flex items-center gap-2" style={{ color: '#fdf8f5' }}>
+              <Users size={18} style={{ color: '#e8b830' }} />
+              1. למי לשלוח?
             </h3>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <label className="border border-pink-100 p-4 rounded-xl cursor-pointer hover:bg-pink-50 transition-colors flex items-start gap-3">
-                <input type="radio" name="audience" className="mt-1 accent-pink-600" defaultChecked />
-                <div>
-                  <p className="font-semibold text-slate-800">לקוחות רדומים</p>
-                  <p className="text-sm text-slate-500 mt-1">לא ביקרו בקליניקה מעל לחודשיים</p>
-                </div>
-              </label>
-
-              <label className="border border-pink-100 p-4 rounded-xl cursor-pointer hover:bg-pink-50 transition-colors flex items-start gap-3">
-                <input type="radio" name="audience" className="mt-1 accent-pink-600" />
-                <div>
-                  <p className="font-semibold text-slate-800">כל הלקוחות</p>
-                  <p className="text-sm text-slate-500 mt-1">הודעה כללית לכל המאגר</p>
-                </div>
-              </label>
+            <div className="grid grid-cols-3 gap-3">
+              {audiences.map((a) => (
+                <button key={a.key} onClick={() => setAudience(a.key)}
+                  className="p-4 rounded-xl text-right transition-all"
+                  style={audience === a.key 
+                    ? { background: 'rgba(232,184,48,0.1)', border: '1px solid rgba(232,184,48,0.35)' }
+                    : { background: '#1a1410', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span className="text-2xl mb-2 block">{a.emoji}</span>
+                  <p className="font-bold text-sm" style={{ color: '#fdf8f5' }}>{a.label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#5a4a40' }}>{a.desc}</p>
+                  <p className="text-sm font-black mt-2" style={{ color: '#e8b830' }}>{a.count} לקוחות</p>
+                </button>
+              ))}
             </div>
-            <p className="text-sm text-pink-600 mt-3 flex items-center gap-1 font-medium">
-              <Users size={14} /> הקמפיין יישלח לכ-42 לקוחות מתאימים.
-            </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-6">
-            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <MessageCircle size={18} className="text-pink-600" />
+          {/* Message builder */}
+          <div className="card p-5">
+            <h3 className="font-bold mb-4 flex items-center gap-2" style={{ color: '#fdf8f5' }}>
+              <Sparkles size={18} style={{ color: '#e8b830' }} />
               2. תוכן ההודעה
             </h3>
             
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-pink-200 rounded-xl p-8 flex flex-col items-center justify-center text-slate-500 hover:bg-pink-50 hover:border-pink-300 transition-colors cursor-pointer">
-                <ImageIcon size={32} className="text-pink-400 mb-2" />
-                <p className="font-medium">לחצי כאן להוספת תמונה (אופציונלי)</p>
-                <p className="text-xs mt-1">מומלץ להעלות תמונה מרובעת</p>
+            {/* Image upload */}
+            <div className="mb-4 flex items-center justify-center border-2 border-dashed rounded-xl p-6 cursor-pointer transition-all"
+              style={{ borderColor: 'rgba(232,184,48,0.2)', background: 'rgba(232,184,48,0.03)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,184,48,0.45)'; e.currentTarget.style.background = 'rgba(232,184,48,0.07)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(232,184,48,0.2)'; e.currentTarget.style.background = 'rgba(232,184,48,0.03)'; }}>
+              <div className="text-center">
+                <Upload size={24} className="mx-auto mb-2" style={{ color: '#5a4a40' }} />
+                <p className="text-sm font-medium" style={{ color: '#8a7060' }}>לחצי להוספת תמונה</p>
+                <p className="text-xs mt-1" style={{ color: '#3a2e29' }}>PNG, JPG עד 5MB</p>
               </div>
+            </div>
 
-              <div>
-                <textarea 
-                  className="w-full p-4 rounded-xl border border-pink-100 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none transition-all resize-none"
-                  rows="5"
-                  placeholder="היי [שם_הלקוחה], התגעגענו! מגיע לך פינוק..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                ></textarea>
-                <p className="text-xs text-slate-400 mt-2">תוכלי להשתמש במילה [שם_הלקוחה] והמערכת תחליף אותה אוטומטית בשם האמיתי.</p>
+            {/* Message text */}
+            <div className="relative">
+              <textarea 
+                className="input-dark resize-none"
+                rows={5}
+                placeholder="היי [שם_הלקוחה], התגעגענו! 🌸&#10;מגיע לך פינוק..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <p className="text-xs mt-2" style={{ color: '#3a2e29' }}>
+                💡 השתמשי ב-[שם_הלקוחה] והמערכת תחליף אוטומטית
+              </p>
+            </div>
+          </div>
+
+          {/* Send button */}
+          <button className="w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-base transition-all"
+            style={{ background: 'linear-gradient(135deg, #25d366, #128c7e)', color: '#fff', boxShadow: '0 4px 20px rgba(37,211,102,0.3)' }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <Send size={20} />
+            שלח קמפיין ל-{audiences.find(a => a.key === audience)?.count} לקוחות
+          </button>
+        </div>
+
+        {/* Right side: preview + history */}
+        <div className="space-y-4">
+          
+          {/* WhatsApp Preview */}
+          <div className="card p-5">
+            <h3 className="font-bold mb-4 text-sm" style={{ color: '#fdf8f5' }}>תצוגה מקדימה</h3>
+            <div className="rounded-xl overflow-hidden" style={{ background: '#0a1a0f' }}>
+              <div className="h-8 flex items-center px-3 gap-2" style={{ background: '#075e54' }}>
+                <div className="w-5 h-5 rounded-full" style={{ background: '#25d366' }}></div>
+                <span className="text-xs text-white font-medium">Shirly Cosmetics</span>
+              </div>
+              <div className="p-4">
+                <div className="p-3 rounded-xl rounded-tl-none text-sm max-w-[90%] ml-auto" style={{ background: '#1c3a28' }}>
+                  <p style={{ color: '#d4f8e5', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                    {message || "היי דנה, התגעגענו! 🌸\nמגיע לך פינוק - קבלי 10% הנחה על הטיפול הבא."}
+                  </p>
+                  <span className="text-xs block text-left mt-1" style={{ color: '#5a8a6a' }}>10:42 ✓✓</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Live Preview */}
-        <div className="bg-slate-100 rounded-2xl p-6 relative overflow-hidden flex flex-col border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-6 text-center">תצוגה מקדימה - WhatsApp</h3>
-          
-          <div className="bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-cover flex-1 rounded-xl shadow-inner p-4 flex flex-col relative">
-            <div className="bg-white p-3 rounded-lg rounded-tr-none shadow-sm max-w-[85%] self-end relative">
-              <p className="text-sm text-slate-800 whitespace-pre-wrap">
-                {message || "היי דנה, התגעגענו! קבלי קופון 50 שקלים לטיפול פנים קלאסי."}
-              </p>
-              <span className="text-[10px] text-slate-400 block text-left mt-1">10:42</span>
+          {/* Past campaigns */}
+          <div className="card p-5">
+            <h3 className="font-bold mb-4 text-sm" style={{ color: '#fdf8f5' }}>קמפיינים אחרונים</h3>
+            <div className="space-y-3">
+              {pastCampaigns.map((c, i) => (
+                <div key={i} className="p-3 rounded-xl" style={{ background: '#1a1410' }}>
+                  <p className="font-semibold text-sm" style={{ color: '#fdf8f5' }}>{c.name}</p>
+                  <div className="flex gap-3 mt-2 text-xs" style={{ color: '#5a4a40' }}>
+                    <span>נשלח ל-{c.sent}</span>
+                    <span style={{ color: '#34d399' }}>נפתח: {c.opened}</span>
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: '#3a2e29' }}>{c.date}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
