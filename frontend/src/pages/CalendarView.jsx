@@ -26,6 +26,7 @@ export default function CalendarView() {
   const [clients, setClients] = useState([]);
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedTherapist, setSelectedTherapist] = useState('all');
   
   const startDate = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 6 }).map((_, i) => addDays(startDate, i));
@@ -43,35 +44,87 @@ export default function CalendarView() {
       .catch(err => console.error('Failed to fetch clients:', err));
   }, []);
 
-  // Fallback to sample appointments if none synced yet
-  const appointmentsToDisplay = appointments.length > 0 
+  // Base list of appointments (live or fallback)
+  const baseAppointments = appointments.length > 0 
     ? appointments 
     : [
-        { id: 's1', clientName: 'דנה ישראלי', treatmentName: 'טיפול פנים קלאסי', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(10, 0, 0, 0) },
-        { id: 's2', clientName: 'מיכל לוי', treatmentName: 'לייזר שיער — רגליים', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 3)).setHours(11, 0, 0, 0) },
-        { id: 's3', clientName: 'אורית כהן', treatmentName: 'ניקוי פנים עמוק', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(14, 0, 0, 0) },
-        { id: 's4', clientName: 'רחל אברמוב', treatmentName: 'טיפול פנים זוהר', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 4)).setHours(9, 0, 0, 0) }
+        { id: 's1', clientName: 'דנה ישראלי', treatmentName: 'טיפול פנים קלאסי', therapistName: 'שירלי סוני', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(10, 0, 0, 0) },
+        { id: 's2', clientName: 'מיכל לוי', treatmentName: 'לייזר שיער — רגליים', therapistName: 'נועה לוי', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 3)).setHours(11, 0, 0, 0) },
+        { id: 's3', clientName: 'אורית כהן', treatmentName: 'ניקוי פנים עמוק', therapistName: 'שירלי סוני', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(14, 0, 0, 0) },
+        { id: 's4', clientName: 'רחל אברמוב', treatmentName: 'טיפול פנים זוהר', therapistName: 'דנה כהן', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 4)).setHours(9, 0, 0, 0) }
       ];
+
+  // Dynamically extract unique therapist names
+  const uniqueTherapists = [...new Set(baseAppointments.map(a => a.therapistName))].filter(Boolean);
+
+  // Filter appointments to display based on selected therapist
+  const appointmentsToDisplay = baseAppointments.filter(
+    appt => selectedTherapist === 'all' || appt.therapistName === selectedTherapist
+  );
 
   return (
     <div dir="rtl" className="flex flex-col h-full rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
 
       {/* Header */}
-      <div className="flex items-center p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)', gap: 12 }}>
-        <h2 className="font-black text-base" style={{ color: 'var(--text-primary)' }}>
-          {format(currentDate, 'MMMM yyyy', { locale: he })}
-        </h2>
-        <div className="flex items-center" style={{ gap: 2, background: 'var(--bg-elevated)', borderRadius: 10, padding: 3 }}>
-          <button onClick={() => setCurrentDate(addDays(currentDate, -7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
-            <ChevronRight size={16} />
-          </button>
-          <button onClick={() => setCurrentDate(new Date())} className="btn-ghost" style={{ padding: '5px 10px', border: 'none', borderRadius: 7, fontSize: 12 }}>
-            היום
-          </button>
-          <button onClick={() => setCurrentDate(addDays(currentDate, 7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
-            <ChevronLeft size={16} />
-          </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 flex-shrink-0 gap-4" style={{ borderBottom: '1px solid var(--border)' }}>
+        
+        {/* Right side: Month name & Date navigation */}
+        <div className="flex items-center gap-4">
+          <h2 className="font-black text-base" style={{ color: 'var(--text-primary)', minWidth: 100 }}>
+            {format(currentDate, 'MMMM yyyy', { locale: he })}
+          </h2>
+          <div className="flex items-center" style={{ gap: 2, background: 'var(--bg-elevated)', borderRadius: 10, padding: 3 }}>
+            <button onClick={() => setCurrentDate(addDays(currentDate, -7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
+              <ChevronRight size={16} />
+            </button>
+            <button onClick={() => setCurrentDate(new Date())} className="btn-ghost" style={{ padding: '5px 10px', border: 'none', borderRadius: 7, fontSize: 12 }}>
+              היום
+            </button>
+            <button onClick={() => setCurrentDate(addDays(currentDate, 7))} className="btn-ghost" style={{ padding: '5px 8px', border: 'none', borderRadius: 7 }}>
+              <ChevronLeft size={16} />
+            </button>
+          </div>
         </div>
+
+        {/* Left side: Therapist filter tabs */}
+        <div className="flex flex-wrap items-center gap-1.5 p-1" style={{ background: 'var(--bg-elevated)', borderRadius: 10 }}>
+          <button
+            onClick={() => setSelectedTherapist('all')}
+            style={{
+              padding: '5px 12px',
+              fontSize: 12,
+              fontWeight: 700,
+              borderRadius: 7,
+              border: 'none',
+              cursor: 'pointer',
+              background: selectedTherapist === 'all' ? 'var(--accent)' : 'transparent',
+              color: selectedTherapist === 'all' ? '#fff' : 'var(--text-secondary)',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            כל הצוות
+          </button>
+          {uniqueTherapists.map(t => (
+            <button
+              key={t}
+              onClick={() => setSelectedTherapist(t)}
+              style={{
+                padding: '5px 12px',
+                fontSize: 12,
+                fontWeight: 700,
+                borderRadius: 7,
+                border: 'none',
+                cursor: 'pointer',
+                background: selectedTherapist === t ? 'var(--accent)' : 'transparent',
+                color: selectedTherapist === t ? '#fff' : 'var(--text-secondary)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+
       </div>
 
       {/* Grid */}
