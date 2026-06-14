@@ -15,6 +15,14 @@ function getColorForTherapist(name = '') {
       solid: 'var(--red)'
     };
   }
+  if (lowercaseName.includes('לורה')) {
+    return {
+      bg: 'var(--green-light)',
+      bdr: 'var(--green-border)',
+      txt: 'var(--green)',
+      solid: 'var(--green)'
+    };
+  }
   if (lowercaseName.includes('נועה')) {
     return {
       bg: 'var(--violet-light)',
@@ -31,19 +39,30 @@ function getColorForTherapist(name = '') {
       solid: 'var(--teal)'
     };
   }
-  // Fallback hash color
+  if (lowercaseName.includes('רחלי')) {
+    return {
+      bg: 'var(--amber-light)',
+      bdr: 'var(--amber-border)',
+      txt: 'var(--amber)',
+      solid: 'var(--amber)'
+    };
+  }
+  
+  // Fallback palette with 5 distinct colors (red, green, violet, teal, amber)
+  const palette = [
+    { bg: 'var(--red-light)', bdr: 'var(--red-border)', txt: 'var(--red)', solid: 'var(--red)' },
+    { bg: 'var(--green-light)', bdr: 'var(--green-border)', txt: 'var(--green)', solid: 'var(--green)' },
+    { bg: 'var(--violet-light)', bdr: 'var(--violet-border)', txt: 'var(--violet)', solid: 'var(--violet)' },
+    { bg: 'var(--teal-light)', bdr: 'var(--teal-border)', txt: 'var(--teal)', solid: 'var(--teal)' },
+    { bg: 'var(--amber-light)', bdr: 'var(--amber-border)', txt: 'var(--amber)', solid: 'var(--amber)' }
+  ];
+  
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % 3;
-  if (index === 0) {
-    return { bg: 'var(--red-light)', bdr: 'var(--red-border)', txt: 'var(--red)', solid: 'var(--red)' };
-  } else if (index === 1) {
-    return { bg: 'var(--violet-light)', bdr: 'var(--violet-border)', txt: 'var(--violet)', solid: 'var(--violet)' };
-  } else {
-    return { bg: 'var(--teal-light)', bdr: 'var(--teal-border)', txt: 'var(--teal)', solid: 'var(--teal)' };
-  }
+  const index = Math.abs(hash) % palette.length;
+  return palette[index];
 }
 
 const START_HOUR = 8;
@@ -196,7 +215,14 @@ export default function CalendarView() {
 
   // Apply filters
   const filteredAppointments = baseAppointments.filter(appt => {
-    const matchTherapist = selectedTherapists.includes('all') || selectedTherapists.includes(appt.therapistName);
+    const matchTherapist = selectedTherapists.includes('all') || selectedTherapists.some(sel => 
+      appt.therapistName === sel || 
+      (appt.therapistName && sel && (
+        appt.therapistName.split(/\s+/)[0] === sel.split(/\s+/)[0] ||
+        appt.therapistName.includes(sel) ||
+        sel.includes(appt.therapistName)
+      ))
+    );
     const matchStatus = statusFilter === 'all' || appt.status === statusFilter;
     return matchTherapist && matchStatus;
   });
@@ -218,11 +244,21 @@ export default function CalendarView() {
     // Daily view: columns represent therapists
     const therapistsToRender = selectedTherapists.includes('all')
       ? uniqueTherapists
-      : uniqueTherapists.filter(t => selectedTherapists.includes(t));
+      : uniqueTherapists.filter(t => 
+          selectedTherapists.some(sel => 
+            t === sel || 
+            (t && sel && (
+              t.split(/\s+/)[0] === sel.split(/\s+/)[0] ||
+              t.includes(sel) ||
+              sel.includes(t)
+            ))
+          )
+        );
 
     columnsData = therapistsToRender.map(t => {
       const dayAppts = filteredAppointments.filter(a => 
-        isSameDay(new Date(a.startTime), currentDate) && a.therapistName === t
+        isSameDay(new Date(a.startTime), currentDate) && 
+        (a.therapistName === t || (a.therapistName && t && a.therapistName.split(/\s+/)[0] === t.split(/\s+/)[0]))
       );
       return {
         title: t,
