@@ -198,3 +198,12 @@ html, body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ── Animations ── */
+@keyframes slideInRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.w-full { width: 100%; }
+

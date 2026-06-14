@@ -1,6 +1,111 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { CalendarDays, Users, MessageCircle, BarChart3, Settings, Menu, Sparkles, Bell, Package, TrendingDown, UserCheck, Zap } from 'lucide-react';
+import { CalendarDays, Users, MessageCircle, BarChart3, Settings, Menu, Sparkles, Bell, Package, TrendingDown, UserCheck, Zap, X } from 'lucide-react';
 import { useState } from 'react';
+
+/* ─── New Appointment Modal ──────────────────────────────── */
+const TREATMENTS = [
+  'טיפול פנים',
+  'ניקוי עמוק',
+  'פנים זוהר',
+  'לייזר שיער',
+  'לייזר פנים',
+  'מיקרונידלינג',
+  'פילינג כימי',
+  'הסרת שיער',
+  'עיצוב גבות',
+  'טיפול גוף',
+];
+
+function NewAppointmentModal({ onClose }) {
+  const [form, setForm] = useState({
+    client: '', phone: '', treatment: '', date: '', time: '10:00', notes: '',
+  });
+  const [saved, setSaved] = useState(false);
+
+  const canSave = form.client && form.treatment && form.date && form.time;
+
+  const save = () => {
+    if (!canSave) return;
+    setSaved(true);
+    setTimeout(onClose, 1200);
+  };
+
+  if (saved) return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="card p-10 text-center" style={{ background: 'var(--bg-surface)', maxWidth: 320, margin: '0 16px' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
+        <p className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>התור נקבע!</p>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 6 }}>
+          {form.client} · {form.treatment} · {form.date} {form.time}
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" dir="rtl"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full" style={{ maxWidth: 500, margin: '0 16px' }}>
+        <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)' }}>
+
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-3">
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CalendarDays size={16} style={{ color: 'var(--accent)' }} />
+              </div>
+              <h3 className="font-black" style={{ color: 'var(--text-primary)' }}>תור חדש</h3>
+            </div>
+            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          </div>
+
+          <div className="px-6 py-5 space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שם לקוחה <span style={{color:'var(--accent)'}}>*</span></label>
+              <input className="input-dark" placeholder="שם מלא" value={form.client} onChange={e => setForm(f => ({...f, client: e.target.value}))} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>טלפון</label>
+              <input className="input-dark" placeholder="050-0000000" value={form.phone} onChange={e => setForm(f => ({...f, phone: e.target.value}))} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>סוג טיפול <span style={{color:'var(--accent)'}}>*</span></label>
+              <select className="input-dark" value={form.treatment}
+                onChange={e => setForm(f => ({...f, treatment: e.target.value}))}
+                style={{ appearance: 'none', cursor: 'pointer' }}>
+                <option value="">-- בחרי טיפול --</option>
+                {TREATMENTS.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>תאריך <span style={{color:'var(--accent)'}}>*</span></label>
+                <input type="date" className="input-dark" value={form.date} onChange={e => setForm(f => ({...f, date: e.target.value}))} />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שעה <span style={{color:'var(--accent)'}}>*</span></label>
+                <input type="time" className="input-dark" value={form.time} onChange={e => setForm(f => ({...f, time: e.target.value}))} />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>הערות</label>
+              <textarea className="input-dark resize-none" rows={2} placeholder="הערות לתור..." value={form.notes} onChange={e => setForm(f => ({...f, notes: e.target.value}))} />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <button onClick={onClose} className="btn-ghost">ביטול</button>
+            <button onClick={save} className="btn-primary"
+              disabled={!canSave} style={{ opacity: canSave ? 1 : 0.5 }}>
+              <CalendarDays size={14} /> קבע תור
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const navItems = [
   { name: 'דשבורד',        icon: BarChart3,    path: '/'           },
@@ -17,6 +122,7 @@ const navItems = [
 
 export default function MainLayout() {
   const [open, setOpen] = useState(true);
+  const [showAppt, setShowAppt] = useState(false);
 
   return (
     <div className="h-screen w-full flex overflow-hidden" style={{ background: 'var(--bg-base)', direction: 'rtl' }}>
@@ -96,13 +202,14 @@ export default function MainLayout() {
           <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
             {new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
+          {showAppt && <NewAppointmentModal onClose={() => setShowAppt(false)} />}
           <div className="flex items-center flex-shrink-0" style={{ gap: 10 }}>
             <button className="relative flex items-center justify-center flex-shrink-0"
               style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
               <Bell size={16} />
               <span className="absolute" style={{ top: 7, left: 7, width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', border: '1.5px solid var(--bg-surface)' }} />
             </button>
-            <button className="btn-primary flex-shrink-0">+ תור חדש</button>
+            <button onClick={() => setShowAppt(true)} className="btn-primary flex-shrink-0">+ תור חדש</button>
           </div>
         </header>
 
