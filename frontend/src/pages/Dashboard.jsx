@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, CalendarDays, Users, Banknote, Megaphone, Clock, ArrowLeft } from 'lucide-react';
+import { TrendingUp, TrendingDown, CalendarDays, Users, Banknote, Megaphone, Clock, ArrowLeft, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const stats = [
   { label: 'תורים היום',     value: '8',       change: '+2 מאתמול',  up: true,  icon: CalendarDays, color: 'var(--accent)',  bg: 'var(--accent-light)',  bdr: 'var(--accent-border)'  },
@@ -21,6 +22,39 @@ const quickActions = [
 ];
 
 export default function Dashboard() {
+  const [syncStatus, setSyncStatus] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+
+  const fetchSyncStatus = async () => {
+    try {
+      // In dev, assuming backend is on port 5000
+      const res = await fetch('http://localhost:5000/api/sync-status');
+      if (res.ok) {
+        const data = await res.json();
+        setSyncStatus(data.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch sync status', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchSyncStatus();
+  }, []);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch('http://localhost:5000/api/sync', { method: 'POST' });
+      if (res.ok) {
+        await fetchSyncStatus();
+      }
+    } catch (e) {
+      console.error('Sync failed', e);
+    }
+    setSyncing(false);
+  };
+
   return (
     <div dir="rtl" className="space-y-6">
 
@@ -118,6 +152,44 @@ export default function Dashboard() {
             <p className="font-bold text-sm mb-1" style={{ color: 'var(--text-primary)' }}>12 לקוחות לא ביקרו</p>
             <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>מעל חודש ללא ביקור. מומלץ לשלוח תזכורת.</p>
             <button className="btn-primary w-full justify-center text-xs py-2">שלח תזכורת עכשיו</button>
+          </div>
+
+          {/* Easybizy Sync Widget */}
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>סנכרון Easybizy</h3>
+              <div className="flex items-center justify-center flex-shrink-0"
+                style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--violet-light)', color: 'var(--violet)' }}>
+                <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
+              </div>
+            </div>
+            
+            <div className="text-xs space-y-1 mb-4" style={{ color: 'var(--text-secondary)' }}>
+              <p>סטטוס: {syncStatus?.last_sync ? 'פעיל' : 'ממתין לסנכרון ראשון'}</p>
+              {syncStatus?.last_sync && (
+                <p>סונכרן לאחרונה: {new Date(syncStatus.last_sync).toLocaleString('he-IL')}</p>
+              )}
+              {syncStatus?.total_synced > 0 && (
+                <p>סה"כ יובאו: {syncStatus.total_synced} לקוחות</p>
+              )}
+            </div>
+            
+            <button 
+              onClick={handleSync} 
+              disabled={syncing}
+              className="w-full flex items-center justify-center rounded-xl font-bold transition-all"
+              style={{ 
+                padding: '9px 12px', 
+                background: 'var(--bg-hover)', 
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+                fontSize: 13,
+                opacity: syncing ? 0.7 : 1,
+                cursor: syncing ? 'wait' : 'pointer'
+              }}
+            >
+              {syncing ? 'מסנכרן...' : 'סנכרן עכשיו מ-Easybizy'}
+            </button>
           </div>
         </div>
       </div>
