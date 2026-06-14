@@ -136,34 +136,59 @@ function getCustomerPaths() {
   ];
 }
 
+function getWeekRange() {
+  const now = new Date();
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const dateParam = urlParams.get('date');
+    if (dateParam) {
+      const parts = dateParam.split('-');
+      if (parts.length === 3) {
+        const yr = 2000 + parseInt(parts[0]);
+        const mo = parseInt(parts[1]) - 1;
+        const da = parseInt(parts[2]);
+        const d = new Date(yr, mo, da);
+        if (!isNaN(d.getTime())) {
+          now.setTime(d.getTime());
+        }
+      }
+    }
+  } catch (e) {}
+
+  const day = now.getDay();
+  const distToSat = (day + 1) % 7;
+  const start = new Date(now);
+  start.setDate(now.getDate() - distToSat);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 8);
+  end.setHours(0, 0, 0, 0);
+
+  const formatISO = (d) => {
+    const yr = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    return `${yr}-${mo}-${da}T00:00:00`;
+  };
+
+  return { start: formatISO(start), end: formatISO(end) };
+}
+
 function getAppointmentPaths() {
+  const range = getWeekRange();
+  const filter = `$filter=Start ge ${range.start} and Start le ${range.end}`;
   return [
-    '/odata/CalendarEvents?$expand=Employee,Meeting($expand=Customer,Treatment)',
-    '/odata/CalendarEvents?$expand=Employee,Meeting($expand=Customer)',
-    '/odata/CalendarEvents?$expand=Employee,Meeting',
-    '/odata/CalendarEvents?$expand=Employee',
-    '/odata/Meetings?$expand=CalendarEvent,Customer,Employee,Treatment',
-    '/odata/Meetings?$expand=CalendarEvent,Customer,Employee',
-    '/odata/Meetings?$expand=CalendarEvent,Customer',
-    '/odata/Meetings?$expand=CalendarEvent',
-    '/odata/Meetings',
-    '/odata/meetings',
+    `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
+    `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting($expand=Customer)`,
+    `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting`,
+    `/odata/CalendarEvents?${filter}`,
+    `/api/Calendar/Meetings?start=${range.start}&end=${range.end}`,
+    `/odata/Meetings?${filter}&$expand=CalendarEvent,Customer,Employee,Treatment`,
+    `/odata/Meetings?${filter}&$expand=CalendarEvent,Customer,Employee`,
+    `/odata/Meetings?${filter}`,
     '/api/appointments',
-    '/api/Appointments',
-    '/api/v1/appointments',
-    '/api/meetings',
-    '/api/Meetings',
-    '/api/v1/meetings',
-    '/api/events',
-    '/api/v1/events',
-    '/api/calendar',
-    '/api/Calendar',
-    '/odata/Appointments',
-    '/odata/appointments',
-    '/odata/Events',
-    '/odata/events',
-    '/odata/CalendarEvents',
-    '/odata/calendarevents'
+    '/api/meetings'
   ];
 }
 

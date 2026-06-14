@@ -80,8 +80,11 @@
 
     const urlLower = url.toLowerCase();
     
+    const apptKeywords = ['calendar', 'appointment', 'meeting', 'holiday', 'block', 'break', 'event', 'schedule', 'workhour', 'shift', 'availability'];
+    const isApptUrl = apptKeywords.some(kw => urlLower.includes(kw));
+    
     // 1. Direct URL-based classification (very fast and reliable)
-    if (urlLower.includes('calendar/') || urlLower.includes('calendarevents') || urlLower.includes('appointments') || urlLower.includes('meetings') || urlLower.includes('holiday') || urlLower.includes('block') || urlLower.includes('break')) {
+    if (isApptUrl) {
       console.log(`[Shirly Sync Injector] Intercepted ${array.length} appointments/breaks from URL: ${url}`);
       window.postMessage({
         source: 'shirly-sync-injector',
