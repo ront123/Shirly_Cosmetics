@@ -202,7 +202,6 @@ export default function MainLayout() {
           <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
             {new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
-          {showAppt && <NewAppointmentModal onClose={() => setShowAppt(false)} />}
           <div className="flex items-center flex-shrink-0" style={{ gap: 10 }}>
             <button className="relative flex items-center justify-center flex-shrink-0"
               style={{ width: 36, height: 36, borderRadius: 9, background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
@@ -220,6 +219,9 @@ export default function MainLayout() {
           </div>
         </div>
       </main>
+
+      {/* Global modals — rendered at root so position:fixed centers correctly */}
+      {showAppt && <NewAppointmentModal onClose={() => setShowAppt(false)} />}
     </div>
   );
 }
