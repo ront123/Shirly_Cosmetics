@@ -40,6 +40,8 @@ function fmtDate(d) {
 const CLIENT_FIELDS = [
   { key: 'name',       label: 'שם מלא',         required: true  },
   { key: 'phone',      label: 'טלפון',           required: true  },
+  { key: 'gender',     label: 'מגדר',            required: false },
+  { key: 'balance',    label: 'יתרת לקוח',       required: false },
   { key: 'email',      label: 'אימייל',          required: false },
   { key: 'birthday',   label: 'יום הולדת',       required: false },
   { key: 'lastVisit',  label: 'ביקור אחרון',     required: false },
@@ -53,6 +55,8 @@ const CLIENT_FIELDS = [
 const COL_PATTERNS = {
   name:       [/^name$/i, /שם/],
   phone:      [/mobile|phone|טל|נייד/i],
+  gender:     [/gender|sex|מגדר|מין/i],
+  balance:    [/balance|debt|יתרה|חוב/i],
   email:      [/email|mail|אימייל/i],
   birthday:   [/birth|dateofbirth|לידה|יום הולדת/i],
   lastVisit:  [/lastvisit|last.visit|ביקור/i],
@@ -75,7 +79,7 @@ const FILTERS = [
    NEW CLIENT MODAL
 ══════════════════════════════════════════════════════════ */
 function NewClientModal({ onClose, onSave }) {
-  const [form, setForm] = useState({ name: '', phone: '', email: '', birthday: '', notes: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', birthday: '', notes: '', gender: '', balance: '' });
   const [errors, setErrors] = useState({});
 
   const validate = () => {
@@ -96,6 +100,8 @@ function NewClientModal({ onClose, onSave }) {
       email:     form.email,
       birthday:  form.birthday,
       notes:     form.notes,
+      gender:    form.gender,
+      balance:   parseFloat(form.balance) || 0,
       initials:  form.name.trim()[0] || '?',
       lastVisit: new Date().toISOString().slice(0, 10),
       visits:    0,
@@ -138,6 +144,8 @@ function NewClientModal({ onClose, onSave }) {
           <div className="px-6 py-5 space-y-4">
             {field('name',     'שם מלא',    'text', 'לדוגמא: שרה כהן')}
             {field('phone',    'טלפון',     'tel',  '050-0000000')}
+            {field('gender',   'מגדר',      'text', 'נקבה / זכר')}
+            {field('balance',  'יתרת לקוח',  'number', '0')}
             {field('email',    'אימייל',    'email', 'example@mail.com')}
             {field('birthday', 'יום הולדת', 'date')}
             {field('notes',    'הערות',     'text', 'אלרגיות, העדפות...')}
@@ -252,6 +260,8 @@ function ExcelImportModal({ onClose, onImport }) {
         lastVisit,
         address:     getValue(row, rawRow, 'address'),
         notes:       getValue(row, rawRow, 'notes'),
+        gender:      getValue(row, rawRow, 'gender'),
+        balance:     parseFloat(getValue(row, rawRow, 'balance')) || 0,
         initials:    name[0] || '?',
         visits,
         avgInvoice:  Math.round(avgInvoice),
@@ -570,7 +580,7 @@ export default function ClientsList() {
             <table className="w-full" dir="rtl">
               <thead style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
                 <tr>
-                  {['לקוחה', 'טלפון', 'ביקור אחרון', 'ביקורים', 'ממוצע חשבונית', 'סה"כ הוצאה', 'סטטוס', ''].map((h, i) => (
+                  {['לקוחה', 'טלפון', 'מגדר', 'ביקור אחרון', 'ביקורים', 'ממוצע חשבונית', 'סה"כ הוצאה', 'יתרת לקוח', 'סטטוס', ''].map((h, i) => (
                     <th key={i} className="text-right text-xs font-bold py-3 px-4" style={{ color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -601,6 +611,10 @@ export default function ClientsList() {
                     <td className="py-3 px-4">
                       <span className="text-sm" dir="ltr" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{c.phone || '—'}</span>
                     </td>
+                    {/* Gender */}
+                    <td className="py-3 px-4">
+                      <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{c.gender || '—'}</span>
+                    </td>
                     {/* Last visit */}
                     <td className="py-3 px-4">
                       <span className="text-sm" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>{fmtDate(c.lastVisit)}</span>
@@ -616,6 +630,12 @@ export default function ClientsList() {
                     {/* Spent */}
                     <td className="py-3 px-4">
                       <span className="font-bold text-sm" style={{ color: 'var(--violet)' }}>{c.spent || '—'}</span>
+                    </td>
+                    {/* Balance */}
+                    <td className="py-3 px-4">
+                      <span className="font-bold text-sm" style={{ color: c.balance < 0 ? 'var(--red)' : c.balance > 0 ? 'var(--green)' : 'var(--text-secondary)' }}>
+                        {c.balance !== undefined ? `₪${parseFloat(c.balance).toLocaleString('he-IL')}` : '—'}
+                      </span>
                     </td>
                     {/* Status */}
                     <td className="py-3 px-4">

@@ -78,6 +78,18 @@ const getApptTimes = (appt) => {
   return { start, end };
 };
 
+const isBreakEvent = (appt) => {
+  if (!appt) return false;
+  const name = String(appt.clientName || '').toLowerCase();
+  const treatment = String(appt.treatmentName || '').toLowerCase();
+  const notes = String(appt.notes || '').toLowerCase();
+  const keywords = ['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה'];
+  return keywords.some(kw => name.includes(kw) || treatment.includes(kw) || notes.includes(kw)) || 
+         (!appt.clientId && !appt.clientPhone && 
+          (name.includes('הפסקה') || name.includes('ארוחה') || name.includes('חסום') || name.includes('נעול') || 
+           treatment.includes('הפסקה') || treatment.includes('ארוחה') || treatment.includes('חסום') || treatment.includes('נעול')));
+};
+
 // Interval overlapping grouping algorithm
 function getLaidOutAppointments(dayAppts) {
   if (dayAppts.length === 0) return [];
@@ -531,37 +543,40 @@ export default function CalendarView() {
                     const formatHour = (d) => format(new Date(d), 'HH:mm');
                     const timeStr = `${formatHour(appt.startTime)} - ${formatHour(appt.endTime || new Date(new Date(appt.startTime).getTime() + 60*60*1000))}`;
                     
+                    const breakEvent = isBreakEvent(appt);
                     return (
                       <div
                         key={appt.id}
-                        onClick={(e) => { e.stopPropagation(); setSelectedAppt(appt); }}
-                        className="absolute overflow-hidden transition-all duration-150 hover:z-20"
+                        onClick={(e) => { if (breakEvent) return; e.stopPropagation(); setSelectedAppt(appt); }}
+                        className={`absolute overflow-hidden transition-all duration-150 ${breakEvent ? '' : 'hover:z-20'}`}
                         style={{
                           top: topPx + 2,
                           height: heightPx - 4,
                           right: `${rightPct}%`,
                           width: `calc(${widthPct}% - 4px)`,
                           borderRadius: 6,
-                          background: apptColor.bg,
-                          border: `1px solid ${apptColor.bdr}`,
-                          borderRight: `3px solid ${apptColor.solid}`,
+                          background: breakEvent ? 'rgba(255, 255, 255, 0.06)' : apptColor.bg,
+                          border: breakEvent ? '1px solid rgba(255, 255, 255, 0.1)' : `1px solid ${apptColor.bdr}`,
+                          borderRight: breakEvent ? '3px solid #6b7280' : `3px solid ${apptColor.solid}`,
                           padding: '4px 6px',
-                          cursor: 'pointer',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                          cursor: breakEvent ? 'default' : 'pointer',
+                          boxShadow: breakEvent ? 'none' : '0 2px 4px rgba(0,0,0,0.15)',
                           display: 'flex',
                           flexDirection: 'column'
                         }}
                       >
                         <div className="flex flex-col h-full justify-between min-w-0">
                           <div className="min-w-0">
-                            <p className="font-bold truncate" style={{ fontSize: 13, color: '#ffffff', fontWeight: '800', lineHeight: 1.2 }}>
+                            <p className="font-bold truncate" style={{ fontSize: 13, color: breakEvent ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', fontWeight: '800', lineHeight: 1.2 }}>
                               {appt.clientName}
                             </p>
-                            <p className="truncate" style={{ fontSize: 11, color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600', marginTop: 1.5 }}>
-                              {appt.treatmentName}
-                            </p>
+                            {!breakEvent && appt.treatmentName && (
+                              <p className="truncate" style={{ fontSize: 11, color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600', marginTop: 1.5 }}>
+                                {appt.treatmentName}
+                              </p>
+                            )}
                           </div>
-                          <span style={{ fontSize: 10, color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', alignSelf: 'flex-start', marginTop: 2 }}>
+                          <span style={{ fontSize: 10, color: breakEvent ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.7)', fontWeight: '500', alignSelf: 'flex-start', marginTop: 2 }}>
                             {timeStr}
                           </span>
                         </div>

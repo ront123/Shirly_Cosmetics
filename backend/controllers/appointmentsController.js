@@ -18,14 +18,14 @@ exports.getAppointments = async (req, res) => {
     
     // Map to camelCase properties expected by frontend
     const formatted = result.rows.map(row => {
-      const clientName = `${row.first_name || ''} ${row.last_name || ''}`.trim();
+      const clientName = row.title || `${row.first_name || ''} ${row.last_name || ''}`.trim();
       return {
         id: row.id,
         easybizyId: row.easybizy_id || '',
         clientId: row.client_id || '',
         clientPhone: row.phone_number || '',
         clientName: clientName || 'לקוח לא מזוהה',
-        treatmentName: row.treatment_name || 'טיפול כללי',
+        treatmentName: row.treatment_name || (row.title ? row.title : 'טיפול כללי'),
         therapistName: row.therapist_name || 'שירלי',
         startTime: row.start_time ? new Date(row.start_time).toISOString() : '',
         endTime: row.end_time ? new Date(row.end_time).toISOString() : '',

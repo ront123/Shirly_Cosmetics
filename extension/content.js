@@ -125,6 +125,10 @@ function getCustomerPaths() {
 
 function getAppointmentPaths() {
   return [
+    '/odata/CalendarEvents?$expand=Employee,Meeting($expand=Customer,Treatment)',
+    '/odata/CalendarEvents?$expand=Employee,Meeting($expand=Customer)',
+    '/odata/CalendarEvents?$expand=Employee,Meeting',
+    '/odata/CalendarEvents?$expand=Employee',
     '/odata/Meetings?$expand=CalendarEvent,Customer,Employee,Treatment',
     '/odata/Meetings?$expand=CalendarEvent,Customer,Employee',
     '/odata/Meetings?$expand=CalendarEvent,Customer',

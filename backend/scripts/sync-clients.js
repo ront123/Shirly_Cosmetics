@@ -86,6 +86,8 @@ function mapClient(raw, index) {
     hue:         hueFromName(name),
     address:     raw.Address || raw.address || '',
     source:      raw.ArrivalSource || raw.Source || raw.source || '',
+    gender:      raw.Gender || raw.gender || '',
+    balance:     parseFloat(raw.Balance || raw.balance || 0) || 0,
     notes:       '',
     _source:     'easybizy',
     _syncedAt:   new Date().toISOString(),
@@ -188,13 +190,27 @@ async function syncClients() {
 
   // Also update status of existing clients if their lastVisit changed
   const updatedExisting = existing.map(ec => {
-    const remote = remoteClients.find(rc => String(rc.id) === String(ec.id));
+    const remote = remoteClients.find(rc => String(rc.id) === String(ec.id) || (rc.phone && rc.phone === ec.phone));
     if (!remote) return ec;
-    // Update lastVisit and status if changed
-    if (remote.lastVisit && remote.lastVisit !== ec.lastVisit) {
-      return { ...ec, lastVisit: remote.lastVisit, status: remote.status, _syncedAt: remote._syncedAt };
-    }
-    return ec;
+    
+    const updated = { ...ec };
+    if (remote.name) updated.name = remote.name;
+    if (remote.phone) updated.phone = remote.phone;
+    if (remote.email) updated.email = remote.email;
+    if (remote.birthday) updated.birthday = remote.birthday;
+    if (remote.lastVisit) updated.lastVisit = remote.lastVisit;
+    if (remote.nextMeeting) updated.nextMeeting = remote.nextMeeting;
+    if (remote.address) updated.address = remote.address;
+    if (remote.source) updated.source = remote.source;
+    if (remote.gender) updated.gender = remote.gender;
+    if (remote.balance !== undefined) updated.balance = remote.balance;
+    
+    updated.visits = remote.visits;
+    updated.avgInvoice = remote.avgInvoice;
+    updated.spent = remote.spent;
+    updated.status = remote.status;
+    updated._syncedAt = remote._syncedAt;
+    return updated;
   });
 
   const merged = [...newClients, ...updatedExisting];

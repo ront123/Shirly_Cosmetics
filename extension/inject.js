@@ -42,13 +42,16 @@
         const hasClient = keys.some(k => k.includes('client') || k.includes('customer') || k.includes('patient') || k.includes('user'));
         // Check for service/treatment reference (treatment, service, duration)
         const hasTreatment = keys.some(k => k.includes('treatment') || k.includes('service') || k.includes('type') || k.includes('duration'));
+        // Check for subject/title fields (common in general events/breaks)
+        const hasSubject = keys.some(k => k.includes('subject') || k.includes('title'));
         
         if (hasTime) score += 2;
         if (hasClient) score += 1.5;
         if (hasTreatment) score += 1.5;
+        if (hasSubject) score += 1.5;
       }
     }
-    return (score / sample.length) >= 2.5;
+    return (score / sample.length) >= 2.0;
   }
 
   function extractArray(data) {

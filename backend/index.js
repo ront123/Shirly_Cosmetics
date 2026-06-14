@@ -22,7 +22,10 @@ async function runMigrations() {
       ALTER TABLE clients ADD COLUMN IF NOT EXISTS source VARCHAR(100);
       ALTER TABLE clients ADD COLUMN IF NOT EXISTS visits INTEGER DEFAULT 0;
       ALTER TABLE clients ADD COLUMN IF NOT EXISTS avg_invoice INTEGER DEFAULT 0;
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS gender VARCHAR(50);
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS balance DECIMAL(10,2) DEFAULT 0.00;
       ALTER TABLE appointments ADD COLUMN IF NOT EXISTS easybizy_id VARCHAR(100);
+      ALTER TABLE appointments ADD COLUMN IF NOT EXISTS title VARCHAR(255);
     `);
     console.log('✅ Database migrations completed successfully.');
   } catch (err) {

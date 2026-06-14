@@ -77,6 +77,8 @@ function mapClient(raw, index) {
     hue: hueFromName(name),
     address: raw.Address || raw.address || '',
     source: raw.ArrivalSource || raw.Source || raw.source || '',
+    gender: raw.Gender || raw.gender || '',
+    balance: parseFloat(raw.Balance || raw.balance || 0) || 0,
     notes: '',
     _source: 'easybizy_extension',
     _syncedAt: new Date().toISOString(),
@@ -84,12 +86,16 @@ function mapClient(raw, index) {
 }
 
 function mapAppointment(raw, index) {
+  // Check if we have a nested Meeting object (common when raw is a CalendarEvent)
+  const meetingRaw = raw.Meeting || raw.meeting;
+  const isBreak = !meetingRaw && !raw.Customer && !raw.client && !raw.CustomerId;
+
   // 1. Client Name & Details (ID and Phone)
   let clientName = '';
   let clientPhone = '';
   let easybizyClientId = '';
   
-  let customerRaw = raw.Customer || raw.client;
+  let customerRaw = raw.Customer || raw.client || (meetingRaw && (meetingRaw.Customer || meetingRaw.client));
   if (customerRaw && typeof customerRaw === 'object') {
     const fName = String(customerRaw.FirstName || customerRaw.Firstname || customerRaw.firstName || '').trim();
     const lName = String(customerRaw.LastName || customerRaw.Lastname || customerRaw.lastName || '').trim();
@@ -104,7 +110,13 @@ function mapAppointment(raw, index) {
   if (!clientName) {
     clientName = raw.clientName || raw.ClientName || raw.customerName || raw.CustomerName || raw.customer_name || raw.client_name || raw.Client || raw.client || '';
   }
+  
+  // If it is a break event, use Subject/Title as clientName
+  if (isBreak && !clientName) {
+    clientName = raw.Subject || raw.Title || raw.subject || raw.title || 'אירוע כללי';
+  }
   clientName = String(clientName).trim();
+
   if (!clientPhone && raw.clientPhone) {
     clientPhone = formatPhone(raw.clientPhone);
   }
@@ -116,11 +128,9 @@ function mapAppointment(raw, index) {
 
   // 2. Treatment Name
   let treatmentName = '';
-  if (raw.Treatment && typeof raw.Treatment === 'object') {
-    treatmentName = raw.Treatment.Name || raw.Treatment.Title || raw.Treatment.name || raw.Treatment.title || raw.Treatment.Subject || raw.Treatment.subject || '';
-  }
-  if (!treatmentName && raw.treatment && typeof raw.treatment === 'object') {
-    treatmentName = raw.treatment.name || raw.treatment.title || raw.treatment.Name || raw.treatment.Title || raw.treatment.subject || raw.treatment.Subject || '';
+  let treatmentRaw = raw.Treatment || raw.treatment || (meetingRaw && (meetingRaw.Treatment || meetingRaw.treatment));
+  if (treatmentRaw && typeof treatmentRaw === 'object') {
+    treatmentName = treatmentRaw.Name || treatmentRaw.Title || treatmentRaw.name || treatmentRaw.title || treatmentRaw.Subject || treatmentRaw.subject || '';
   }
   if (!treatmentName && raw.Service && typeof raw.Service === 'object') {
     treatmentName = raw.Service.Name || raw.Service.Title || raw.Service.name || raw.Service.title || raw.Service.Subject || raw.Service.subject || '';
@@ -134,6 +144,11 @@ function mapAppointment(raw, index) {
   if (!treatmentName) {
     treatmentName = raw.treatmentName || raw.TreatmentName || raw.serviceName || raw.ServiceName || raw.service || raw.treatment || raw.Subject || raw.subject || raw.Title || raw.title || '';
   }
+  
+  // If it's a break event, use the subject/title as treatmentName
+  if (isBreak && !treatmentName) {
+    treatmentName = raw.Subject || raw.Title || raw.subject || raw.title || 'אירוע כללי';
+  }
   treatmentName = String(treatmentName).trim();
 
   // 3. Therapist Name
@@ -143,6 +158,12 @@ function mapAppointment(raw, index) {
   }
   if (!therapistName && raw.employee && typeof raw.employee === 'object') {
     therapistName = raw.employee.name || '';
+  }
+  if (!therapistName && meetingRaw && meetingRaw.Employee && typeof meetingRaw.Employee === 'object') {
+    therapistName = meetingRaw.Employee.Name || meetingRaw.Employee.FirstName || '';
+  }
+  if (!therapistName && meetingRaw && meetingRaw.employee && typeof meetingRaw.employee === 'object') {
+    therapistName = meetingRaw.employee.name || '';
   }
   if (!therapistName) {
     therapistName = raw.therapistName || raw.TherapistName || raw.employeeName || raw.EmployeeName || raw.employee || raw.therapist || 'שירלי';
@@ -156,11 +177,15 @@ function mapAppointment(raw, index) {
     start = raw.CalendarEvent.Start || raw.CalendarEvent.StartTime || raw.CalendarEvent.StartDateTime || raw.CalendarEvent.start || '';
     end = raw.CalendarEvent.End || raw.CalendarEvent.EndTime || raw.CalendarEvent.EndDateTime || raw.CalendarEvent.end || '';
   }
+  if (!start && meetingRaw) {
+    start = meetingRaw.startTime || meetingRaw.start_time || meetingRaw.start || '';
+    end = meetingRaw.endTime || meetingRaw.end_time || meetingRaw.end || '';
+  }
   if (!start) {
-    start = raw.startTime || raw.start_time || raw.start || raw.date || raw.dateTime || raw.datetime || raw.CreatedOn || '';
+    start = raw.Start || raw.start || raw.startTime || raw.start_time || raw.date || raw.dateTime || raw.datetime || raw.CreatedOn || '';
   }
   if (!end) {
-    end = raw.endTime || raw.end_time || raw.end || start || '';
+    end = raw.End || raw.end || raw.endTime || raw.end_time || start || '';
   }
 
   return {
@@ -319,6 +344,8 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
     const easybizyId = String(raw.CustomerId || raw.Id || raw.id || '');
     const address = raw.Address || raw.address || '';
     const source = raw.ArrivalSource || raw.Source || raw.source || '';
+    const gender = raw.Gender || raw.gender || '';
+    const balance = parseFloat(raw.Balance || raw.balance || 0) || 0;
 
     const nameParts = name.split(/\s+/);
     const firstName = raw.FirstName || raw.Firstname || nameParts[0] || 'לקוח';
@@ -342,7 +369,9 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
       avgInvoice,
       easybizyId,
       address,
-      source
+      source,
+      gender,
+      balance
     };
 
     if (existingId) {
@@ -359,12 +388,12 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
       const values = [];
       const placeholders = [];
       batch.forEach((c, idx) => {
-        const base = idx * 11;
-        placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11})`);
-        values.push(c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source);
+        const base = idx * 13;
+        placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11}, $${base + 12}, $${base + 13})`);
+        values.push(c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.gender, c.balance);
       });
       const query = `
-        INSERT INTO clients (first_name, last_name, phone_number, email, last_visit_date, date_of_birth, visits, avg_invoice, easybizy_id, address, source)
+        INSERT INTO clients (first_name, last_name, phone_number, email, last_visit_date, date_of_birth, visits, avg_invoice, easybizy_id, address, source, gender, balance)
         VALUES ${placeholders.join(', ')}
         RETURNING id, phone_number, easybizy_id
       `;
@@ -382,9 +411,10 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
       await pool.query(
         `UPDATE clients 
          SET first_name = $1, last_name = $2, phone_number = $3, email = $4, last_visit_date = $5, 
-             date_of_birth = $6, visits = $7, avg_invoice = $8, easybizy_id = $9, address = $10, source = $11
-         WHERE id = $12`,
-        [c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.id]
+             date_of_birth = $6, visits = $7, avg_invoice = $8, easybizy_id = $9, address = $10, source = $11,
+             gender = $12, balance = $13
+         WHERE id = $14`,
+        [c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.gender, c.balance, c.id]
       );
     }
     console.log(`Updated ${clientsToUpdate.length} existing clients in PostgreSQL.`);
@@ -392,7 +422,7 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
 
   // --- 3. SYNC APPOINTMENTS ---
   console.log('📅 [Postgres Sync] מסנכרן פגישות...');
-  const dbApptsRes = await pool.query('SELECT id, easybizy_id, client_id, start_time, status, notes FROM appointments');
+  const dbApptsRes = await pool.query('SELECT id, easybizy_id, client_id, start_time, status, notes, title FROM appointments');
   const apptByEasybizyId = new Map();
   const apptByClientTime = new Map();
   dbApptsRes.rows.forEach(r => {
@@ -408,41 +438,47 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
     const raw = rawAppointments[idx];
     const mapped = mapAppointment(raw, idx);
 
+    // Identify if it's a break event
+    const isBreakEvent = (mapped.clientName && ['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה'].some(kw => mapped.clientName.includes(kw))) || (!raw.Customer && !raw.client && !raw.CustomerId && !raw.id_customer && !raw.Meeting && !raw.meeting);
+
     let clientId = null;
-    let customerRaw = raw.Customer || raw.client;
-    if (customerRaw && typeof customerRaw === 'object') {
-      const cPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || '');
-      const cEasybizyId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
-      if (cEasybizyId && clientByEasybizyId.has(cEasybizyId)) {
-        clientId = clientByEasybizyId.get(cEasybizyId);
-      } else if (cPhone && clientByPhone.has(cPhone)) {
-        clientId = clientByPhone.get(cPhone);
+    
+    if (!isBreakEvent) {
+      let customerRaw = raw.Customer || raw.client || (raw.Meeting && (raw.Meeting.Customer || raw.Meeting.client));
+      if (customerRaw && typeof customerRaw === 'object') {
+        const cPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || '');
+        const cEasybizyId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
+        if (cEasybizyId && clientByEasybizyId.has(cEasybizyId)) {
+          clientId = clientByEasybizyId.get(cEasybizyId);
+        } else if (cPhone && clientByPhone.has(cPhone)) {
+          clientId = clientByPhone.get(cPhone);
+        }
       }
-    }
 
-    if (!clientId && mapped.clientName) {
-      const nameParts = mapped.clientName.split(/\s+/);
-      const firstName = nameParts[0] || 'לקוח';
-      const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
-      
-      const matchRes = await pool.query(
-        'SELECT id FROM clients WHERE first_name = $1 AND last_name = $2 LIMIT 1',
-        [firstName, lastName]
-      );
-      if (matchRes.rows.length > 0) {
-        clientId = matchRes.rows[0].id;
-      } else {
-        const insertClientRes = await pool.query(
-          `INSERT INTO clients (first_name, last_name, phone_number) 
-           VALUES ($1, $2, $3) RETURNING id`,
-          [firstName, lastName, `placeholder_${Date.now()}_${idx}`]
+      if (!clientId && mapped.clientName) {
+        const nameParts = mapped.clientName.split(/\s+/);
+        const firstName = nameParts[0] || 'לקוח';
+        const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
+        
+        const matchRes = await pool.query(
+          'SELECT id FROM clients WHERE first_name = $1 AND last_name = $2 LIMIT 1',
+          [firstName, lastName]
         );
-        clientId = insertClientRes.rows[0].id;
-        clientByPhone.set(`placeholder_${Date.now()}_${idx}`, clientId);
+        if (matchRes.rows.length > 0) {
+          clientId = matchRes.rows[0].id;
+        } else {
+          const insertClientRes = await pool.query(
+            `INSERT INTO clients (first_name, last_name, phone_number) 
+             VALUES ($1, $2, $3) RETURNING id`,
+            [firstName, lastName, `placeholder_${Date.now()}_${idx}`]
+          );
+          clientId = insertClientRes.rows[0].id;
+          clientByPhone.set(`placeholder_${Date.now()}_${idx}`, clientId);
+        }
       }
-    }
 
-    if (!clientId) continue;
+      if (!clientId) continue; // Non-break appointments must have a client
+    }
 
     const therapistId = await ensureTherapist(mapped.therapistName);
     const treatmentId = await ensureTreatment(mapped.treatmentName);
@@ -459,6 +495,7 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
       else if (s.includes('no_show') || s.includes('לא הגיע')) status = 'no_show';
     }
     const notes = mapped.notes || '';
+    const title = isBreakEvent ? mapped.clientName : '';
 
     let existingAppt = null;
     if (easybizyId && !easybizyId.startsWith('appt_') && apptByEasybizyId.has(easybizyId)) {
@@ -478,13 +515,15 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
       endTime,
       status,
       notes,
-      easybizyId
+      easybizyId,
+      title
     };
 
     if (existingAppt) {
       const changed = 
         existingAppt.status !== status || 
         existingAppt.notes !== notes || 
+        existingAppt.title !== title ||
         new Date(existingAppt.start_time).getTime() !== startTime.getTime();
       
       if (changed) {
@@ -502,12 +541,12 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
       const values = [];
       const placeholders = [];
       batch.forEach((a, idx) => {
-        const base = idx * 8;
-        placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`);
-        values.push(a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId);
+        const base = idx * 9;
+        placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`);
+        values.push(a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.title);
       });
       const query = `
-        INSERT INTO appointments (client_id, therapist_id, treatment_id, start_time, end_time, status, notes, easybizy_id)
+        INSERT INTO appointments (client_id, therapist_id, treatment_id, start_time, end_time, status, notes, easybizy_id, title)
         VALUES ${placeholders.join(', ')}
       `;
       await pool.query(query, values);
@@ -519,9 +558,9 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
     for (const a of apptsToUpdate) {
       await pool.query(
         `UPDATE appointments 
-         SET client_id = $1, therapist_id = $2, treatment_id = $3, start_time = $4, end_time = $5, status = $6, notes = $7, easybizy_id = $8
-         WHERE id = $9`,
-        [a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.id]
+         SET client_id = $1, therapist_id = $2, treatment_id = $3, start_time = $4, end_time = $5, status = $6, notes = $7, easybizy_id = $8, title = $9
+         WHERE id = $10`,
+        [a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.title, a.id]
       );
     }
     console.log(`Updated ${apptsToUpdate.length} appointments in PostgreSQL.`);
@@ -567,6 +606,8 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
       if (remote.nextMeeting) updated.nextMeeting = remote.nextMeeting;
       if (remote.address) updated.address = remote.address;
       if (remote.source) updated.source = remote.source;
+      if (remote.gender) updated.gender = remote.gender;
+      if (remote.balance !== undefined) updated.balance = remote.balance;
       
       if (remote.visits >= (ec.visits || 0)) {
         updated.visits = remote.visits;

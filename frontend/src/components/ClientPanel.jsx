@@ -1,4 +1,4 @@
-import { Phone, Mail, Calendar, Star, TrendingUp, MapPin } from 'lucide-react';
+import { Phone, Mail, Calendar, Star, TrendingUp, MapPin, User, CreditCard } from 'lucide-react';
 
 function fmtDate(d) {
   if (!d) return '—';
@@ -11,14 +11,16 @@ export default function ClientPanel({ client, onClose }) {
   if (!client) return null;
   
   const rows = [
-    { icon: Phone,    label: 'טלפון',         val: client.phone       || '—' },
-    { icon: Mail,     label: 'אימייל',         val: client.email       || '—' },
-    { icon: Calendar, label: 'ביקור אחרון',    val: fmtDate(client.lastVisit) },
-    { icon: Calendar, label: 'תור הבא',        val: fmtDate(client.nextMeeting) },
-    { icon: Star,     label: 'יום הולדת',      val: fmtDate(client.birthday) },
-    { icon: TrendingUp,label:'ביקורים',        val: client.visits      ?? '—' },
-    { icon: TrendingUp,label:'ממוצע חשבונית',  val: client.avgInvoice ? `₪${client.avgInvoice}` : '—' },
-    { icon: MapPin,   label: 'כתובת',          val: client.address     || '—' },
+    { icon: Phone,      label: 'טלפון',         val: client.phone       || '—' },
+    { icon: Mail,       label: 'אימייל',         val: client.email       || '—' },
+    { icon: User,       label: 'מגדר',          val: client.gender      || '—' },
+    { icon: CreditCard, label: 'יתרת לקוח',      val: client.balance !== undefined ? `₪${parseFloat(client.balance).toLocaleString('he-IL')}` : '—' },
+    { icon: Calendar,   label: 'ביקור אחרון',    val: fmtDate(client.lastVisit) },
+    { icon: Calendar,   label: 'תור הבא',        val: fmtDate(client.nextMeeting) },
+    { icon: Star,       label: 'יום הולדת',      val: fmtDate(client.birthday) },
+    { icon: TrendingUp, label: 'ביקורים',        val: client.visits      ?? '—' },
+    { icon: TrendingUp, label: 'ממוצע חשבונית',  val: client.avgInvoice ? `₪${client.avgInvoice}` : '—' },
+    { icon: MapPin,     label: 'כתובת',          val: client.address     || '—' },
   ];
 
   return (

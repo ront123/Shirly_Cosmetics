@@ -39,6 +39,8 @@ exports.getClients = async (req, res) => {
         hue: hueFromName(name),
         address: row.address || '',
         source: row.source || '',
+        gender: row.gender || '',
+        balance: parseFloat(row.balance) || 0,
         notes: row.notes || ''
       };
     });
