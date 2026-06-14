@@ -1,5 +1,53 @@
 [
   {
+    "id": "appt_1781445365310_0",
+    "clientId": "",
+    "clientName": "אירוע כללי",
+    "clientPhone": "",
+    "treatmentName": "אירוע כללי",
+    "therapistName": "שירלי",
+    "startTime": "2026-06-14T13:56:05.311Z",
+    "endTime": "2026-06-14T13:56:05.311Z",
+    "status": "scheduled",
+    "notes": ""
+  },
+  {
+    "id": "appt_1781445365311_1",
+    "clientId": "",
+    "clientName": "אירוע כללי",
+    "clientPhone": "",
+    "treatmentName": "אירוע כללי",
+    "therapistName": "שירלי",
+    "startTime": "2026-06-14T13:56:05.311Z",
+    "endTime": "2026-06-14T13:56:05.311Z",
+    "status": "scheduled",
+    "notes": ""
+  },
+  {
+    "id": 106585,
+    "clientId": "56",
+    "clientName": "רינת רשף",
+    "clientPhone": "050-6979281",
+    "treatmentName": "לק ג'ל",
+    "therapistName": "לורה",
+    "startTime": "2026-07-09T13:00:00.000Z",
+    "endTime": "2026-07-09T14:00:00.000Z",
+    "status": "scheduled",
+    "notes": ""
+  },
+  {
+    "id": 106586,
+    "clientId": "56",
+    "clientName": "רינת רשף",
+    "clientPhone": "050-6979281",
+    "treatmentName": "גבות + שפם",
+    "therapistName": "שירלי",
+    "startTime": "2026-07-09T14:00:00.000Z",
+    "endTime": "2026-07-09T14:30:00.000Z",
+    "status": "scheduled",
+    "notes": ""
+  },
+  {
     "id": 1,
     "clientName": "שירלי עירוני טיפול 2 גבות",
     "treatmentName": "טיפול כללי",
@@ -15350,7 +15398,7 @@
   {
     "id": 104203,
     "clientName": "ילנה מחולה",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "ילנה מחולה",
     "therapistName": "שירלי",
     "startTime": "2026-06-22T09:30:00.000Z",
     "endTime": "2026-06-22T10:30:00.000Z",
@@ -15530,24 +15578,12 @@
   {
     "id": 106542,
     "clientName": "דנה משגב.",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "דנה משגב.",
     "therapistName": "שירלי",
     "startTime": "2026-06-23T12:30:00.000Z",
     "endTime": "2026-06-23T17:00:00.000Z",
     "status": "scheduled",
     "notes": "דנה משגב. ",
-    "clientId": "",
-    "clientPhone": ""
-  },
-  {
-    "id": 106560,
-    "clientName": "לקוח לא מזוהה",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-11T10:30:00.000Z",
-    "endTime": "2026-06-11T12:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
     "clientId": "",
     "clientPhone": ""
   },
@@ -21074,24 +21110,12 @@
   {
     "id": 106527,
     "clientName": "מרב דייג",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-09T10:30:00.000Z",
     "endTime": "2026-06-09T11:00:00.000Z",
     "status": "scheduled",
     "notes": "מרב וענבר שחי ושפם",
-    "clientId": "36",
-    "clientPhone": "050-5732267"
-  },
-  {
-    "id": 106528,
-    "clientName": "מרב דייג",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-07-05T12:00:00.000Z",
-    "endTime": "2026-07-05T13:30:00.000Z",
-    "status": "scheduled",
-    "notes": "",
     "clientId": "36",
     "clientPhone": "050-5732267"
   },
@@ -24314,7 +24338,7 @@
   {
     "id": 106567,
     "clientName": "הגר לושי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-07-01T07:30:00.000Z",
     "endTime": "2026-07-01T08:15:00.000Z",
@@ -24326,7 +24350,7 @@
   {
     "id": 106568,
     "clientName": "הגר לושי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-07-01T08:00:00.000Z",
     "endTime": "2026-07-01T09:30:00.000Z",
@@ -27410,7 +27434,7 @@
   {
     "id": 105499,
     "clientName": "אורלי חלפון",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-28T12:00:00.000Z",
     "endTime": "2026-06-28T13:00:00.000Z",
@@ -29618,7 +29642,7 @@
   {
     "id": 106529,
     "clientName": "הילי יקס",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-09T15:30:00.000Z",
     "endTime": "2026-06-09T16:00:00.000Z",
@@ -31404,18 +31428,6 @@
     "clientPhone": "050-6979281"
   },
   {
-    "id": 105403,
-    "clientName": "רינת רשף",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-06-11T13:00:00.000Z",
-    "endTime": "2026-06-11T14:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "56",
-    "clientPhone": "050-6979281"
-  },
-  {
     "id": 105438,
     "clientName": "רינת רשף",
     "treatmentName": "ג׳ל",
@@ -31442,22 +31454,10 @@
   {
     "id": 106580,
     "clientName": "רינת רשף",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-07-09T15:00:00.000Z",
     "endTime": "2026-07-09T16:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "56",
-    "clientPhone": "050-6979281"
-  },
-  {
-    "id": 106581,
-    "clientName": "רינת רשף",
-    "treatmentName": "טיפול פנים",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-18T13:00:00.000Z",
-    "endTime": "2026-06-18T15:00:00.000Z",
     "status": "scheduled",
     "notes": "",
     "clientId": "56",
@@ -39362,7 +39362,7 @@
   {
     "id": 105359,
     "clientName": "רינה גורה",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-07T14:30:00.000Z",
     "endTime": "2026-06-07T15:00:00.000Z",
@@ -39374,7 +39374,7 @@
   {
     "id": 105360,
     "clientName": "רינה גורה",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-07T13:45:00.000Z",
     "endTime": "2026-06-07T14:30:00.000Z",
@@ -39426,30 +39426,6 @@
     "therapistName": "שירלי",
     "startTime": "2026-05-10T12:30:00.000Z",
     "endTime": "2026-05-10T13:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "124",
-    "clientPhone": "052-2426597"
-  },
-  {
-    "id": 106537,
-    "clientName": "רינה גורה",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-07-05T13:30:00.000Z",
-    "endTime": "2026-07-05T14:15:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "124",
-    "clientPhone": "052-2426597"
-  },
-  {
-    "id": 106538,
-    "clientName": "רינה גורה",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-07-05T13:15:00.000Z",
-    "endTime": "2026-07-05T13:30:00.000Z",
     "status": "scheduled",
     "notes": "",
     "clientId": "124",
@@ -41918,7 +41894,7 @@
   {
     "id": 104091,
     "clientName": "אורנה סגל",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "טיפול פנים",
     "therapistName": "שירלי",
     "startTime": "2026-06-23T08:00:00.000Z",
     "endTime": "2026-06-23T10:00:00.000Z",
@@ -54158,7 +54134,7 @@
   {
     "id": 106561,
     "clientName": "תמר חץ",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-11T12:00:00.000Z",
     "endTime": "2026-06-11T12:30:00.000Z",
@@ -57086,7 +57062,7 @@
   {
     "id": 106566,
     "clientName": "ניקול בנארי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "טיפול פנים",
     "therapistName": "שירלי",
     "startTime": "2026-07-01T06:00:00.000Z",
     "endTime": "2026-07-01T08:00:00.000Z",
@@ -57098,7 +57074,7 @@
   {
     "id": 106570,
     "clientName": "ניקול בנארי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-07-02T14:30:00.000Z",
     "endTime": "2026-07-02T15:30:00.000Z",
@@ -57110,7 +57086,7 @@
   {
     "id": 106571,
     "clientName": "ניקול בנארי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-07-02T15:30:00.000Z",
     "endTime": "2026-07-02T16:00:00.000Z",
@@ -66590,7 +66566,7 @@
   {
     "id": 105464,
     "clientName": "דבינה הומינר",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "לק ג׳ל",
     "therapistName": "שירלי",
     "startTime": "2026-06-11T14:00:00.000Z",
     "endTime": "2026-06-11T15:00:00.000Z",
@@ -66614,7 +66590,7 @@
   {
     "id": 105450,
     "clientName": "דבינה הומינר",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "לק ג'ל",
     "therapistName": "לורה",
     "startTime": "2026-06-11T13:00:00.000Z",
     "endTime": "2026-06-11T14:00:00.000Z",
@@ -66626,7 +66602,7 @@
   {
     "id": 106565,
     "clientName": "דבינה הומינר",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "לק ג'ל, פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-07-02T13:45:00.000Z",
     "endTime": "2026-07-02T15:30:00.000Z",
@@ -70932,30 +70908,6 @@
     "clientPhone": "052-5988166"
   },
   {
-    "id": 104256,
-    "clientName": "נואי שטרן",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-25T06:00:00.000Z",
-    "endTime": "2026-06-25T08:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "261",
-    "clientPhone": "052-5988166"
-  },
-  {
-    "id": 106519,
-    "clientName": "נואי שטרן",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-07-09T08:00:00.000Z",
-    "endTime": "2026-07-09T10:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "261",
-    "clientPhone": "052-5988166"
-  },
-  {
     "id": 85069,
     "clientName": "נואי שטרן",
     "treatmentName": "טיפול כללי",
@@ -72854,7 +72806,7 @@
   {
     "id": 105351,
     "clientName": "ענבל כהן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-07T13:00:00.000Z",
     "endTime": "2026-06-07T13:45:00.000Z",
@@ -84602,7 +84554,7 @@
   {
     "id": 105488,
     "clientName": "עירית כץ",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-25T13:00:00.000Z",
     "endTime": "2026-06-25T13:45:00.000Z",
@@ -86330,7 +86282,7 @@
   {
     "id": 105442,
     "clientName": "רחל שמעוני",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-28T13:00:00.000Z",
     "endTime": "2026-06-28T13:45:00.000Z",
@@ -87854,7 +87806,7 @@
   {
     "id": 106540,
     "clientName": "מירי שטין",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-24T06:00:00.000Z",
     "endTime": "2026-06-24T07:00:00.000Z",
@@ -97082,7 +97034,7 @@
   {
     "id": 106544,
     "clientName": "איריס מור",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-09T09:00:00.000Z",
     "endTime": "2026-06-09T10:30:00.000Z",
@@ -104474,7 +104426,7 @@
   {
     "id": 106549,
     "clientName": "לירון קורן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-10T13:30:00.000Z",
     "endTime": "2026-06-10T14:00:00.000Z",
@@ -104930,7 +104882,7 @@
   {
     "id": 106582,
     "clientName": "שירן שקד",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-30T14:30:00.000Z",
     "endTime": "2026-06-30T15:00:00.000Z",
@@ -112622,7 +112574,7 @@
   {
     "id": 106506,
     "clientName": "ציפי אדר",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-23T09:15:00.000Z",
     "endTime": "2026-06-23T10:15:00.000Z",
@@ -112634,7 +112586,7 @@
   {
     "id": 106564,
     "clientName": "ציפי אדר",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-23T10:00:00.000Z",
     "endTime": "2026-06-23T10:30:00.000Z",
@@ -122184,18 +122136,6 @@
     "clientPhone": "052-6130666"
   },
   {
-    "id": 105282,
-    "clientName": "שני קקון",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-06-24T08:00:00.000Z",
-    "endTime": "2026-06-24T09:45:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "572",
-    "clientPhone": "052-6130666"
-  },
-  {
     "id": 101676,
     "clientName": "שני קקון",
     "treatmentName": "טיפול כללי",
@@ -122222,7 +122162,7 @@
   {
     "id": 105471,
     "clientName": "שני קקון",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "מניקור, פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-23T07:30:00.000Z",
     "endTime": "2026-06-23T09:15:00.000Z",
@@ -126210,18 +126150,6 @@
     "therapistName": "לורה",
     "startTime": "2026-03-03T07:00:00.000Z",
     "endTime": "2026-03-03T08:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "594",
-    "clientPhone": "054-6300722"
-  },
-  {
-    "id": 106576,
-    "clientName": "אתי מזרחי",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-07-05T14:15:00.000Z",
-    "endTime": "2026-07-05T15:00:00.000Z",
     "status": "scheduled",
     "notes": "",
     "clientId": "594",
@@ -139154,7 +139082,7 @@
   {
     "id": 105504,
     "clientName": "אביגיל סודי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "מניקור, פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-25T13:45:00.000Z",
     "endTime": "2026-06-25T15:30:00.000Z",
@@ -142236,21 +142164,9 @@
     "clientPhone": "052-4887866"
   },
   {
-    "id": 105302,
-    "clientName": "ניצן שטראוס",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-05T06:00:00.000Z",
-    "endTime": "2026-06-05T08:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "780",
-    "clientPhone": "052-4887866"
-  },
-  {
     "id": 106516,
     "clientName": "ניצן שטראוס",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "טיפול פנים",
     "therapistName": "שירלי",
     "startTime": "2026-07-03T06:00:00.000Z",
     "endTime": "2026-07-03T08:00:00.000Z",
@@ -149630,7 +149546,7 @@
   {
     "id": 105465,
     "clientName": "קרן אלמגור",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-21T15:15:00.000Z",
     "endTime": "2026-06-21T16:00:00.000Z",
@@ -149858,7 +149774,7 @@
   {
     "id": 105483,
     "clientName": "קרן דרס כהן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-09T15:00:00.000Z",
     "endTime": "2026-06-09T15:30:00.000Z",
@@ -149870,7 +149786,7 @@
   {
     "id": 105484,
     "clientName": "קרן דרס כהן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-25T12:00:00.000Z",
     "endTime": "2026-06-25T13:00:00.000Z",
@@ -151898,7 +151814,7 @@
   {
     "id": 106572,
     "clientName": "קרן מילר",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "טיפול פנים",
     "therapistName": "שירלי",
     "startTime": "2026-06-21T08:00:00.000Z",
     "endTime": "2026-06-21T10:00:00.000Z",
@@ -157322,7 +157238,7 @@
   {
     "id": 105436,
     "clientName": "גיל יונה",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-09T08:30:00.000Z",
     "endTime": "2026-06-09T09:30:00.000Z",
@@ -162566,7 +162482,7 @@
   {
     "id": 105501,
     "clientName": "הדר בן דוד",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "טיפול פנים",
     "therapistName": "שירלי",
     "startTime": "2026-06-25T08:00:00.000Z",
     "endTime": "2026-06-25T10:00:00.000Z",
@@ -163418,7 +163334,7 @@
   {
     "id": 105352,
     "clientName": "לי אלמגור",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-10T08:00:00.000Z",
     "endTime": "2026-06-10T08:45:00.000Z",
@@ -164834,7 +164750,7 @@
   {
     "id": 106514,
     "clientName": "מירב פישל",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "מניקור, פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-07-02T12:00:00.000Z",
     "endTime": "2026-07-02T13:45:00.000Z",
@@ -164846,7 +164762,7 @@
   {
     "id": 105316,
     "clientName": "רוני חן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-10T07:00:00.000Z",
     "endTime": "2026-06-10T08:00:00.000Z",
@@ -168282,18 +168198,6 @@
     "therapistName": "שירלי",
     "startTime": "2026-02-25T13:00:00.000Z",
     "endTime": "2026-02-25T15:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "1057",
-    "clientPhone": "052-9697660"
-  },
-  {
-    "id": 105445,
-    "clientName": "ליאור אלפסי",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-06-11T14:45:00.000Z",
-    "endTime": "2026-06-11T15:45:00.000Z",
     "status": "scheduled",
     "notes": "",
     "clientId": "1057",
@@ -172214,7 +172118,7 @@
   {
     "id": 105379,
     "clientName": "נועה אשכנזי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "לק ג'ל, גבות + שפם",
     "therapistName": "לורה",
     "startTime": "2026-06-09T06:00:00.000Z",
     "endTime": "2026-06-09T07:30:00.000Z",
@@ -172226,7 +172130,7 @@
   {
     "id": 105380,
     "clientName": "נועה אשכנזי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "לק ג'ל, גבות + שפם",
     "therapistName": "לורה",
     "startTime": "2026-06-23T06:00:00.000Z",
     "endTime": "2026-06-23T07:30:00.000Z",
@@ -173330,7 +173234,7 @@
   {
     "id": 106509,
     "clientName": "עינת רן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-05T08:30:00.000Z",
     "endTime": "2026-06-05T09:00:00.000Z",
@@ -174912,21 +174816,9 @@
     "clientPhone": "052-5769437"
   },
   {
-    "id": 105508,
-    "clientName": "רום גבעתי",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-07-05T15:00:00.000Z",
-    "endTime": "2026-07-05T16:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "1094",
-    "clientPhone": "052-5769437"
-  },
-  {
     "id": 105505,
     "clientName": "רום גבעתי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-11T14:45:00.000Z",
     "endTime": "2026-06-11T15:45:00.000Z",
@@ -183062,7 +182954,7 @@
   {
     "id": 106508,
     "clientName": "דנה איכנבאום חן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-05T08:00:00.000Z",
     "endTime": "2026-06-05T08:30:00.000Z",
@@ -183072,36 +182964,12 @@
     "clientPhone": "050-4343445"
   },
   {
-    "id": 105391,
-    "clientName": "דנה איכנבאום חן",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-06-10T09:15:00.000Z",
-    "endTime": "2026-06-10T10:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "2174",
-    "clientPhone": "050-4343445"
-  },
-  {
     "id": 106553,
     "clientName": "דנה איכנבאום חן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-24T07:00:00.000Z",
     "endTime": "2026-06-24T07:45:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "2174",
-    "clientPhone": "050-4343445"
-  },
-  {
-    "id": 106554,
-    "clientName": "דנה איכנבאום חן",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-11T08:00:00.000Z",
-    "endTime": "2026-06-11T08:30:00.000Z",
     "status": "scheduled",
     "notes": "",
     "clientId": "2174",
@@ -186206,7 +186074,7 @@
   {
     "id": 104237,
     "clientName": "מיכל רוזנברג",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "לק ג'ל, פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-21T13:30:00.000Z",
     "endTime": "2026-06-21T15:15:00.000Z",
@@ -187730,7 +187598,7 @@
   {
     "id": 106532,
     "clientName": "קרן אברהם",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "מניקור, פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-07T14:30:00.000Z",
     "endTime": "2026-06-07T16:00:00.000Z",
@@ -189590,7 +189458,7 @@
   {
     "id": 106497,
     "clientName": "סבטה רומנוב",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "שעווה רגליים",
     "therapistName": "לורה",
     "startTime": "2026-06-28T13:45:00.000Z",
     "endTime": "2026-06-28T14:45:00.000Z",
@@ -193286,7 +193154,7 @@
   {
     "id": 105425,
     "clientName": "זהר רז",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-07T12:00:00.000Z",
     "endTime": "2026-06-07T13:00:00.000Z",
@@ -194930,7 +194798,7 @@
   {
     "id": 106563,
     "clientName": "ליהיא קקון",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-24T10:45:00.000Z",
     "endTime": "2026-06-24T11:30:00.000Z",
@@ -197304,18 +197172,6 @@
     "clientPhone": "052-2487547"
   },
   {
-    "id": 105324,
-    "clientName": "לימור לוי",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-06-11T12:00:00.000Z",
-    "endTime": "2026-06-11T13:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "4403",
-    "clientPhone": "052-2487547"
-  },
-  {
     "id": 102997,
     "clientName": "לימור לוי",
     "treatmentName": "טיפול כללי",
@@ -197342,7 +197198,7 @@
   {
     "id": 106546,
     "clientName": "לימור לוי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-11T12:00:00.000Z",
     "endTime": "2026-06-11T13:00:00.000Z",
@@ -197846,7 +197702,7 @@
   {
     "id": 105300,
     "clientName": "יסמין גרוטאס",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "טיפול פנים",
     "therapistName": "שירלי",
     "startTime": "2026-06-09T06:00:00.000Z",
     "endTime": "2026-06-09T08:00:00.000Z",
@@ -201194,7 +201050,7 @@
   {
     "id": 105415,
     "clientName": "טינה בלומו",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-21T12:00:00.000Z",
     "endTime": "2026-06-21T13:00:00.000Z",
@@ -206126,7 +205982,7 @@
   {
     "id": 105461,
     "clientName": "משי דורני",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-24T10:30:00.000Z",
     "endTime": "2026-06-24T11:00:00.000Z",
@@ -207282,18 +207138,6 @@
     "therapistName": "לורה",
     "startTime": "2026-01-22T13:45:00.000Z",
     "endTime": "2026-01-22T14:45:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "9696",
-    "clientPhone": "050-2552282"
-  },
-  {
-    "id": 105434,
-    "clientName": "מוריה אהרון",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-06-11T14:00:00.000Z",
-    "endTime": "2026-06-11T14:45:00.000Z",
     "status": "scheduled",
     "notes": "",
     "clientId": "9696",
@@ -208680,18 +208524,6 @@
     "clientPhone": "054-4378989"
   },
   {
-    "id": 105427,
-    "clientName": "יערית גבאי",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "לורה",
-    "startTime": "2026-07-09T14:00:00.000Z",
-    "endTime": "2026-07-09T15:00:00.000Z",
-    "status": "scheduled",
-    "notes": "",
-    "clientId": "15734",
-    "clientPhone": "054-4378989"
-  },
-  {
     "id": 59188,
     "clientName": "יסמין צרפתי",
     "treatmentName": "טיפול כללי",
@@ -209810,7 +209642,7 @@
   {
     "id": 105473,
     "clientName": "רבקה כהן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "מניקור, שפם",
     "therapistName": "לורה",
     "startTime": "2026-06-10T10:00:00.000Z",
     "endTime": "2026-06-10T11:00:00.000Z",
@@ -209822,7 +209654,7 @@
   {
     "id": 105474,
     "clientName": "רבקה כהן",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "מניקור, שפם",
     "therapistName": "לורה",
     "startTime": "2026-07-01T10:30:00.000Z",
     "endTime": "2026-07-01T11:30:00.000Z",
@@ -211154,7 +210986,7 @@
   {
     "id": 106530,
     "clientName": "אורית לוי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "גבות + שפם",
     "therapistName": "שירלי",
     "startTime": "2026-06-09T12:30:00.000Z",
     "endTime": "2026-06-09T13:00:00.000Z",
@@ -211634,7 +211466,7 @@
   {
     "id": 106575,
     "clientName": "עידן נקש",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור אקספרס",
     "therapistName": "לורה",
     "startTime": "2026-06-24T09:45:00.000Z",
     "endTime": "2026-06-24T10:30:00.000Z",
@@ -213182,7 +213014,7 @@
   {
     "id": 105385,
     "clientName": "לאה לוי",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-09T07:30:00.000Z",
     "endTime": "2026-06-09T08:30:00.000Z",
@@ -213650,7 +213482,7 @@
   {
     "id": 106526,
     "clientName": "תמר מלכה",
-    "treatmentName": "טיפול כללי",
+    "treatmentName": "פדיקור",
     "therapistName": "לורה",
     "startTime": "2026-06-28T14:45:00.000Z",
     "endTime": "2026-06-28T15:45:00.000Z",

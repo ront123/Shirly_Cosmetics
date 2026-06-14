@@ -4,6 +4,14 @@
       "success": true,
       "added": 0,
       "total_synced": 0,
+      "duration": 206,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:56:05.372Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
       "duration": 151,
       "source": "chrome_extension",
       "timestamp": "2026-06-14T13:44:15.041Z"
@@ -145,7 +153,7 @@
       "timestamp": "2026-06-14T10:42:35.294Z"
     }
   ],
-  "last_sync": "2026-06-14T13:44:15.041Z",
+  "last_sync": "2026-06-14T13:56:05.372Z",
   "total_synced": 1823,
   "source": "chrome_extension"
 }
