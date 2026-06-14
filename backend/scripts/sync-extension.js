@@ -41,12 +41,22 @@ function parseDateISO(val) {
 }
 
 function mapClient(raw, index) {
-  const name = String(raw.Name || raw.name || raw.FullName || raw.fullName || '').trim();
-  const phone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile || '');
-  const lastVisit = parseDate(raw.LastVisit || raw.lastVisit || raw.LastVisitDate);
-  const dob = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate || raw.birthDate);
-  const visits = parseInt(raw.NumberOfVisits || raw.Visits || raw.visits || 0, 10) || 0;
-  const avgInvoice = parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0) || 0;
+  let name = String(raw.Name || raw.name || raw.FullName || raw.fullName || raw.CustomerName || raw.Customername || raw.customerName || '').trim();
+  if (!name) {
+    const fName = String(raw.FirstName || raw.Firstname || raw.first_name || raw.firstName || '').trim();
+    const lName = String(raw.LastName || raw.Lastname || raw.last_name || raw.lastName || '').trim();
+    name = `${fName} ${lName}`.trim();
+  }
+  const phone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile || raw.Mobilefirst || '');
+  const lastVisit = parseDate(raw.LastVisit || raw.lastVisit || raw.LastVisitDate || raw.LastMeeting || raw.lastMeeting || '');
+  const dob = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate || raw.birthDate || raw.Birthdate || '');
+  const visits = parseInt(raw.NumberOfVisits || raw.Visits || raw.visits || raw.HistoryMeetingsCount || raw.historyMeetingsCount || 0, 10) || 0;
+  const spentVal = parseFloat(raw.TotalSpent || raw.totalSpent || raw.spent || raw.Spent || 0) || 0;
+  let avgInvoice = parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0) || 0;
+  if (!avgInvoice && spentVal && visits) {
+    avgInvoice = spentVal / visits;
+  }
+  const spentNum = spentVal || Math.round(avgInvoice * visits);
   const daysSince = lastVisit
     ? (Date.now() - new Date(lastVisit).getTime()) / (1000 * 60 * 60 * 24)
     : 9999;
@@ -56,13 +66,13 @@ function mapClient(raw, index) {
     name,
     initials: name[0] || '?',
     phone,
-    email: raw.EmailAddress || raw.Email || raw.email || '',
+    email: raw.EmailAddress || raw.Email || raw.email || raw.Emailaddress || '',
     birthday: dob,
     lastVisit,
-    nextMeeting: parseDate(raw.NextMeeting || raw.NextAppointment || raw.nextMeeting || ''),
+    nextMeeting: parseDate(raw.NextMeeting || raw.NextAppointment || raw.nextMeeting || raw.Nextmeeting || ''),
     visits,
     avgInvoice: Math.round(avgInvoice),
-    spent: '₪' + Math.round(avgInvoice * visits).toLocaleString('he-IL'),
+    spent: '₪' + Math.round(spentNum).toLocaleString('he-IL'),
     status: daysSince < 90 ? 'active' : 'inactive',
     hue: hueFromName(name),
     address: raw.Address || raw.address || '',
@@ -74,29 +84,55 @@ function mapClient(raw, index) {
 }
 
 function mapAppointment(raw, index) {
-  // 1. Client Name
+  // 1. Client Name & Details (ID and Phone)
   let clientName = '';
-  if (raw.Customer && typeof raw.Customer === 'object') {
-    clientName = `${raw.Customer.FirstName || ''} ${raw.Customer.LastName || ''}`.trim();
+  let clientPhone = '';
+  let easybizyClientId = '';
+  
+  let customerRaw = raw.Customer || raw.client;
+  if (customerRaw && typeof customerRaw === 'object') {
+    const fName = String(customerRaw.FirstName || customerRaw.Firstname || customerRaw.firstName || '').trim();
+    const lName = String(customerRaw.LastName || customerRaw.Lastname || customerRaw.lastName || '').trim();
+    clientName = `${fName} ${lName}`.trim();
+    if (!clientName) {
+      clientName = customerRaw.Name || customerRaw.name || customerRaw.FullName || customerRaw.fullName || customerRaw.CustomerName || customerRaw.Customername || customerRaw.customerName || '';
+    }
+    clientPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || customerRaw.mobile || customerRaw.Mobilefirst || '');
+    easybizyClientId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
   }
-  if (!clientName && raw.client && typeof raw.client === 'object') {
-    clientName = raw.client.name || raw.client.fullName || raw.client.FullName || '';
-  }
+  
   if (!clientName) {
-    clientName = raw.clientName || raw.ClientName || raw.customerName || raw.CustomerName || raw.Client || raw.client || '';
+    clientName = raw.clientName || raw.ClientName || raw.customerName || raw.CustomerName || raw.customer_name || raw.client_name || raw.Client || raw.client || '';
   }
   clientName = String(clientName).trim();
+  if (!clientPhone && raw.clientPhone) {
+    clientPhone = formatPhone(raw.clientPhone);
+  }
+
+  // Fallback: If clientName is empty but Remarks has data, use Remarks
+  if (!clientName && raw.Remarks) {
+    clientName = raw.Remarks.trim();
+  }
 
   // 2. Treatment Name
   let treatmentName = '';
   if (raw.Treatment && typeof raw.Treatment === 'object') {
-    treatmentName = raw.Treatment.Name || raw.Treatment.Title || '';
+    treatmentName = raw.Treatment.Name || raw.Treatment.Title || raw.Treatment.name || raw.Treatment.title || raw.Treatment.Subject || raw.Treatment.subject || '';
   }
   if (!treatmentName && raw.treatment && typeof raw.treatment === 'object') {
-    treatmentName = raw.treatment.name || raw.treatment.title || '';
+    treatmentName = raw.treatment.name || raw.treatment.title || raw.treatment.Name || raw.treatment.Title || raw.treatment.subject || raw.treatment.Subject || '';
+  }
+  if (!treatmentName && raw.Service && typeof raw.Service === 'object') {
+    treatmentName = raw.Service.Name || raw.Service.Title || raw.Service.name || raw.Service.title || raw.Service.Subject || raw.Service.subject || '';
+  }
+  if (!treatmentName && raw.service && typeof raw.service === 'object') {
+    treatmentName = raw.service.name || raw.service.title || raw.service.Name || raw.service.Title || raw.service.subject || raw.service.Subject || '';
+  }
+  if (!treatmentName && raw.CalendarEvent && typeof raw.CalendarEvent === 'object') {
+    treatmentName = raw.CalendarEvent.Subject || raw.CalendarEvent.Title || raw.CalendarEvent.subject || raw.CalendarEvent.title || '';
   }
   if (!treatmentName) {
-    treatmentName = raw.treatmentName || raw.TreatmentName || raw.serviceName || raw.ServiceName || raw.service || raw.treatment || '';
+    treatmentName = raw.treatmentName || raw.TreatmentName || raw.serviceName || raw.ServiceName || raw.service || raw.treatment || raw.Subject || raw.subject || raw.Title || raw.title || '';
   }
   treatmentName = String(treatmentName).trim();
 
@@ -127,14 +163,11 @@ function mapAppointment(raw, index) {
     end = raw.endTime || raw.end_time || raw.end || start || '';
   }
 
-  // Fallback: If clientName is empty but Remarks has data, use Remarks
-  if (!clientName && raw.Remarks) {
-    clientName = raw.Remarks.trim();
-  }
-
   return {
     id: raw.MeetingId || raw.id || raw.AppointmentId || `appt_${Date.now()}_${index}`,
+    clientId: easybizyClientId,
     clientName: clientName || 'לקוח לא מזוהה',
+    clientPhone: clientPhone,
     treatmentName: treatmentName || 'טיפול כללי',
     therapistName: therapistName,
     startTime: parseDateISO(start),
@@ -263,24 +296,33 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
   const clientsToUpdate = [];
 
   rawCustomers.forEach((raw, idx) => {
-    const name = String(raw.Name || raw.name || raw.FullName || raw.fullName || '').trim();
-    const phone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile || '');
+    let name = String(raw.Name || raw.name || raw.FullName || raw.fullName || raw.CustomerName || raw.Customername || raw.customerName || '').trim();
+    if (!name) {
+      const fName = String(raw.FirstName || raw.Firstname || raw.first_name || raw.firstName || '').trim();
+      const lName = String(raw.LastName || raw.Lastname || raw.last_name || raw.lastName || '').trim();
+      name = `${fName} ${lName}`.trim();
+    }
+    const phone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile || raw.Mobilefirst || '');
     if (!name && !phone) return;
 
-    const email = raw.EmailAddress || raw.Email || raw.email || '';
-    const lastVisitStr = parseDate(raw.LastVisit || raw.lastVisit || raw.LastVisitDate);
+    const email = raw.EmailAddress || raw.Email || raw.email || raw.Emailaddress || '';
+    const lastVisitStr = parseDate(raw.LastVisit || raw.lastVisit || raw.LastVisitDate || raw.LastMeeting || raw.lastMeeting || '');
     const lastVisit = lastVisitStr ? new Date(lastVisitStr) : null;
-    const dobStr = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate || raw.birthDate);
+    const dobStr = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate || raw.birthDate || raw.Birthdate || '');
     const dob = dobStr ? new Date(dobStr) : null;
-    const visits = parseInt(raw.NumberOfVisits || raw.Visits || raw.visits || 0, 10) || 0;
-    const avgInvoice = Math.round(parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0)) || 0;
+    const visits = parseInt(raw.NumberOfVisits || raw.Visits || raw.visits || raw.HistoryMeetingsCount || raw.historyMeetingsCount || 0, 10) || 0;
+    const spentVal = parseFloat(raw.TotalSpent || raw.totalSpent || raw.spent || raw.Spent || 0) || 0;
+    let avgInvoice = parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0) || 0;
+    if (!avgInvoice && spentVal && visits) {
+      avgInvoice = spentVal / visits;
+    }
     const easybizyId = String(raw.CustomerId || raw.Id || raw.id || '');
     const address = raw.Address || raw.address || '';
     const source = raw.ArrivalSource || raw.Source || raw.source || '';
 
     const nameParts = name.split(/\s+/);
-    const firstName = nameParts[0] || 'לקוח';
-    const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
+    const firstName = raw.FirstName || raw.Firstname || nameParts[0] || 'לקוח';
+    const lastName = raw.LastName || raw.Lastname || nameParts.slice(1).join(' ') || 'לא-מזוהה';
 
     let existingId = null;
     if (easybizyId && clientByEasybizyId.has(easybizyId)) {
@@ -513,8 +555,20 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
       if (!remote) return ec;
 
       const updated = { ...ec };
+      if (remote.name) {
+        updated.name = remote.name;
+        updated.initials = remote.initials || remote.name[0] || '?';
+        updated.hue = remote.hue;
+      }
+      if (remote.phone) updated.phone = remote.phone;
+      if (remote.email) updated.email = remote.email;
+      if (remote.birthday) updated.birthday = remote.birthday;
       if (remote.lastVisit) updated.lastVisit = remote.lastVisit;
-      if (remote.visits > (ec.visits || 0)) {
+      if (remote.nextMeeting) updated.nextMeeting = remote.nextMeeting;
+      if (remote.address) updated.address = remote.address;
+      if (remote.source) updated.source = remote.source;
+      
+      if (remote.visits >= (ec.visits || 0)) {
         updated.visits = remote.visits;
         updated.avgInvoice = remote.avgInvoice;
         updated.spent = remote.spent;
@@ -551,6 +605,10 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
       if (!remote) return ea;
       return {
         ...ea,
+        clientId: remote.clientId || ea.clientId || '',
+        clientName: remote.clientName || ea.clientName || '',
+        clientPhone: remote.clientPhone || ea.clientPhone || '',
+        treatmentName: remote.treatmentName !== 'טיפול כללי' ? remote.treatmentName : (ea.treatmentName || 'טיפול כללי'),
         status: remote.status,
         notes: remote.notes || ea.notes,
         startTime: remote.startTime,

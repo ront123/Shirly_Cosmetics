@@ -50,12 +50,22 @@ function parseDate(val) {
 }
 
 function mapClient(raw, index) {
-  const name      = String(raw.Name || raw.name || raw.FullName || '').trim();
-  const phone     = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || '');
-  const lastVisit = parseDate(raw.LastVisit  || raw.lastVisit  || raw.LastVisitDate);
-  const dob       = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate);
-  const visits    = parseInt(raw.NumberOfVisits || raw.Visits || 0, 10) || 0;
-  const avgInvoice = parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0) || 0;
+  let name = String(raw.Name || raw.name || raw.FullName || raw.fullName || raw.CustomerName || raw.Customername || raw.customerName || '').trim();
+  if (!name) {
+    const fName = String(raw.FirstName || raw.Firstname || raw.first_name || raw.firstName || '').trim();
+    const lName = String(raw.LastName || raw.Lastname || raw.last_name || raw.lastName || '').trim();
+    name = `${fName} ${lName}`.trim();
+  }
+  const phone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile || raw.Mobilefirst || '');
+  const lastVisit = parseDate(raw.LastVisit || raw.lastVisit || raw.LastVisitDate || raw.LastMeeting || raw.lastMeeting || '');
+  const dob = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate || raw.birthDate || raw.Birthdate || '');
+  const visits = parseInt(raw.NumberOfVisits || raw.Visits || raw.visits || raw.HistoryMeetingsCount || raw.historyMeetingsCount || 0, 10) || 0;
+  const spentVal = parseFloat(raw.TotalSpent || raw.totalSpent || raw.spent || raw.Spent || 0) || 0;
+  let avgInvoice = parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0) || 0;
+  if (!avgInvoice && spentVal && visits) {
+    avgInvoice = spentVal / visits;
+  }
+  const spentNum = spentVal || Math.round(avgInvoice * visits);
   const daysSince = lastVisit
     ? (Date.now() - new Date(lastVisit).getTime()) / (1000 * 60 * 60 * 24)
     : 9999;
@@ -65,17 +75,17 @@ function mapClient(raw, index) {
     name,
     initials:    name[0] || '?',
     phone,
-    email:       raw.EmailAddress || raw.Email || raw.email || '',
+    email:       raw.EmailAddress || raw.Email || raw.email || raw.Emailaddress || '',
     birthday:    dob,
     lastVisit,
-    nextMeeting: parseDate(raw.NextMeeting || raw.NextAppointment || ''),
+    nextMeeting: parseDate(raw.NextMeeting || raw.NextAppointment || raw.nextMeeting || raw.Nextmeeting || ''),
     visits,
     avgInvoice:  Math.round(avgInvoice),
-    spent:       '₪' + Math.round(avgInvoice * visits).toLocaleString('he-IL'),
+    spent:       '₪' + Math.round(spentNum).toLocaleString('he-IL'),
     status:      daysSince < 90 ? 'active' : 'inactive',
     hue:         hueFromName(name),
     address:     raw.Address || raw.address || '',
-    source:      raw.ArrivalSource || raw.Source || '',
+    source:      raw.ArrivalSource || raw.Source || raw.source || '',
     notes:       '',
     _source:     'easybizy',
     _syncedAt:   new Date().toISOString(),

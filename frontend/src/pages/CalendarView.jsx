@@ -141,9 +141,29 @@ export default function CalendarView() {
   const [clients, setClients] = useState([]);
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [selectedTherapist, setSelectedTherapist] = useState('all');
+  const [selectedTherapists, setSelectedTherapists] = useState(['all']);
   const [viewMode, setViewMode] = useState('week'); // 'week' or 'day'
   const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'scheduled', 'confirmed', 'cancelled'
+
+  const handleToggleTherapist = (t) => {
+    if (t === 'all') {
+      setSelectedTherapists(['all']);
+    } else {
+      setSelectedTherapists(prev => {
+        const hasAll = prev.includes('all');
+        const hasT = prev.includes(t);
+        if (hasAll) {
+          return [t];
+        }
+        if (hasT) {
+          const next = prev.filter(x => x !== t);
+          return next.length === 0 ? ['all'] : next;
+        } else {
+          return [...prev, t];
+        }
+      });
+    }
+  };
   
   const startDate = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 6 }).map((_, i) => addDays(startDate, i));
@@ -176,7 +196,7 @@ export default function CalendarView() {
 
   // Apply filters
   const filteredAppointments = baseAppointments.filter(appt => {
-    const matchTherapist = selectedTherapist === 'all' || appt.therapistName === selectedTherapist;
+    const matchTherapist = selectedTherapists.includes('all') || selectedTherapists.includes(appt.therapistName);
     const matchStatus = statusFilter === 'all' || appt.status === statusFilter;
     return matchTherapist && matchStatus;
   });
@@ -196,31 +216,22 @@ export default function CalendarView() {
     });
   } else {
     // Daily view: columns represent therapists
-    if (selectedTherapist !== 'all') {
-      const dayAppts = filteredAppointments.filter(a => isSameDay(new Date(a.startTime), currentDate));
-      columnsData = [
-        {
-          title: selectedTherapist,
-          dateNumber: format(currentDate, 'd'),
-          isToday: isSameDay(currentDate, new Date()),
-          appointments: getLaidOutAppointments(dayAppts),
-          isTherapistHeader: true
-        }
-      ];
-    } else {
-      columnsData = uniqueTherapists.map(t => {
-        const dayAppts = filteredAppointments.filter(a => 
-          isSameDay(new Date(a.startTime), currentDate) && a.therapistName === t
-        );
-        return {
-          title: t,
-          dateNumber: format(currentDate, 'd'),
-          isToday: isSameDay(currentDate, new Date()),
-          appointments: getLaidOutAppointments(dayAppts),
-          isTherapistHeader: true
-        };
-      });
-    }
+    const therapistsToRender = selectedTherapists.includes('all')
+      ? uniqueTherapists
+      : uniqueTherapists.filter(t => selectedTherapists.includes(t));
+
+    columnsData = therapistsToRender.map(t => {
+      const dayAppts = filteredAppointments.filter(a => 
+        isSameDay(new Date(a.startTime), currentDate) && a.therapistName === t
+      );
+      return {
+        title: t,
+        dateNumber: format(currentDate, 'd'),
+        isToday: isSameDay(currentDate, new Date()),
+        appointments: getLaidOutAppointments(dayAppts),
+        isTherapistHeader: true
+      };
+    });
   }
 
   const handlePrevDate = () => {
@@ -340,7 +351,7 @@ export default function CalendarView() {
           {/* Therapist Tabs */}
           <div className="flex items-center gap-1.5 p-1" style={{ background: 'var(--bg-elevated)', borderRadius: 10 }}>
             <button
-              onClick={() => setSelectedTherapist('all')}
+              onClick={() => handleToggleTherapist('all')}
               style={{
                 padding: '5px 12px',
                 fontSize: 12,
@@ -348,8 +359,8 @@ export default function CalendarView() {
                 borderRadius: 7,
                 border: 'none',
                 cursor: 'pointer',
-                background: selectedTherapist === 'all' ? 'var(--accent)' : 'transparent',
-                color: selectedTherapist === 'all' ? '#fff' : 'var(--text-secondary)',
+                background: selectedTherapists.includes('all') ? 'var(--accent)' : 'transparent',
+                color: selectedTherapists.includes('all') ? '#fff' : 'var(--text-secondary)',
                 transition: 'all 0.15s ease',
               }}
             >
@@ -358,7 +369,7 @@ export default function CalendarView() {
             {uniqueTherapists.map(t => (
               <button
                 key={t}
-                onClick={() => setSelectedTherapist(t)}
+                onClick={() => handleToggleTherapist(t)}
                 style={{
                   padding: '5px 12px',
                   fontSize: 12,
@@ -366,8 +377,8 @@ export default function CalendarView() {
                   borderRadius: 7,
                   border: 'none',
                   cursor: 'pointer',
-                  background: selectedTherapist === t ? getColorForTherapist(t).solid : 'transparent',
-                  color: selectedTherapist === t ? '#fff' : 'var(--text-secondary)',
+                  background: selectedTherapists.includes(t) && !selectedTherapists.includes('all') ? getColorForTherapist(t).solid : 'transparent',
+                  color: selectedTherapists.includes(t) && !selectedTherapists.includes('all') ? '#fff' : 'var(--text-secondary)',
                   transition: 'all 0.15s ease',
                 }}
               >
@@ -507,14 +518,14 @@ export default function CalendarView() {
                       >
                         <div className="flex flex-col h-full justify-between min-w-0">
                           <div className="min-w-0">
-                            <p className="font-bold truncate" style={{ fontSize: 11, color: apptColor.txt, lineHeight: 1.2 }}>
+                            <p className="font-bold truncate" style={{ fontSize: 13, color: '#ffffff', fontWeight: '800', lineHeight: 1.2 }}>
                               {appt.clientName}
                             </p>
-                            <p className="truncate opacity-80" style={{ fontSize: 9, color: apptColor.txt, marginTop: 1 }}>
+                            <p className="truncate" style={{ fontSize: 11, color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600', marginTop: 1.5 }}>
                               {appt.treatmentName}
                             </p>
                           </div>
-                          <span style={{ fontSize: 8, color: apptColor.txt, opacity: 0.6, alignSelf: 'flex-start', marginTop: 2 }}>
+                          <span style={{ fontSize: 10, color: 'rgba(255, 255, 255, 0.7)', fontWeight: '500', alignSelf: 'flex-start', marginTop: 2 }}>
                             {timeStr}
                           </span>
                         </div>
@@ -649,11 +660,22 @@ export default function CalendarView() {
               <button onClick={() => setSelectedAppt(null)} className="btn-ghost" style={{ padding: '10px 20px', borderRadius: 10, fontSize: 14, fontWeight: 700 }}>סגור</button>
               <button className="btn-primary" style={{ padding: '10px 22px', borderRadius: 10, fontSize: 14, fontWeight: 800 }}
                 onClick={() => {
-                  const matchedClient = clients.find(c => 
-                    (selectedAppt.clientId && c.id === selectedAppt.clientId) ||
-                    (c.phone && selectedAppt.clientPhone && c.phone.replace(/\D/g, '') === selectedAppt.clientPhone.replace(/\D/g, '')) ||
-                    (c.name && selectedAppt.clientName && c.name.trim().toLowerCase() === selectedAppt.clientName.trim().toLowerCase())
-                  );
+                  const matchedClient = clients.find(c => {
+                    const cleanId = (id) => String(id || '').trim().toLowerCase();
+                    if (selectedAppt.clientId && (cleanId(c.id) === cleanId(selectedAppt.clientId) || cleanId(c.easybizy_id) === cleanId(selectedAppt.clientId))) return true;
+                    
+                    const cleanPhone = (phone) => String(phone || '').replace(/\D/g, '');
+                    if (c.phone && selectedAppt.clientPhone && cleanPhone(c.phone) === cleanPhone(selectedAppt.clientPhone)) return true;
+                    
+                    if (c.name && selectedAppt.clientName) {
+                      const cleanCName = c.name.trim().toLowerCase();
+                      const cleanAName = selectedAppt.clientName.trim().toLowerCase();
+                      if (cleanCName === cleanAName) return true;
+                      if (cleanCName.length > 3 && cleanAName.includes(cleanCName)) return true;
+                      if (cleanAName.length > 3 && cleanCName.includes(cleanAName)) return true;
+                    }
+                    return false;
+                  });
                   if (matchedClient) {
                     setSelectedClient(matchedClient);
                     setSelectedAppt(null);
