@@ -20,8 +20,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "node-cron": "^4.2.1",
-    "pg": "^8.21.0",
-    "puppeteer": "^25.1.0"
+    "pg": "^8.21.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
