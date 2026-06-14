@@ -146,7 +146,7 @@ export default function MainLayout() {
         <div className="flex items-center h-14 px-4 flex-shrink-0"
           style={{ borderBottom: '1px solid var(--border)', gap: 10 }}>
           <div className="flex items-center justify-center flex-shrink-0"
-            style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--accent)', boxShadow: '0 2px 10px rgba(244,63,94,0.4)' }}>
+            style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--accent)', boxShadow: '0 2px 10px rgba(99,102,241,0.4)' }}>
             <Sparkles size={16} color="#fff" />
           </div>
 
