@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { format, addDays, startOfWeek } from 'date-fns';
+import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
 import { he } from 'date-fns/locale';
+import REAL_APPOINTMENTS from '../data/appointments.json';
 
 const COLORS = [
   { bg: 'var(--accent-light)',  bdr: 'var(--accent-border)',  txt: 'var(--accent)'  },
@@ -9,12 +10,14 @@ const COLORS = [
   { bg: 'var(--teal-light)',   bdr: 'var(--teal-border)',   txt: 'var(--teal)'   },
 ];
 
-const sampleAppointments = [
-  { day: 1, hour: 10, client: 'דנה ישראלי',  treatment: 'טיפול פנים', color: COLORS[0] },
-  { day: 3, hour: 11, client: 'מיכל לוי',    treatment: 'לייזר רגליים', color: COLORS[1] },
-  { day: 1, hour: 14, client: 'אורית כהן',   treatment: 'פנים זוהר',  color: COLORS[2] },
-  { day: 4, hour: 9,  client: 'רחל אברמוב',  treatment: 'ניקוי עמוק', color: COLORS[0] },
-];
+function getColorForTreatment(name = '') {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % COLORS.length;
+  return COLORS[index];
+}
 
 export default function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -23,6 +26,16 @@ export default function CalendarView() {
   const hours = Array.from({ length: 11 }).map((_, i) => i + 9);
 
   const isToday = (day) => format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+
+  // Fallback to sample appointments if none synced yet
+  const appointmentsToDisplay = REAL_APPOINTMENTS.length > 0 
+    ? REAL_APPOINTMENTS 
+    : [
+        { id: 's1', clientName: 'דנה ישראלי', treatmentName: 'טיפול פנים קלאסי', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(10, 0, 0, 0) },
+        { id: 's2', clientName: 'מיכל לוי', treatmentName: 'לייזר שיער — רגליים', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 3)).setHours(11, 0, 0, 0) },
+        { id: 's3', clientName: 'אורית כהן', treatmentName: 'ניקוי פנים עמוק', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(14, 0, 0, 0) },
+        { id: 's4', clientName: 'רחל אברמוב', treatmentName: 'טיפול פנים זוהר', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 4)).setHours(9, 0, 0, 0) }
+      ];
 
   return (
     <div dir="rtl" className="flex flex-col h-full rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
@@ -63,7 +76,7 @@ export default function CalendarView() {
                     width: 34, height: 34, borderRadius: 9,
                     background: isToday(day) ? 'var(--accent)' : 'transparent',
                     color: isToday(day) ? '#fff' : 'var(--text-primary)',
-                    boxShadow: isToday(day) ? '0 2px 10px rgba(244,63,94,0.4)' : 'none',
+                    boxShadow: isToday(day) ? '0 2px 10px rgba(99,102,241,0.4)' : 'none',
                   }}
                 >
                   {format(day, 'd')}
@@ -78,8 +91,14 @@ export default function CalendarView() {
               <div className="flex items-start justify-center pt-2" style={{ width: 56 }}>
                 <span className="text-xs font-semibold" style={{ color: 'var(--text-faint)' }}>{hour}:00</span>
               </div>
-              {weekDays.map((_, i) => {
-                const appt = sampleAppointments.find(a => a.hour === hour && a.day === i);
+              {weekDays.map((day, i) => {
+                const appt = appointmentsToDisplay.find(a => {
+                  const apptDate = new Date(a.startTime);
+                  return isSameDay(apptDate, day) && apptDate.getHours() === hour;
+                });
+                
+                const apptColor = appt ? getColorForTreatment(appt.treatmentName) : null;
+                
                 return (
                   <div
                     key={i}
@@ -94,13 +113,13 @@ export default function CalendarView() {
                         style={{
                           inset: '4px 4px 4px 4px',
                           borderRadius: 8,
-                          background: appt.color.bg,
-                          border: `1px solid ${appt.color.bdr}`,
+                          background: apptColor.bg,
+                          border: `1px solid ${apptColor.bdr}`,
                           padding: '5px 8px',
                         }}
                       >
-                        <p className="font-bold truncate" style={{ fontSize: 11, color: appt.color.txt }}>{appt.client}</p>
-                        <p className="truncate" style={{ fontSize: 10, color: appt.color.txt, opacity: 0.7, marginTop: 1 }}>{appt.treatment}</p>
+                        <p className="font-bold truncate" style={{ fontSize: 11, color: apptColor.txt }}>{appt.clientName}</p>
+                        <p className="truncate" style={{ fontSize: 10, color: apptColor.txt, opacity: 0.7, marginTop: 1 }}>{appt.treatmentName}</p>
                       </div>
                     )}
                   </div>

@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "סנכרון שירלי קוסמטיקס מאיזי ביזי",
+  "version": "1.1",
+  "description": "סנכרון לקוחות ונתונים מאיזי ביזי למערכת Shirly Cosmetics (כולל זיהוי רשת אוטומטי)",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.easybizy.net/*",
+    "http://localhost:5001/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.easybizy.net/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js"],
+      "matches": ["https://*.easybizy.net/*"]
+    }
+  ]
+}
