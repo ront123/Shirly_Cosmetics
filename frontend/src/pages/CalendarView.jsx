@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
 import { he } from 'date-fns/locale';
-import REAL_APPOINTMENTS from '../data/appointments.json';
+import { fetchAppointments } from '../utils/api';
 
 const COLORS = [
   { bg: 'var(--accent-light)',  bdr: 'var(--accent-border)',  txt: 'var(--accent)'  },
@@ -21,15 +21,23 @@ function getColorForTreatment(name = '') {
 
 export default function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [appointments, setAppointments] = useState([]);
+  
   const startDate = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 6 }).map((_, i) => addDays(startDate, i));
   const hours = Array.from({ length: 11 }).map((_, i) => i + 9);
 
   const isToday = (day) => format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
+  useEffect(() => {
+    fetchAppointments()
+      .then(data => setAppointments(data))
+      .catch(err => console.error('Failed to fetch appointments:', err));
+  }, []);
+
   // Fallback to sample appointments if none synced yet
-  const appointmentsToDisplay = REAL_APPOINTMENTS.length > 0 
-    ? REAL_APPOINTMENTS 
+  const appointmentsToDisplay = appointments.length > 0 
+    ? appointments 
     : [
         { id: 's1', clientName: 'דנה ישראלי', treatmentName: 'טיפול פנים קלאסי', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(10, 0, 0, 0) },
         { id: 's2', clientName: 'מיכל לוי', treatmentName: 'לייזר שיער — רגליים', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 3)).setHours(11, 0, 0, 0) },

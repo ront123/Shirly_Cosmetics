@@ -13,3 +13,9 @@ export const fetchAppointments = async () => {
   if (!res.ok) throw new Error('Failed to fetch appointments');
   return res.json();
 };
+
+export const fetchClients = async () => {
+  const res = await fetch(`${API_URL}/clients`);
+  if (!res.ok) throw new Error('Failed to fetch clients');
+  return res.json();
+};

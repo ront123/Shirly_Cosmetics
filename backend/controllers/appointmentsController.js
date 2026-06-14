@@ -1,5 +1,8 @@
 const { pool } = require('../config/db');
 
+const fs = require('fs');
+const path = require('path');
+
 exports.getAppointments = async (req, res) => {
   try {
     const result = await pool.query(`
@@ -12,9 +15,38 @@ exports.getAppointments = async (req, res) => {
       LEFT JOIN users u ON a.therapist_id = u.id
       ORDER BY a.start_time ASC
     `);
-    res.json(result.rows);
+    
+    // Map to camelCase properties expected by frontend
+    const formatted = result.rows.map(row => {
+      const clientName = `${row.first_name || ''} ${row.last_name || ''}`.trim();
+      return {
+        id: row.id,
+        easybizyId: row.easybizy_id || '',
+        clientName: clientName || 'לקוח לא מזוהה',
+        treatmentName: row.treatment_name || 'טיפול כללי',
+        therapistName: row.therapist_name || 'שירלי',
+        startTime: row.start_time ? new Date(row.start_time).toISOString() : '',
+        endTime: row.end_time ? new Date(row.end_time).toISOString() : '',
+        status: row.status || 'scheduled',
+        notes: row.notes || ''
+      };
+    });
+
+    res.json(formatted);
   } catch (err) {
-    console.error(err);
+    console.warn('⚠️ Database query failed, falling back to static appointments.json file:', err.message);
+    
+    // Fallback: load from static JSON file
+    try {
+      const apptsPath = path.join(__dirname, '../../frontend/src/data/appointments.json');
+      if (fs.existsSync(apptsPath)) {
+        const fileData = fs.readFileSync(apptsPath, 'utf8');
+        return res.json(JSON.parse(fileData));
+      }
+    } catch (fallbackErr) {
+      console.error('❌ Fallback failed:', fallbackErr.message);
+    }
+    
     res.status(500).json({ error: 'Server error' });
   }
 };

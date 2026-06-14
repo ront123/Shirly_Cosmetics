@@ -9,12 +9,36 @@ app.use(cors());
 app.use(express.json({ limit: '150mb' }));
 app.use(express.urlencoded({ limit: '150mb', extended: true }));
 
+const { pool } = require('./config/db');
+
+// Run database migrations on startup
+async function runMigrations() {
+  try {
+    console.log('🔄 Running database migrations...');
+    await pool.query(`
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS easybizy_id VARCHAR(100);
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS date_of_birth DATE;
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS address VARCHAR(255);
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS source VARCHAR(100);
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS visits INTEGER DEFAULT 0;
+      ALTER TABLE clients ADD COLUMN IF NOT EXISTS avg_invoice INTEGER DEFAULT 0;
+      ALTER TABLE appointments ADD COLUMN IF NOT EXISTS easybizy_id VARCHAR(100);
+    `);
+    console.log('✅ Database migrations completed successfully.');
+  } catch (err) {
+    console.error('❌ Database migration error:', err);
+  }
+}
+runMigrations();
+
 // Routes
 const treatmentsRoutes = require('./routes/treatments');
 const appointmentsRoutes = require('./routes/appointments');
+const clientsRoutes = require('./routes/clients');
 
 app.use('/api/treatments', treatmentsRoutes);
 app.use('/api/appointments', appointmentsRoutes);
+app.use('/api/clients', clientsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Shirly Cosmetics API is running' });

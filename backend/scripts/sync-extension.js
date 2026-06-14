@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { pool } = require('../config/db');
 
 const CLIENTS_PATH = path.join(__dirname, '../../frontend/src/data/clients.json');
 const APPOINTMENTS_PATH = path.join(__dirname, '../../frontend/src/data/appointments.json');
@@ -207,24 +208,291 @@ function appendLog(entry) {
   saveLog(log);
 }
 
+async function syncToPostgres(rawCustomers, rawAppointments) {
+  console.log('🔌 [Postgres Sync] מתחיל סנכרון לבסיס הנתונים...');
+  
+  // --- 1. PRE-LOAD MAPS FOR THERAPISTS & TREATMENTS ---
+  const treatmentTypesRes = await pool.query('SELECT id, name FROM treatment_types');
+  const treatmentMap = new Map(treatmentTypesRes.rows.map(r => [r.name.trim(), r.id]));
+  
+  const usersRes = await pool.query('SELECT id, name FROM users');
+  const userMap = new Map(usersRes.rows.map(r => [r.name.trim(), r.id]));
+
+  const ensureTreatment = async (name) => {
+    if (!name) name = 'טיפול כללי';
+    name = name.trim();
+    if (treatmentMap.has(name)) return treatmentMap.get(name);
+    const insertRes = await pool.query(
+      'INSERT INTO treatment_types (name, duration_minutes, price, color_code) VALUES ($1, $2, $3, $4) RETURNING id',
+      [name, 60, 0, '#6366f1']
+    );
+    const id = insertRes.rows[0].id;
+    treatmentMap.set(name, id);
+    return id;
+  };
+
+  const ensureTherapist = async (name) => {
+    if (!name) name = 'שירלי';
+    name = name.trim();
+    if (userMap.has(name)) return userMap.get(name);
+    const email = `${name.toLowerCase().replace(/\s+/g, '')}_ext@shirlycosmetics.com`;
+    const insertRes = await pool.query(
+      `INSERT INTO users (name, email, password_hash, role) 
+       VALUES ($1, $2, $3, $4) RETURNING id`,
+      [name, email, 'hashed_placeholder', 'therapist']
+    );
+    const id = insertRes.rows[0].id;
+    userMap.set(name, id);
+    return id;
+  };
+
+  await ensureTreatment('טיפול כללי');
+  await ensureTherapist('שירלי');
+
+  // --- 2. SYNC CLIENTS ---
+  console.log('👤 [Postgres Sync] מסנכרן לקוחות...');
+  const dbClientsRes = await pool.query('SELECT id, phone_number, easybizy_id FROM clients');
+  const clientByEasybizyId = new Map();
+  const clientByPhone = new Map();
+  dbClientsRes.rows.forEach(r => {
+    if (r.easybizy_id) clientByEasybizyId.set(String(r.easybizy_id), r.id);
+    if (r.phone_number) clientByPhone.set(r.phone_number, r.id);
+  });
+
+  const clientsToInsert = [];
+  const clientsToUpdate = [];
+
+  rawCustomers.forEach((raw, idx) => {
+    const name = String(raw.Name || raw.name || raw.FullName || raw.fullName || '').trim();
+    const phone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile || '');
+    if (!name && !phone) return;
+
+    const email = raw.EmailAddress || raw.Email || raw.email || '';
+    const lastVisitStr = parseDate(raw.LastVisit || raw.lastVisit || raw.LastVisitDate);
+    const lastVisit = lastVisitStr ? new Date(lastVisitStr) : null;
+    const dobStr = parseDate(raw.DateOfBirth || raw.dateOfBirth || raw.BirthDate || raw.birthDate);
+    const dob = dobStr ? new Date(dobStr) : null;
+    const visits = parseInt(raw.NumberOfVisits || raw.Visits || raw.visits || 0, 10) || 0;
+    const avgInvoice = Math.round(parseFloat(raw.AvarageInvoice || raw.AverageInvoice || raw.avgInvoice || 0)) || 0;
+    const easybizyId = String(raw.CustomerId || raw.Id || raw.id || '');
+    const address = raw.Address || raw.address || '';
+    const source = raw.ArrivalSource || raw.Source || raw.source || '';
+
+    const nameParts = name.split(/\s+/);
+    const firstName = nameParts[0] || 'לקוח';
+    const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
+
+    let existingId = null;
+    if (easybizyId && clientByEasybizyId.has(easybizyId)) {
+      existingId = clientByEasybizyId.get(easybizyId);
+    } else if (phone && clientByPhone.has(phone)) {
+      existingId = clientByPhone.get(phone);
+    }
+
+    const clientObj = {
+      firstName,
+      lastName,
+      phone: phone || `placeholder_${Date.now()}_${idx}`,
+      email,
+      lastVisit,
+      dob,
+      visits,
+      avgInvoice,
+      easybizyId,
+      address,
+      source
+    };
+
+    if (existingId) {
+      clientsToUpdate.push({ id: existingId, ...clientObj });
+    } else {
+      clientsToInsert.push(clientObj);
+    }
+  });
+
+  if (clientsToInsert.length > 0) {
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < clientsToInsert.length; i += BATCH_SIZE) {
+      const batch = clientsToInsert.slice(i, i + BATCH_SIZE);
+      const values = [];
+      const placeholders = [];
+      batch.forEach((c, idx) => {
+        const base = idx * 11;
+        placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11})`);
+        values.push(c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source);
+      });
+      const query = `
+        INSERT INTO clients (first_name, last_name, phone_number, email, last_visit_date, date_of_birth, visits, avg_invoice, easybizy_id, address, source)
+        VALUES ${placeholders.join(', ')}
+        RETURNING id, phone_number, easybizy_id
+      `;
+      const res = await pool.query(query, values);
+      res.rows.forEach(r => {
+        if (r.phone_number) clientByPhone.set(r.phone_number, r.id);
+        if (r.easybizy_id) clientByEasybizyId.set(String(r.easybizy_id), r.id);
+      });
+    }
+    console.log(`Inserted ${clientsToInsert.length} new clients to PostgreSQL.`);
+  }
+
+  if (clientsToUpdate.length > 0) {
+    for (const c of clientsToUpdate) {
+      await pool.query(
+        `UPDATE clients 
+         SET first_name = $1, last_name = $2, phone_number = $3, email = $4, last_visit_date = $5, 
+             date_of_birth = $6, visits = $7, avg_invoice = $8, easybizy_id = $9, address = $10, source = $11
+         WHERE id = $12`,
+        [c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.id]
+      );
+    }
+    console.log(`Updated ${clientsToUpdate.length} existing clients in PostgreSQL.`);
+  }
+
+  // --- 3. SYNC APPOINTMENTS ---
+  console.log('📅 [Postgres Sync] מסנכרן פגישות...');
+  const dbApptsRes = await pool.query('SELECT id, easybizy_id, client_id, start_time, status, notes FROM appointments');
+  const apptByEasybizyId = new Map();
+  const apptByClientTime = new Map();
+  dbApptsRes.rows.forEach(r => {
+    if (r.easybizy_id) apptByEasybizyId.set(String(r.easybizy_id), r);
+    const key = `${r.client_id}_${new Date(r.start_time).getTime()}`;
+    apptByClientTime.set(key, r);
+  });
+
+  const apptsToInsert = [];
+  const apptsToUpdate = [];
+
+  for (let idx = 0; idx < rawAppointments.length; idx++) {
+    const raw = rawAppointments[idx];
+    const mapped = mapAppointment(raw, idx);
+
+    let clientId = null;
+    let customerRaw = raw.Customer || raw.client;
+    if (customerRaw && typeof customerRaw === 'object') {
+      const cPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || '');
+      const cEasybizyId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
+      if (cEasybizyId && clientByEasybizyId.has(cEasybizyId)) {
+        clientId = clientByEasybizyId.get(cEasybizyId);
+      } else if (cPhone && clientByPhone.has(cPhone)) {
+        clientId = clientByPhone.get(cPhone);
+      }
+    }
+
+    if (!clientId && mapped.clientName) {
+      const nameParts = mapped.clientName.split(/\s+/);
+      const firstName = nameParts[0] || 'לקוח';
+      const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
+      
+      const matchRes = await pool.query(
+        'SELECT id FROM clients WHERE first_name = $1 AND last_name = $2 LIMIT 1',
+        [firstName, lastName]
+      );
+      if (matchRes.rows.length > 0) {
+        clientId = matchRes.rows[0].id;
+      } else {
+        const insertClientRes = await pool.query(
+          `INSERT INTO clients (first_name, last_name, phone_number) 
+           VALUES ($1, $2, $3) RETURNING id`,
+          [firstName, lastName, `placeholder_${Date.now()}_${idx}`]
+        );
+        clientId = insertClientRes.rows[0].id;
+        clientByPhone.set(`placeholder_${Date.now()}_${idx}`, clientId);
+      }
+    }
+
+    if (!clientId) continue;
+
+    const therapistId = await ensureTherapist(mapped.therapistName);
+    const treatmentId = await ensureTreatment(mapped.treatmentName);
+
+    const easybizyId = String(mapped.id);
+    const startTime = new Date(mapped.startTime);
+    const endTime = new Date(mapped.endTime);
+    
+    let status = 'scheduled';
+    if (mapped.status) {
+      const s = String(mapped.status).toLowerCase();
+      if (s.includes('cancel') || s.includes('ביטול') || s.includes('מבוטל')) status = 'cancelled';
+      else if (s.includes('complete') || s.includes('בוצע') || s.includes('סיום')) status = 'completed';
+      else if (s.includes('no_show') || s.includes('לא הגיע')) status = 'no_show';
+    }
+    const notes = mapped.notes || '';
+
+    let existingAppt = null;
+    if (easybizyId && !easybizyId.startsWith('appt_') && apptByEasybizyId.has(easybizyId)) {
+      existingAppt = apptByEasybizyId.get(easybizyId);
+    } else {
+      const key = `${clientId}_${startTime.getTime()}`;
+      if (apptByClientTime.has(key)) {
+        existingAppt = apptByClientTime.get(key);
+      }
+    }
+
+    const apptObj = {
+      clientId,
+      therapistId,
+      treatmentId,
+      startTime,
+      endTime,
+      status,
+      notes,
+      easybizyId
+    };
+
+    if (existingAppt) {
+      const changed = 
+        existingAppt.status !== status || 
+        existingAppt.notes !== notes || 
+        new Date(existingAppt.start_time).getTime() !== startTime.getTime();
+      
+      if (changed) {
+        apptsToUpdate.push({ id: existingAppt.id, ...apptObj });
+      }
+    } else {
+      apptsToInsert.push(apptObj);
+    }
+  }
+
+  if (apptsToInsert.length > 0) {
+    const BATCH_SIZE = 500;
+    for (let i = 0; i < apptsToInsert.length; i += BATCH_SIZE) {
+      const batch = apptsToInsert.slice(i, i + BATCH_SIZE);
+      const values = [];
+      const placeholders = [];
+      batch.forEach((a, idx) => {
+        const base = idx * 8;
+        placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`);
+        values.push(a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId);
+      });
+      const query = `
+        INSERT INTO appointments (client_id, therapist_id, treatment_id, start_time, end_time, status, notes, easybizy_id)
+        VALUES ${placeholders.join(', ')}
+      `;
+      await pool.query(query, values);
+    }
+    console.log(`Inserted ${apptsToInsert.length} new appointments to PostgreSQL.`);
+  }
+
+  if (apptsToUpdate.length > 0) {
+    for (const a of apptsToUpdate) {
+      await pool.query(
+        `UPDATE appointments 
+         SET client_id = $1, therapist_id = $2, treatment_id = $3, start_time = $4, end_time = $5, status = $6, notes = $7, easybizy_id = $8
+         WHERE id = $9`,
+        [a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.id]
+      );
+    }
+    console.log(`Updated ${apptsToUpdate.length} appointments in PostgreSQL.`);
+  }
+
+  console.log('✅ [Postgres Sync] הסנכרון לבסיס הנתונים הושלם בהצלחה.');
+}
+
 async function processExtensionSync(rawCustomers, rawAppointments) {
   const startTime = Date.now();
   console.log(`\n🔄 [Extension Sync] מתחיל עיבוד סנכרון (לקוחות: ${rawCustomers.length}, פגישות: ${rawAppointments.length})...`);
 
-  if (rawAppointments && rawAppointments.length > 0) {
-    console.log("=== RAW APPOINTMENT KEYS ===");
-    console.log(Object.keys(rawAppointments[0]));
-    console.log("=== RAW APPOINTMENT SAMPLE ===");
-    console.log(JSON.stringify(rawAppointments[0]).slice(0, 800));
-  }
-  if (rawCustomers && rawCustomers.length > 0) {
-    console.log("=== RAW CUSTOMER KEYS ===");
-    console.log(Object.keys(rawCustomers[0]));
-    console.log("=== RAW CUSTOMER SAMPLE ===");
-    console.log(JSON.stringify(rawCustomers[0]).slice(0, 800));
-  }
-
-  // 1. Process Customers
+  // 1. Process Customers (Static fallback writing)
   let addedCustomers = 0;
   let updatedCustomersCount = 0;
   let totalCustomers = 0;
@@ -267,7 +535,7 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
     totalCustomers = loadClients().length;
   }
 
-  // 2. Process Appointments
+  // 2. Process Appointments (Static fallback writing)
   let addedAppointments = 0;
   let totalAppointmentsCount = 0;
   if (rawAppointments && rawAppointments.length > 0) {
@@ -278,7 +546,6 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
 
     const newAppointments = remoteAppointments.filter(a => !existingApptIds.has(String(a.id)));
     
-    // Merge and update status of existing appointments if they matched
     const updatedExistingAppts = existingAppointments.map(ea => {
       const remote = remoteAppointments.find(ra => String(ra.id) === String(ea.id));
       if (!remote) return ea;
@@ -297,6 +564,13 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
     totalAppointmentsCount = mergedAppts.length;
   } else {
     totalAppointmentsCount = loadAppointments().length;
+  }
+
+  // 3. PostgreSQL Database Sync (Graceful Try-Catch)
+  try {
+    await syncToPostgres(rawCustomers, rawAppointments);
+  } catch (dbErr) {
+    console.warn('⚠️ [Postgres Sync] סנכרון לבסיס הנתונים נכשל (ישתמש בגיבוי ה-JSON):', dbErr.message);
   }
 
   const duration = Date.now() - startTime;

@@ -1,14 +1,7 @@
 import { TrendingUp, TrendingDown, CalendarDays, Users, Banknote, Megaphone, Clock, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import REAL_APPOINTMENTS from '../data/appointments.json';
-
-const stats = [
-  { label: 'תורים היום',     value: '8',       change: '+2 מאתמול',  up: true,  icon: CalendarDays, color: 'var(--accent)',  bg: 'var(--accent-light)',  bdr: 'var(--accent-border)'  },
-  { label: 'הכנסות החודש',   value: '₪24,500', change: '+12%',       up: true,  icon: Banknote,     color: 'var(--teal)',    bg: 'var(--teal-light)',    bdr: 'var(--teal-border)'    },
-  { label: 'לקוחות פעילים',  value: '147',     change: '+14 החודש',  up: true,  icon: Users,        color: 'var(--violet)', bg: 'var(--violet-light)', bdr: 'var(--violet-border)' },
-  { label: 'קמפיינים פעילים',value: '2',       change: '42 ייצאו בקרוב', up: null, icon: Megaphone, color: 'var(--amber)',   bg: 'var(--amber-light)',   bdr: 'var(--amber-border)'   },
-];
+import { fetchAppointments, fetchClients, API_URL } from '../utils/api';
 
 const quickActions = [
   { label: 'שלח תזכורות ללקוחות', sub: '12 לקוחות לא ביקרו חודש+', emoji: '📩', color: 'var(--accent)'  },
@@ -19,10 +12,23 @@ const quickActions = [
 export default function Dashboard() {
   const [syncStatus, setSyncStatus] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [appointments, setAppointments] = useState([]);
+  const [clients, setClients] = useState([]);
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const appointmentsToDisplay = REAL_APPOINTMENTS.length > 0
-    ? REAL_APPOINTMENTS
+  
+  const todayAppts = appointments.filter(appt => appt.startTime.startsWith(todayStr));
+  const activeClients = clients.filter(c => c.status === 'active');
+
+  const stats = [
+    { label: 'תורים היום',     value: todayAppts.length || '0',       change: todayAppts.length > 0 ? `+${todayAppts.length} היום` : 'אין תורים',  up: todayAppts.length > 0,  icon: CalendarDays, color: 'var(--accent)',  bg: 'var(--accent-light)',  bdr: 'var(--accent-border)'  },
+    { label: 'הכנסות החודש',   value: '₪24,500', change: '+12%',       up: true,  icon: Banknote,     color: 'var(--teal)',    bg: 'var(--teal-light)',    bdr: 'var(--teal-border)'    },
+    { label: 'לקוחות פעילים',  value: activeClients.length || clients.length || '0',     change: clients.length > 0 ? `סה"כ ${clients.length}` : '—',  up: true,  icon: Users,        color: 'var(--violet)', bg: 'var(--violet-light)', bdr: 'var(--violet-border)' },
+    { label: 'קמפיינים פעילים',value: '2',       change: '42 ייצאו בקרוב', up: null, icon: Megaphone, color: 'var(--amber)',   bg: 'var(--amber-light)',   bdr: 'var(--amber-border)'   },
+  ];
+
+  const appointmentsToDisplay = appointments.length > 0
+    ? appointments
         .filter(appt => appt.startTime.startsWith(todayStr))
         .map(appt => {
           const dateObj = new Date(appt.startTime);
@@ -36,17 +42,11 @@ export default function Dashboard() {
           };
         })
         .sort((a, b) => a.time.localeCompare(b.time))
-    : [
-        { time: '09:00', client: 'דנה ישראלי',   treatment: 'טיפול פנים קלאסי',  therapist: 'שירלי', status: 'confirmed' },
-        { time: '10:30', client: 'מיכל לוי',     treatment: 'לייזר שיער — רגליים', therapist: 'נועה',  status: 'confirmed' },
-        { time: '12:00', client: 'אורית כהן',    treatment: 'ניקוי פנים עמוק',    therapist: 'שירלי', status: 'pending'   },
-        { time: '14:30', client: 'רחל אברמוב',   treatment: 'טיפול פנים זוהר',    therapist: 'דנה',   status: 'confirmed' },
-      ];
+    : [];
 
   const fetchSyncStatus = async () => {
     try {
-      // In dev, assuming backend is on port 5001
-      const res = await fetch('http://localhost:5001/api/sync-status');
+      const res = await fetch(`${API_URL}/sync-status`);
       if (res.ok) {
         const data = await res.json();
         setSyncStatus(data.data);
@@ -58,14 +58,31 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchSyncStatus();
+
+    // Fetch appointments
+    fetchAppointments()
+      .then(data => setAppointments(data))
+      .catch(err => console.error('Failed to fetch appointments:', err));
+
+    // Fetch clients
+    fetchClients()
+      .then(data => setClients(data))
+      .catch(err => console.error('Failed to fetch clients:', err));
   }, []);
 
   const handleSync = async () => {
     setSyncing(true);
     try {
-      const res = await fetch('http://localhost:5001/api/sync', { method: 'POST' });
+      const res = await fetch(`${API_URL}/sync`, { method: 'POST' });
       if (res.ok) {
         await fetchSyncStatus();
+        // Reload data after manual sync trigger
+        const [apptsData, clientsData] = await Promise.all([
+          fetchAppointments(),
+          fetchClients()
+        ]);
+        setAppointments(apptsData);
+        setClients(clientsData);
       }
     } catch (e) {
       console.error('Sync failed', e);

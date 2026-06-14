@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Search, Plus, Phone, Calendar, MoreVertical, TrendingUp,
   X, Upload, ChevronDown, Check, FileSpreadsheet, UserPlus,
@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import REAL_CLIENTS from '../data/clients.json';
+import { fetchClients } from '../utils/api';
+
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 function xlDate(serial) {
@@ -541,6 +543,16 @@ export default function ClientsList() {
   const [showNew,     setShowNew]     = useState(false);
   const [showImport,  setShowImport]  = useState(false);
   const [selected,    setSelected]    = useState(null);
+
+  useEffect(() => {
+    fetchClients()
+      .then(data => {
+        if (data && data.length > 0) {
+          setClients(data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch clients:', err));
+  }, []);
 
   const addClient = (c)   => setClients(p => [c, ...p]);
   const addBulk   = (arr) => setClients(arr); // replace with imported
