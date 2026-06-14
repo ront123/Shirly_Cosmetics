@@ -22,6 +22,8 @@ exports.getAppointments = async (req, res) => {
       return {
         id: row.id,
         easybizyId: row.easybizy_id || '',
+        clientId: row.client_id || '',
+        clientPhone: row.phone_number || '',
         clientName: clientName || 'לקוח לא מזוהה',
         treatmentName: row.treatment_name || 'טיפול כללי',
         therapistName: row.therapist_name || 'שירלי',
