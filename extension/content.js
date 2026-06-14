@@ -26,9 +26,16 @@ window.addEventListener("message", (event) => {
       lastInterceptedCustomersUrl = event.data.url;
       console.log(`[Shirly Sync] Cached ${cachedCustomers.length} customers from intercepted network call: ${lastInterceptedCustomersUrl}`);
     } else if (event.data.type === 'APPOINTMENTS_INTERCEPTED') {
-      cachedAppointments = event.data.data;
+      if (!cachedAppointments) cachedAppointments = [];
+      const incoming = event.data.data || [];
+      const existingIds = new Set(cachedAppointments.map(a => String(a.MeetingId || a.id || a.CalendarEventId)));
+      const newItems = incoming.filter(item => {
+        const id = String(item.MeetingId || item.id || item.CalendarEventId);
+        return !existingIds.has(id);
+      });
+      cachedAppointments.push(...newItems);
       lastInterceptedAppointmentsUrl = event.data.url;
-      console.log(`[Shirly Sync] Cached ${cachedAppointments.length} appointments from intercepted network call: ${lastInterceptedAppointmentsUrl}`);
+      console.log(`[Shirly Sync] Merged ${newItems.length} new appointments/breaks. Total cached: ${cachedAppointments.length} from: ${lastInterceptedAppointmentsUrl}`);
     }
   }
 });
@@ -98,8 +105,14 @@ async function runSync() {
     };
   }
 
-  // Send the extracted data to the local backend
-  return await sendToBackend(finalCustomers, finalAppointments, syncLogSources.join(' & '));
+  // Return the gathered data back to the popup context
+  return {
+    success: true,
+    customers: finalCustomers,
+    appointments: finalAppointments,
+    appointmentsUrl: lastInterceptedAppointmentsUrl,
+    method: syncLogSources.join(' & ')
+  };
 }
 
 function getCustomerPaths() {
@@ -182,33 +195,6 @@ async function tryRelativeFetches(paths) {
   return null;
 }
 
-async function sendToBackend(customers, appointments, method) {
-  try {
-    console.log(`[Shirly Sync] Sending to local backend (customers: ${customers.length}, appointments: ${appointments.length}) via ${method}`);
-    const backendRes = await fetch('http://localhost:5001/api/sync-extension', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        customers: customers,
-        appointments: appointments
-      })
-    });
-
-    if (!backendRes.ok) {
-      const errText = await backendRes.text();
-      return { success: false, error: `שגיאה בשרת המקומי: ${backendRes.status} - ${errText}` };
-    }
-
-    const result = await backendRes.json();
-    return { success: true, data: result };
-  } catch (err) {
-    console.error("[Shirly Sync] Local backend server connection failed:", err);
-    return {
-      success: false,
-      error: `חיבור לשרת המקומי נכשל (localhost:5001). ודא ששרת ה-Node.js של המערכת מופעל. (${err.message})`
-    };
-  }
-}
 
 function findAuthToken() {
   try {
@@ -234,13 +220,14 @@ function findAuthToken() {
 function extractArray(data) {
   if (!data) return null;
   if (Array.isArray(data)) return data;
-  if (Array.isArray(data.data)) return data.data;
-  if (Array.isArray(data.items)) return data.items;
-  if (Array.isArray(data.customers)) return data.customers;
-  if (Array.isArray(data.clients)) return data.clients;
-  if (Array.isArray(data.appointments)) return data.appointments;
-  if (Array.isArray(data.meetings)) return data.meetings;
-  if (Array.isArray(data.events)) return data.events;
+  if (data.value && Array.isArray(data.value)) return data.value;
+  if (data.data && Array.isArray(data.data)) return data.data;
+  if (data.items && Array.isArray(data.items)) return data.items;
+  if (data.customers && Array.isArray(data.customers)) return data.customers;
+  if (data.clients && Array.isArray(data.clients)) return data.clients;
+  if (data.appointments && Array.isArray(data.appointments)) return data.appointments;
+  if (data.meetings && Array.isArray(data.meetings)) return data.meetings;
+  if (data.events && Array.isArray(data.events)) return data.events;
   
   for (const key in data) {
     if (Array.isArray(data[key])) {

@@ -78,11 +78,27 @@ app.post('/api/sync', async (req, res) => {
 
 app.post('/api/sync-extension', async (req, res) => {
   try {
-    const { customers, appointments } = req.body;
+    const { customers, appointments, appointmentsUrl } = req.body;
+    
+    // Save raw payload to disk for debugging
+    try {
+      const debugDir = path.join(__dirname, 'data');
+      if (!fs.existsSync(debugDir)) fs.mkdirSync(debugDir, { recursive: true });
+      fs.writeFileSync(path.join(debugDir, 'last-raw-payload.json'), JSON.stringify(req.body, null, 2));
+      console.log('📝 Saved raw sync payload to data/last-raw-payload.json');
+      
+      if (req.body.metadata) {
+        fs.writeFileSync(path.join(debugDir, 'metadata.xml'), req.body.metadata);
+        console.log('📝 Saved OData schema metadata to data/metadata.xml');
+      }
+    } catch (debugErr) {
+      console.error('Failed to save debug raw payload:', debugErr);
+    }
+
     if ((!customers || !Array.isArray(customers)) && (!appointments || !Array.isArray(appointments))) {
       return res.status(400).json({ success: false, error: 'Invalid payload: must provide customers or appointments array' });
     }
-    const result = await processExtensionSync(customers || [], appointments || []);
+    const result = await processExtensionSync(customers || [], appointments || [], appointmentsUrl);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

@@ -57,13 +57,14 @@
   function extractArray(data) {
     if (!data) return null;
     if (Array.isArray(data)) return data;
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.items)) return data.items;
-    if (Array.isArray(data.customers)) return data.customers;
-    if (Array.isArray(data.clients)) return data.clients;
-    if (Array.isArray(data.appointments)) return data.appointments;
-    if (Array.isArray(data.meetings)) return data.meetings;
-    if (Array.isArray(data.events)) return data.events;
+    if (data.value && Array.isArray(data.value)) return data.value;
+    if (data.data && Array.isArray(data.data)) return data.data;
+    if (data.items && Array.isArray(data.items)) return data.items;
+    if (data.customers && Array.isArray(data.customers)) return data.customers;
+    if (data.clients && Array.isArray(data.clients)) return data.clients;
+    if (data.appointments && Array.isArray(data.appointments)) return data.appointments;
+    if (data.meetings && Array.isArray(data.meetings)) return data.meetings;
+    if (data.events && Array.isArray(data.events)) return data.events;
     
     for (const key in data) {
       if (Array.isArray(data[key])) {
@@ -74,21 +75,48 @@
   }
 
   function handleInterceptedData(url, data) {
-    if (isCustomerData(data)) {
-      const array = extractArray(data);
-      console.log(`[Shirly Sync Injector] Intercepted ${array.length} customers from ${url}`);
+    const array = extractArray(data);
+    if (!array || array.length === 0) return;
+
+    const urlLower = url.toLowerCase();
+    
+    // 1. Direct URL-based classification (very fast and reliable)
+    if (urlLower.includes('calendar/') || urlLower.includes('calendarevents') || urlLower.includes('appointments') || urlLower.includes('meetings') || urlLower.includes('holiday') || urlLower.includes('block') || urlLower.includes('break')) {
+      console.log(`[Shirly Sync Injector] Intercepted ${array.length} appointments/breaks from URL: ${url}`);
+      window.postMessage({
+        source: 'shirly-sync-injector',
+        type: 'APPOINTMENTS_INTERCEPTED',
+        url: url,
+        data: array
+      }, '*');
+      return;
+    }
+
+    if (urlLower.includes('customers') || urlLower.includes('clients') || urlLower.includes('leads')) {
+      console.log(`[Shirly Sync Injector] Intercepted ${array.length} customers from URL: ${url}`);
       window.postMessage({
         source: 'shirly-sync-injector',
         type: 'CUSTOMERS_INTERCEPTED',
         url: url,
         data: array
       }, '*');
-    } else if (isAppointmentData(data)) {
-      const array = extractArray(data);
-      console.log(`[Shirly Sync Injector] Intercepted ${array.length} appointments from ${url}`);
+      return;
+    }
+
+    // 2. Fallback heuristic checks (prioritize appointments to avoid false-positive customer classification)
+    if (isAppointmentData(data)) {
+      console.log(`[Shirly Sync Injector] Intercepted ${array.length} appointments (heuristic) from ${url}`);
       window.postMessage({
         source: 'shirly-sync-injector',
         type: 'APPOINTMENTS_INTERCEPTED',
+        url: url,
+        data: array
+      }, '*');
+    } else if (isCustomerData(data)) {
+      console.log(`[Shirly Sync Injector] Intercepted ${array.length} customers (heuristic) from ${url}`);
+      window.postMessage({
+        source: 'shirly-sync-injector',
+        type: 'CUSTOMERS_INTERCEPTED',
         url: url,
         data: array
       }, '*');

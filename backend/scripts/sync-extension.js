@@ -33,6 +33,23 @@ function parseDate(val) {
 
 function parseDateISO(val) {
   if (!val) return new Date().toISOString();
+  if (typeof val === 'string') {
+    // Check for MM/DD/YYYY HH:MM
+    const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+    if (match) {
+      const m = parseInt(match[1], 10);
+      const d = parseInt(match[2], 10);
+      const y = parseInt(match[3], 10);
+      const h = parseInt(match[4], 10);
+      const min = parseInt(match[5], 10);
+      
+      const dateObj = new Date(y, m - 1, d, h, min);
+      if (!isNaN(dateObj.getTime())) {
+        return dateObj.toISOString();
+      }
+    }
+  }
+  
   try {
     const d = new Date(val);
     if (!isNaN(d.getTime())) return d.toISOString();
@@ -88,12 +105,22 @@ function mapClient(raw, index) {
 function mapAppointment(raw, index) {
   // Check if we have a nested Meeting object (common when raw is a CalendarEvent)
   const meetingRaw = raw.Meeting || raw.meeting;
-  const isBreak = !meetingRaw && !raw.Customer && !raw.client && !raw.CustomerId;
 
   // 1. Client Name & Details (ID and Phone)
   let clientName = '';
   let clientPhone = '';
   let easybizyClientId = '';
+  
+  // Try getting from root level first (common in /api/Calendar/Meetings)
+  if (raw.CustomerId) {
+    easybizyClientId = String(raw.CustomerId);
+  }
+  if (raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile) {
+    clientPhone = formatPhone(raw.MobileFirst || raw.Mobile || raw.Phone || raw.phone || raw.mobile);
+  }
+  if (raw.Title || raw.title) {
+    clientName = String(raw.Title || raw.title).trim();
+  }
   
   let customerRaw = raw.Customer || raw.client || (meetingRaw && (meetingRaw.Customer || meetingRaw.client));
   if (customerRaw && typeof customerRaw === 'object') {
@@ -104,13 +131,15 @@ function mapAppointment(raw, index) {
       clientName = customerRaw.Name || customerRaw.name || customerRaw.FullName || customerRaw.fullName || customerRaw.CustomerName || customerRaw.Customername || customerRaw.customerName || '';
     }
     clientPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || customerRaw.mobile || customerRaw.Mobilefirst || '');
-    easybizyClientId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
+    easybizyClientId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || easybizyClientId || '');
   }
   
   if (!clientName) {
     clientName = raw.clientName || raw.ClientName || raw.customerName || raw.CustomerName || raw.customer_name || raw.client_name || raw.Client || raw.client || '';
   }
   
+  const isBreak = !easybizyClientId && !raw.Customer && !raw.client && !raw.CustomerId && !raw.MobileFirst && !meetingRaw;
+
   // If it is a break event, use Subject/Title as clientName
   if (isBreak && !clientName) {
     clientName = raw.Subject || raw.Title || raw.subject || raw.title || 'אירוע כללי';
@@ -128,9 +157,17 @@ function mapAppointment(raw, index) {
 
   // 2. Treatment Name
   let treatmentName = '';
-  let treatmentRaw = raw.Treatment || raw.treatment || (meetingRaw && (meetingRaw.Treatment || meetingRaw.treatment));
-  if (treatmentRaw && typeof treatmentRaw === 'object') {
-    treatmentName = treatmentRaw.Name || treatmentRaw.Title || treatmentRaw.name || treatmentRaw.title || treatmentRaw.Subject || treatmentRaw.subject || '';
+  
+  // Support ServiceNames array (from /api/Calendar/Meetings)
+  if (raw.ServiceNames && Array.isArray(raw.ServiceNames) && raw.ServiceNames.length > 0) {
+    treatmentName = raw.ServiceNames.join(', ');
+  }
+  
+  if (!treatmentName) {
+    let treatmentRaw = raw.Treatment || raw.treatment || (meetingRaw && (meetingRaw.Treatment || meetingRaw.treatment));
+    if (treatmentRaw && typeof treatmentRaw === 'object') {
+      treatmentName = treatmentRaw.Name || treatmentRaw.Title || treatmentRaw.name || treatmentRaw.title || treatmentRaw.Subject || treatmentRaw.subject || '';
+    }
   }
   if (!treatmentName && raw.Service && typeof raw.Service === 'object') {
     treatmentName = raw.Service.Name || raw.Service.Title || raw.Service.name || raw.Service.title || raw.Service.Subject || raw.Service.subject || '';
@@ -142,18 +179,36 @@ function mapAppointment(raw, index) {
     treatmentName = raw.CalendarEvent.Subject || raw.CalendarEvent.Title || raw.CalendarEvent.subject || raw.CalendarEvent.title || '';
   }
   if (!treatmentName) {
-    treatmentName = raw.treatmentName || raw.TreatmentName || raw.serviceName || raw.ServiceName || raw.service || raw.treatment || raw.Subject || raw.subject || raw.Title || raw.title || '';
+    treatmentName = raw.treatmentName || raw.TreatmentName || raw.serviceName || raw.ServiceName || raw.service || raw.treatment || raw.Subject || raw.subject || '';
+  }
+
+  // Fallback: if treatmentName is empty or equals "טיפול כללי", check if we have a short remark/note/description
+  if (!treatmentName || treatmentName === 'טיפול כללי') {
+    const noteVal = String(raw.Remarks || raw.notes || raw.Notes || raw.description || '').trim();
+    if (noteVal && noteVal.length > 0 && noteVal.length < 50) {
+      treatmentName = noteVal;
+    }
   }
   
   // If it's a break event, use the subject/title as treatmentName
-  if (isBreak && !treatmentName) {
+  if (isBreak && (!treatmentName || treatmentName === 'טיפול כללי')) {
     treatmentName = raw.Subject || raw.Title || raw.subject || raw.title || 'אירוע כללי';
   }
+
+  treatmentName = treatmentName || 'טיפול כללי';
   treatmentName = String(treatmentName).trim();
 
   // 3. Therapist Name
   let therapistName = '';
-  if (raw.Employee && typeof raw.Employee === 'object') {
+  
+  // Map EmployeeId from /api/Calendar/Meetings
+  if (raw.EmployeeId === 1) {
+    therapistName = 'שירלי';
+  } else if (raw.EmployeeId === 8) {
+    therapistName = 'לורה';
+  }
+  
+  if (!therapistName && raw.Employee && typeof raw.Employee === 'object') {
     therapistName = raw.Employee.Name || raw.Employee.FirstName || '';
   }
   if (!therapistName && raw.employee && typeof raw.employee === 'object') {
@@ -182,10 +237,10 @@ function mapAppointment(raw, index) {
     end = meetingRaw.endTime || meetingRaw.end_time || meetingRaw.end || '';
   }
   if (!start) {
-    start = raw.Start || raw.start || raw.startTime || raw.start_time || raw.date || raw.dateTime || raw.datetime || raw.CreatedOn || '';
+    start = raw.StartTime || raw.Start || raw.start || raw.startTime || raw.start_time || raw.date || raw.dateTime || raw.datetime || raw.CreatedOn || '';
   }
   if (!end) {
-    end = raw.End || raw.end || raw.endTime || raw.end_time || start || '';
+    end = raw.EndTime || raw.End || raw.end || raw.endTime || raw.end_time || start || '';
   }
 
   return {
@@ -266,7 +321,7 @@ function appendLog(entry) {
   saveLog(log);
 }
 
-async function syncToPostgres(rawCustomers, rawAppointments) {
+async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = null) {
   console.log('🔌 [Postgres Sync] מתחיל סנכרון לבסיס הנתונים...');
   
   // --- 1. PRE-LOAD MAPS FOR THERAPISTS & TREATMENTS ---
@@ -566,10 +621,79 @@ async function syncToPostgres(rawCustomers, rawAppointments) {
     console.log(`Updated ${apptsToUpdate.length} appointments in PostgreSQL.`);
   }
 
+  // --- 4. CLEANUP DRIFT APPOINTMENTS ---
+  const mappedAppts = rawAppointments.map((raw, idx) => mapAppointment(raw, idx));
+  const remoteApptIds = mappedAppts.map(a => String(a.id)).filter(Boolean);
+  const syncedDates = syncedDatesArray || [...new Set(mappedAppts.map(a => a.startTime.slice(0, 10)).filter(Boolean))];
+
+  if (syncedDates.length > 0) {
+    console.log('🧹 [Postgres Sync] מנקה פגישות שנמחקו או הוזזו בימים המסונכרנים...');
+    for (const dateStr of syncedDates) {
+      const startOfDay = `${dateStr} 00:00:00`;
+      const endOfDay = `${dateStr} 23:59:59`;
+      
+      if (remoteApptIds.length > 0) {
+        await pool.query(
+          `DELETE FROM appointments 
+           WHERE start_time >= $1 AND start_time <= $2 
+           AND easybizy_id IS NOT NULL
+           AND easybizy_id NOT IN (${remoteApptIds.map((_, i) => `$${i + 3}`).join(', ')})`,
+          [startOfDay, endOfDay, ...remoteApptIds]
+        );
+      } else {
+        await pool.query(
+          `DELETE FROM appointments 
+           WHERE start_time >= $1 AND start_time <= $2
+           AND easybizy_id IS NOT NULL`,
+          [startOfDay, endOfDay]
+        );
+      }
+    }
+  }
+
   console.log('✅ [Postgres Sync] הסנכרון לבסיס הנתונים הושלם בהצלחה.');
 }
 
-async function processExtensionSync(rawCustomers, rawAppointments) {
+function getDatesFromUrl(url) {
+  if (!url) return [];
+  try {
+    const qIndex = url.indexOf('?');
+    if (qIndex === -1) return [];
+    const queryString = url.slice(qIndex + 1);
+    
+    const params = {};
+    queryString.split('&').forEach(part => {
+      const [key, val] = part.split('=');
+      if (key && val) {
+        params[key.toLowerCase()] = decodeURIComponent(val);
+      }
+    });
+
+    const startStr = params.start;
+    const endStr = params.end;
+    if (!startStr || !endStr) return [];
+
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return [];
+
+    const dates = [];
+    const curr = new Date(startDate);
+    while (curr <= endDate) {
+      const yr = curr.getFullYear();
+      const mo = String(curr.getMonth() + 1).padStart(2, '0');
+      const da = String(curr.getDate()).padStart(2, '0');
+      dates.push(`${yr}-${mo}-${da}`);
+      curr.setDate(curr.getDate() + 1);
+    }
+    return dates;
+  } catch (err) {
+    console.error('Error parsing dates from url:', err);
+    return [];
+  }
+}
+
+async function processExtensionSync(rawCustomers, rawAppointments, appointmentsUrl = null) {
   const startTime = Date.now();
   console.log(`\n🔄 [Extension Sync] מתחיל עיבוד סנכרון (לקוחות: ${rawCustomers.length}, פגישות: ${rawAppointments.length})...`);
 
@@ -633,23 +757,59 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
   // 2. Process Appointments (Static fallback writing)
   let addedAppointments = 0;
   let totalAppointmentsCount = 0;
+  let syncedDates = new Set();
   if (rawAppointments && rawAppointments.length > 0) {
     const existingAppointments = loadAppointments();
-    const existingApptIds = new Set(existingAppointments.map(a => String(a.id)));
-
     const remoteAppointments = rawAppointments.map(mapAppointment);
+    const remoteApptIds = new Set(remoteAppointments.map(a => String(a.id)));
+    syncedDates = new Set(remoteAppointments.map(a => a.startTime.slice(0, 10)).filter(Boolean));
+    if (appointmentsUrl) {
+      const urlDates = getDatesFromUrl(appointmentsUrl);
+      urlDates.forEach(d => syncedDates.add(d));
+    }
 
-    const newAppointments = remoteAppointments.filter(a => !existingApptIds.has(String(a.id)));
+    // Filter existing appointments: keep them if they are NOT on the synced dates,
+    // OR if they are on the synced dates and are present in the new remote list.
+    const cleanedExistingAppts = existingAppointments.filter(ea => {
+      const dateStr = ea.startTime ? ea.startTime.slice(0, 10) : '';
+      if (syncedDates.has(dateStr)) {
+        return remoteApptIds.has(String(ea.id));
+      }
+      return true;
+    }).map(ea => {
+      // Self-heal: if treatmentName equals clientName, fix it
+      if (ea.treatmentName && ea.clientName && ea.treatmentName.trim() === ea.clientName.trim()) {
+        ea.treatmentName = (ea.notes && ea.notes.length > 0 && ea.notes.length < 50) ? ea.notes : 'טיפול כללי';
+      }
+      return ea;
+    });
+
+    const cleanedApptIds = new Set(cleanedExistingAppts.map(x => String(x.id)));
+    const newAppointments = remoteAppointments.filter(a => !cleanedApptIds.has(String(a.id)));
     
-    const updatedExistingAppts = existingAppointments.map(ea => {
+    const updatedExistingAppts = cleanedExistingAppts.map(ea => {
       const remote = remoteAppointments.find(ra => String(ra.id) === String(ea.id));
       if (!remote) return ea;
+      
+      // Resolve treatment name, prioritizing remote non-general treatments, then notes, then existing treatment
+      let resolvedTreatment = 'טיפול כללי';
+      if (remote.treatmentName && remote.treatmentName !== 'טיפול כללי') {
+        resolvedTreatment = remote.treatmentName;
+      } else {
+        const noteText = remote.notes || ea.notes || '';
+        if (noteText && noteText.length > 0 && noteText.length < 50) {
+          resolvedTreatment = noteText;
+        } else {
+          resolvedTreatment = ea.treatmentName || 'טיפול כללי';
+        }
+      }
+
       return {
         ...ea,
         clientId: remote.clientId || ea.clientId || '',
         clientName: remote.clientName || ea.clientName || '',
         clientPhone: remote.clientPhone || ea.clientPhone || '',
-        treatmentName: remote.treatmentName !== 'טיפול כללי' ? remote.treatmentName : (ea.treatmentName || 'טיפול כללי'),
+        treatmentName: resolvedTreatment,
         status: remote.status,
         notes: remote.notes || ea.notes,
         startTime: remote.startTime,
@@ -667,7 +827,8 @@ async function processExtensionSync(rawCustomers, rawAppointments) {
 
   // 3. PostgreSQL Database Sync (Graceful Try-Catch)
   try {
-    await syncToPostgres(rawCustomers, rawAppointments);
+    const syncedDatesArray = rawAppointments && rawAppointments.length > 0 ? [...syncedDates] : null;
+    await syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray);
   } catch (dbErr) {
     console.warn('⚠️ [Postgres Sync] סנכרון לבסיס הנתונים נכשל (ישתמש בגיבוי ה-JSON):', dbErr.message);
   }

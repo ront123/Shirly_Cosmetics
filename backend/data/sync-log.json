@@ -1,5 +1,151 @@
 {
-  "runs": [],
-  "last_sync": null,
-  "total_synced": 0
+  "runs": [
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 151,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:44:15.041Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 182,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:44:02.087Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 188,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:39:46.844Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 149,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:39:11.138Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 146,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:39:01.537Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 149,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:38:44.239Z"
+    },
+    {
+      "success": true,
+      "added": 1,
+      "total_synced": 1,
+      "duration": 108,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T13:12:31.205Z"
+    },
+    {
+      "success": true,
+      "added": 1,
+      "total_synced": 1,
+      "duration": 4422,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T11:38:48.593Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 97,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T11:35:51.876Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 81,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T11:34:36.818Z"
+    },
+    {
+      "success": true,
+      "added": 1,
+      "total_synced": 1,
+      "duration": 86,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T11:34:25.307Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 4542,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T11:05:57.710Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 4374,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T10:58:15.935Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 134,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T10:56:41.008Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 3717,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T10:52:40.294Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 3690,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T10:49:25.501Z"
+    },
+    {
+      "success": true,
+      "added": 1795,
+      "total_synced": 1795,
+      "duration": 3653,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T10:45:59.301Z"
+    },
+    {
+      "success": true,
+      "added": 25,
+      "total_synced": 25,
+      "duration": 62,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-14T10:42:35.294Z"
+    }
+  ],
+  "last_sync": "2026-06-14T13:44:15.041Z",
+  "total_synced": 1823,
+  "source": "chrome_extension"
 }

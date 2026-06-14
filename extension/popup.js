@@ -40,19 +40,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       chrome.tabs.sendMessage(activeTab.id, { action: "sync_customers" }, (response) => {
-        btnSpinner.style.display = 'none';
-        btnText.textContent = 'סנכרן לקוחות עכשיו';
-        syncBtn.disabled = false;
-
         if (chrome.runtime.lastError) {
           console.error("Communication error:", chrome.runtime.lastError);
+          btnSpinner.style.display = 'none';
+          btnText.textContent = 'סנכרן לקוחות עכשיו';
+          syncBtn.disabled = false;
           showError("לא ניתן לתקשר עם עמוד איזי ביזי. אנא רענן את העמוד ונסה שוב.");
           return;
         }
 
         if (response && response.success) {
-          showSuccess(response.data);
+          console.log(`[Popup] Gathered data: ${response.customers.length} customers, ${response.appointments.length} appointments. Sending to backend...`);
+          
+          fetch('http://localhost:5001/api/sync-extension', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              customers: response.customers,
+              appointments: response.appointments,
+              appointmentsUrl: response.appointmentsUrl,
+              metadata: response.metadata
+            })
+          })
+          .then(async (backendRes) => {
+            if (!backendRes.ok) {
+              const errText = await backendRes.text();
+              throw new Error(`שגיאה בשרת המקומי: ${backendRes.status} - ${errText}`);
+            }
+            return backendRes.json();
+          })
+          .then((result) => {
+            showSuccess(result);
+          })
+          .catch((err) => {
+            console.error("Local sync error:", err);
+            showError(`חיבור לשרת המקומי נכשל (localhost:5001). ודא ששרת ה-Node.js של המערכת מופעל. (${err.message})`);
+          })
+          .finally(() => {
+            btnSpinner.style.display = 'none';
+            btnText.textContent = 'סנכרן לקוחות עכשיו';
+            syncBtn.disabled = false;
+          });
         } else {
+          btnSpinner.style.display = 'none';
+          btnText.textContent = 'סנכרן לקוחות עכשיו';
+          syncBtn.disabled = false;
           showError(response ? response.error : "שגיאה לא ידועה בתהליך הסנכרון.");
         }
       });
