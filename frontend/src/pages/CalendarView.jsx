@@ -5,19 +5,45 @@ import { he } from 'date-fns/locale';
 import { fetchAppointments, fetchClients } from '../utils/api';
 import ClientPanel from '../components/ClientPanel';
 
-const COLORS = [
-  { bg: 'var(--accent-light)',  bdr: 'var(--accent-border)',  txt: 'var(--accent)'  },
-  { bg: 'var(--violet-light)', bdr: 'var(--violet-border)', txt: 'var(--violet)' },
-  { bg: 'var(--teal-light)',   bdr: 'var(--teal-border)',   txt: 'var(--teal)'   },
-];
-
-function getColorForTreatment(name = '') {
+function getColorForTherapist(name = '') {
+  const lowercaseName = name.toLowerCase();
+  if (lowercaseName.includes('שירלי')) {
+    return {
+      bg: 'var(--red-light)',
+      bdr: 'var(--red-border)',
+      txt: 'var(--red)',
+      solid: 'var(--red)'
+    };
+  }
+  if (lowercaseName.includes('נועה')) {
+    return {
+      bg: 'var(--violet-light)',
+      bdr: 'var(--violet-border)',
+      txt: 'var(--violet)',
+      solid: 'var(--violet)'
+    };
+  }
+  if (lowercaseName.includes('דנה')) {
+    return {
+      bg: 'var(--teal-light)',
+      bdr: 'var(--teal-border)',
+      txt: 'var(--teal)',
+      solid: 'var(--teal)'
+    };
+  }
+  // Fallback hash color
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % COLORS.length;
-  return COLORS[index];
+  const index = Math.abs(hash) % 3;
+  if (index === 0) {
+    return { bg: 'var(--red-light)', bdr: 'var(--red-border)', txt: 'var(--red)', solid: 'var(--red)' };
+  } else if (index === 1) {
+    return { bg: 'var(--violet-light)', bdr: 'var(--violet-border)', txt: 'var(--violet)', solid: 'var(--violet)' };
+  } else {
+    return { bg: 'var(--teal-light)', bdr: 'var(--teal-border)', txt: 'var(--teal)', solid: 'var(--teal)' };
+  }
 }
 
 export default function CalendarView() {
@@ -115,7 +141,7 @@ export default function CalendarView() {
                 borderRadius: 7,
                 border: 'none',
                 cursor: 'pointer',
-                background: selectedTherapist === t ? 'var(--accent)' : 'transparent',
+                background: selectedTherapist === t ? getColorForTherapist(t).solid : 'transparent',
                 color: selectedTherapist === t ? '#fff' : 'var(--text-secondary)',
                 transition: 'all 0.15s ease',
               }}
@@ -166,7 +192,7 @@ export default function CalendarView() {
                   return isSameDay(apptDate, day) && apptDate.getHours() === hour;
                 });
                 
-                const apptColor = appt ? getColorForTreatment(appt.treatmentName) : null;
+                const apptColor = appt ? getColorForTherapist(appt.therapistName) : null;
                 
                 return (
                   <div
@@ -206,77 +232,93 @@ export default function CalendarView() {
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }}
           onClick={() => setSelectedAppt(null)}>
-          <div className="card overflow-hidden w-full max-w-md"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2)' }}
+          <div className="card overflow-hidden w-full max-w-lg"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.4), 0 12px 24px -10px rgba(0,0,0,0.3)'
+            }}
             onClick={e => e.stopPropagation()}>
             
             {/* Header */}
-            <div className="flex items-center justify-between p-5" style={{ borderBottom: '1px solid var(--border)' }}>
-              <div className="flex items-center gap-2">
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Calendar size={16} style={{ color: 'var(--accent)' }} />
+            <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid var(--border)' }}>
+              <div className="flex items-center gap-3">
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: getColorForTherapist(selectedAppt.therapistName).bg,
+                  border: `1px solid ${getColorForTherapist(selectedAppt.therapistName).bdr}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Calendar size={18} style={{ color: getColorForTherapist(selectedAppt.therapistName).txt }} />
                 </div>
-                <h3 className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>פרטי פגישה</h3>
+                <h3 className="font-black text-xl" style={{ color: 'var(--text-primary)' }}>פרטי פגישה</h3>
               </div>
-              <button onClick={() => setSelectedAppt(null)} className="btn-ghost" style={{ padding: '6px 8px', borderRadius: 8 }}>
-                <X size={16} />
+              <button onClick={() => setSelectedAppt(null)} className="btn-ghost" style={{ padding: '8px 10px', borderRadius: 8 }}>
+                <X size={18} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-5 space-y-4">
-              {/* Treatment Badge */}
+            <div className="p-6 space-y-6">
+              {/* Treatment Badge & Therapist */}
               <div className="flex items-center justify-between">
                 <span className="badge font-bold" style={{
-                  background: getColorForTreatment(selectedAppt.treatmentName).bg,
-                  border: `1px solid ${getColorForTreatment(selectedAppt.treatmentName).bdr}`,
-                  color: getColorForTreatment(selectedAppt.treatmentName).txt,
-                  padding: '4px 12px',
-                  fontSize: 12
+                  background: getColorForTherapist(selectedAppt.therapistName).bg,
+                  border: `1px solid ${getColorForTherapist(selectedAppt.therapistName).bdr}`,
+                  color: getColorForTherapist(selectedAppt.therapistName).txt,
+                  padding: '6px 14px',
+                  fontSize: 13,
+                  borderRadius: 8
                 }}>
                   {selectedAppt.treatmentName}
                 </span>
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>מטפלת: {selectedAppt.therapistName || 'שירלי'}</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                  מטפלת: <strong style={{ color: getColorForTherapist(selectedAppt.therapistName).txt }}>{selectedAppt.therapistName || 'שירלי'}</strong>
+                </span>
               </div>
 
               {/* Details List */}
-              <div className="space-y-3">
+              <div className="space-y-5" style={{ padding: '4px 0' }}>
                 {/* Client Name */}
-                <div className="flex items-start gap-3">
-                  <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <User size={13} style={{ color: 'var(--text-muted)' }} />
+                <div className="flex items-center gap-4">
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <User size={16} style={{ color: 'var(--text-muted)' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, color: 'var(--text-faint)' }}>שם לקוחה</p>
-                    <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{selectedAppt.clientName}</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, marginBottom: 2 }}>שם לקוחה</p>
+                    <p className="font-black text-base" style={{ color: 'var(--text-primary)' }}>{selectedAppt.clientName}</p>
                   </div>
                 </div>
 
                 {/* Phone */}
-                <div className="flex items-start gap-3">
-                  <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Phone size={13} style={{ color: 'var(--text-muted)' }} />
+                <div className="flex items-center gap-4">
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Phone size={16} style={{ color: 'var(--text-muted)' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, color: 'var(--text-faint)' }}>טלפון</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, marginBottom: 2 }}>טלפון</p>
                     {selectedAppt.clientPhone ? (
-                      <a href={`tel:${selectedAppt.clientPhone}`} className="font-semibold text-sm hover:underline" style={{ color: 'var(--accent)' }} dir="ltr">
+                      <a href={`tel:${selectedAppt.clientPhone}`} className="font-bold text-base hover:underline" style={{ color: 'var(--accent)' }} dir="ltr">
                         {selectedAppt.clientPhone}
                       </a>
                     ) : (
-                      <p className="font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>—</p>
+                      <p className="font-semibold text-base" style={{ color: 'var(--text-muted)' }}>—</p>
                     )}
                   </div>
                 </div>
 
                 {/* Time */}
-                <div className="flex items-start gap-3">
-                  <div style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Clock size={13} style={{ color: 'var(--text-muted)' }} />
+                <div className="flex items-center gap-4">
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Clock size={16} style={{ color: 'var(--text-muted)' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, color: 'var(--text-faint)' }}>מועד הפגישה</p>
-                    <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                    <p style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, marginBottom: 2 }}>מועד הפגישה</p>
+                    <p className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>
                       {format(new Date(selectedAppt.startTime), 'EEEE, d בMMMM yyyy', { locale: he })} בשעה {format(new Date(selectedAppt.startTime), 'HH:mm')}
                     </p>
                   </div>
@@ -284,16 +326,16 @@ export default function CalendarView() {
               </div>
 
               {/* Notes */}
-              <div className="rounded-xl p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
-                <p style={{ fontSize: 10, color: 'var(--text-faint)', marginBottom: 4 }}>הערות לפגישה</p>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{selectedAppt.notes || 'אין הערות לפגישה זו'}</p>
+              <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                <p style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, marginBottom: 6 }}>הערות לפגישה</p>
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{selectedAppt.notes || 'אין הערות לפגישה זו'}</p>
               </div>
             </div>
 
             {/* Footer Actions */}
-            <div className="flex items-center justify-between p-4" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
-              <button onClick={() => setSelectedAppt(null)} className="btn-ghost" style={{ padding: '8px 16px' }}>סגור</button>
-              <button className="btn-primary" style={{ padding: '8px 16px' }}
+            <div className="flex items-center justify-between p-5" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+              <button onClick={() => setSelectedAppt(null)} className="btn-ghost" style={{ padding: '10px 20px', borderRadius: 10, fontSize: 14, fontWeight: 700 }}>סגור</button>
+              <button className="btn-primary" style={{ padding: '10px 22px', borderRadius: 10, fontSize: 14, fontWeight: 800 }}
                 onClick={() => {
                   const matchedClient = clients.find(c => 
                     (selectedAppt.clientId && c.id === selectedAppt.clientId) ||
