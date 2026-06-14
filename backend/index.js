@@ -41,7 +41,7 @@ app.use('/api/appointments', appointmentsRoutes);
 app.use('/api/clients', clientsRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Shirly Cosmetics API is running' });
+  res.json({ status: 'ok', message: 'Shirly Cosmetics API is running', version: '1.2.0', deployedAt: new Date().toISOString() });
 });
 
 // Easybizy Sync Routes
