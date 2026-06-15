@@ -124,6 +124,6 @@ app.post('/api/sync-extension', async (req, res) => {
   }
 });
 
-app.listen(port, '127.0.0.1', () => {
+app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
