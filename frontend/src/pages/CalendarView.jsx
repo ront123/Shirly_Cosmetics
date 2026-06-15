@@ -212,15 +212,8 @@ export default function CalendarView() {
       .catch(err => console.error('Failed to fetch clients:', err));
   }, []);
 
-  // Base list of appointments (live or fallback)
-  const baseAppointments = appointments.length > 0 
-    ? appointments 
-    : [
-        { id: 's1', clientName: 'דנה ישראלי', treatmentName: 'טיפול פנים קלאסי', therapistName: 'שירלי סוני', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(10, 0, 0, 0), status: 'confirmed' },
-        { id: 's2', clientName: 'מיכל לוי', treatmentName: 'לייזר שיער — רגליים', therapistName: 'נועה לוי', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 3)).setHours(11, 0, 0, 0), status: 'scheduled' },
-        { id: 's3', clientName: 'אורית כהן', treatmentName: 'ניקוי פנים עמוק', therapistName: 'שירלי סוני', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).setHours(12, 0, 0, 0), status: 'confirmed' },
-        { id: 's4', clientName: 'רחל אברמוב', treatmentName: 'טיפול פנים זוהר', therapistName: 'דנה כהן', startTime: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 4)).setHours(9, 0, 0, 0), status: 'scheduled' }
-      ];
+  // Base list of appointments
+  const baseAppointments = appointments;
 
   // Dynamically extract unique therapist names
   const uniqueTherapists = [...new Set(baseAppointments.map(a => a.therapistName))].filter(Boolean);

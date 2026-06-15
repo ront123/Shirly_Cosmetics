@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (response && response.success) {
           console.log(`[Popup] Gathered data: ${response.customers.length} customers, ${response.appointments.length} appointments. Sending to backend...`);
           
-          fetch('http://127.0.0.1:5000/api/sync-extension', {
+          fetch('https://shirly-cosmetics-api.onrender.com/api/sync-extension', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           })
           .catch((err) => {
             console.error("Local sync error:", err);
-            showError(`חיבור לשרת המקומי נכשל (127.0.0.1:5000). ודא ששרת ה-Node.js של המערכת מופעל. (${err.message})`);
+            showError(`חיבור לשרת נכשל. ודא ששרת ה-API פעיל. (${err.message})`);
           })
           .finally(() => {
             btnSpinner.style.display = 'none';

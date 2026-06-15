@@ -579,7 +579,10 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
         existingAppt.status !== status || 
         existingAppt.notes !== notes || 
         existingAppt.title !== title ||
-        new Date(existingAppt.start_time).getTime() !== startTime.getTime();
+        existingAppt.treatment_id !== treatmentId ||
+        existingAppt.therapist_id !== therapistId ||
+        new Date(existingAppt.start_time).getTime() !== startTime.getTime() ||
+        new Date(existingAppt.end_time).getTime() !== endTime.getTime();
       
       if (changed) {
         apptsToUpdate.push({ id: existingAppt.id, ...apptObj });

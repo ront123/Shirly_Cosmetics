@@ -187,7 +187,7 @@ export default function BookingPage() {
           <form className="space-y-4" onSubmit={e => { e.preventDefault(); setDone(true); }}>
             <div>
               <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שם מלא *</label>
-              <input type="text" required className="input-dark" placeholder="לדוגמא: דנה ישראלי" />
+              <input type="text" required className="input-dark" placeholder="לדוגמא: ישראל ישראלי" />
             </div>
             <div>
               <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מספר טלפון *</label>

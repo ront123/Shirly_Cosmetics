@@ -6,19 +6,9 @@ const months = ['ינואר','פברואר','מרץ','אפריל','מאי','יו
 const monthlyRevenue = [12000,14500,11000,18000,16500,24500,0,0,0,0,0,0];
 const monthlyExpenses = [4000,5000,3800,6000,5500,7200,0,0,0,0,0,0];
 
-const topTreatments = [
-  { name: 'טיפול פנים קלאסי', count: 48, revenue: '₪16,800' },
-  { name: 'לייזר שיער — רגליים', count: 31, revenue: '₪4,650' },
-  { name: 'ניקוי פנים עמוק', count: 24, revenue: '₪7,680' },
-  { name: 'טיפול פנים זוהר', count: 19, revenue: '₪5,320' },
-];
+const topTreatments = [];
 
-const topClients = [
-  { name: 'שרה ברגמן', visits: 20, total: '₪7,000' },
-  { name: 'מיכל לוי', visits: 12, total: '₪4,200' },
-  { name: 'רחל אברמוב', visits: 7, total: '₪2,450' },
-  { name: 'דנה ישראלי', visits: 5, total: '₪1,750' },
-];
+const topClients = [];
 
 const maxRevenue = Math.max(...monthlyRevenue.filter(v => v > 0));
 
