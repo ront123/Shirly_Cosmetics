@@ -253,7 +253,8 @@ function mapAppointment(raw, index) {
     startTime: parseDateISO(start),
     endTime: parseDateISO(end),
     status: raw.status || raw.Status || 'scheduled',
-    notes: raw.notes || raw.Notes || raw.Remarks || raw.description || ''
+    notes: raw.notes || raw.Notes || raw.Remarks || raw.description || '',
+    isExplicitBreak: isBreak
   };
 }
 
@@ -520,7 +521,7 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     const mapped = mapAppointment(raw, idx);
 
     let clientId = null;
-    let isBreakEvent = false;
+    let isBreakEvent = mapped.isExplicitBreak || false;
 
     let customerRaw = raw.Customer || raw.client || (raw.Meeting && (raw.Meeting.Customer || raw.Meeting.client));
     if (customerRaw && typeof customerRaw === 'object') {
@@ -581,7 +582,7 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
       else if (s.includes('no_show') || s.includes('לא הגיע')) status = 'no_show';
     }
     const notes = mapped.notes || '';
-    const title = isBreakEvent ? mapped.clientName : '';
+    const title = isBreakEvent ? (mapped.clientName || 'הפסקה/חסימה') : '';
 
     let existingAppt = null;
     if (easybizyId && !easybizyId.startsWith('appt_') && apptByEasybizyId.has(easybizyId)) {
@@ -602,7 +603,8 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
       status,
       notes,
       easybizyId,
-      title
+      title,
+      isExplicitBreak: isBreakEvent
     };
 
     if (existingAppt) {

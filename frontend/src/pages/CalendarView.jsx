@@ -83,7 +83,7 @@ const isBreakEvent = (appt) => {
   const name = String(appt.clientName || '').toLowerCase();
   const treatment = String(appt.treatmentName || '').toLowerCase();
   const notes = String(appt.notes || '').toLowerCase();
-  const keywords = ['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה'];
+  const keywords = ['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה', 'אירוע כללי'];
   return keywords.some(kw => name.includes(kw) || treatment.includes(kw) || notes.includes(kw)) || 
          (!appt.clientId && !appt.clientPhone && 
           (name.includes('הפסקה') || name.includes('ארוחה') || name.includes('חסום') || name.includes('נעול') || 
@@ -573,9 +573,9 @@ export default function CalendarView() {
                         }}
                       >
                         <div className="flex flex-col h-full justify-between min-w-0">
-                          <div className="min-w-0">
+                          <div className="flex items-center justify-between">
                             <p className="font-bold truncate" style={{ fontSize: 13, color: breakEvent ? 'rgba(255, 255, 255, 0.5)' : '#ffffff', fontWeight: '800', lineHeight: 1.2 }}>
-                              {appt.clientName}
+                              {breakEvent ? 'הפסקה / חסימה' : appt.clientName}
                             </p>
                             {!breakEvent && appt.treatmentName && (
                               <p className="truncate" style={{ fontSize: 11, color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600', marginTop: 1.5 }}>

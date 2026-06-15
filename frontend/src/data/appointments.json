@@ -1,10 +1,23 @@
 [
   {
-    "id": "appt_1781446006026_0",
+    "id": 999996,
     "clientId": "",
     "clientName": "אירוע כללי",
     "clientPhone": "",
     "treatmentName": "אירוע כללי",
+    "therapistName": "שירלי",
+    "startTime": "2026-06-15T13:23:20.110Z",
+    "endTime": "2026-06-15T13:23:20.111Z",
+    "status": "scheduled",
+    "notes": "",
+    "isExplicitBreak": true
+  },
+  {
+    "id": "appt_1781446006026_0",
+    "clientId": "",
+    "clientName": "אירוע כללי",
+    "clientPhone": "",
+    "treatmentName": "טיפול כללי",
     "therapistName": "שירלי",
     "startTime": "2026-06-14T14:06:46.026Z",
     "endTime": "2026-06-14T14:06:46.026Z",
@@ -16,7 +29,7 @@
     "clientId": "",
     "clientName": "אירוע כללי",
     "clientPhone": "",
-    "treatmentName": "אירוע כללי",
+    "treatmentName": "טיפול כללי",
     "therapistName": "שירלי",
     "startTime": "2026-06-14T14:06:46.026Z",
     "endTime": "2026-06-14T14:06:46.026Z",
@@ -314,7 +327,7 @@
   {
     "id": 124,
     "clientName": "רעות קיש",
-    "treatmentName": "רעות קיש",
+    "treatmentName": "רעות קיש ",
     "therapistName": "שירלי",
     "startTime": "2018-08-28T07:00:00.000Z",
     "endTime": "2018-08-28T08:00:00.000Z",
@@ -962,7 +975,7 @@
   {
     "id": 234,
     "clientName": "רעות קיש",
-    "treatmentName": "רעות קיש",
+    "treatmentName": "רעות קיש ",
     "therapistName": "רחלי",
     "startTime": "2018-08-28T08:00:00.000Z",
     "endTime": "2018-08-28T08:30:00.000Z",
@@ -1682,7 +1695,7 @@
   {
     "id": 1218,
     "clientName": "בית ספר אייל",
-    "treatmentName": "בית ספר אייל",
+    "treatmentName": "בית ספר אייל ",
     "therapistName": "רחלי",
     "startTime": "2018-11-22T07:00:00.000Z",
     "endTime": "2018-11-22T08:00:00.000Z",
@@ -1706,7 +1719,7 @@
   {
     "id": 1272,
     "clientName": "קלאב פור יו",
-    "treatmentName": "קלאב פור יו",
+    "treatmentName": "קלאב פור יו ",
     "therapistName": "שירלי",
     "startTime": "2019-01-01T10:00:00.000Z",
     "endTime": "2019-01-01T11:00:00.000Z",
@@ -2042,7 +2055,7 @@
   {
     "id": 1721,
     "clientName": "בגדים לאימון",
-    "treatmentName": "בגדים לאימון",
+    "treatmentName": "בגדים לאימון ",
     "therapistName": "שירלי",
     "startTime": "2018-12-12T06:25:00.000Z",
     "endTime": "2018-12-12T06:50:00.000Z",
@@ -2126,7 +2139,7 @@
   {
     "id": 1820,
     "clientName": "קרם לאופירה",
-    "treatmentName": "קרם לאופירה",
+    "treatmentName": "קרם לאופירה ",
     "therapistName": "שירלי",
     "startTime": "2018-12-20T07:30:00.000Z",
     "endTime": "2018-12-20T08:30:00.000Z",
@@ -2966,7 +2979,7 @@
   {
     "id": 2912,
     "clientName": "טלי פדיקור גבות",
-    "treatmentName": "טלי פדיקור גבות",
+    "treatmentName": "טלי פדיקור גבות ",
     "therapistName": "רחלי",
     "startTime": "2019-04-14T18:30:00.000Z",
     "endTime": "2019-04-14T19:30:00.000Z",
@@ -3038,7 +3051,7 @@
   {
     "id": 3025,
     "clientName": "רותם שפירא גבות",
-    "treatmentName": "רותם שפירא גבות",
+    "treatmentName": "רותם שפירא גבות ",
     "therapistName": "רחלי",
     "startTime": "2019-04-21T08:00:00.000Z",
     "endTime": "2019-04-21T08:15:00.000Z",
@@ -3098,7 +3111,7 @@
   {
     "id": 3169,
     "clientName": "בתאל",
-    "treatmentName": "בתאל",
+    "treatmentName": "בתאל ",
     "therapistName": "רחלי",
     "startTime": "2019-05-02T14:30:00.000Z",
     "endTime": "2019-05-02T14:45:00.000Z",
@@ -3386,7 +3399,7 @@
   {
     "id": 3605,
     "clientName": "מסיבת סיום נויה",
-    "treatmentName": "מסיבת סיום נויה",
+    "treatmentName": "מסיבת סיום נויה ",
     "therapistName": "רחלי",
     "startTime": "2019-06-25T13:30:00.000Z",
     "endTime": "2019-06-25T15:30:00.000Z",
@@ -3518,7 +3531,7 @@
   {
     "id": 3909,
     "clientName": "סימה עירייה",
-    "treatmentName": "סימה עירייה",
+    "treatmentName": "סימה עירייה ",
     "therapistName": "רחלי",
     "startTime": "2019-07-08T06:00:00.000Z",
     "endTime": "2019-07-08T07:00:00.000Z",
@@ -6062,7 +6075,7 @@
   {
     "id": 15301,
     "clientName": "תפוס",
-    "treatmentName": "תפוס",
+    "treatmentName": "תפוס ",
     "therapistName": "שירלי",
     "startTime": "2021-06-30T13:00:00.000Z",
     "endTime": "2021-06-30T18:00:00.000Z",
@@ -6098,7 +6111,7 @@
   {
     "id": 15378,
     "clientName": "דפוס סימופרס \nמתנות לחג",
-    "treatmentName": "דפוס סימופרס \nמתנות לחג",
+    "treatmentName": "דפוס סימופרס \nמתנות לחג ",
     "therapistName": "שירלי",
     "startTime": "2021-07-12T06:30:00.000Z",
     "endTime": "2021-07-12T07:30:00.000Z",
@@ -6110,7 +6123,7 @@
   {
     "id": 15384,
     "clientName": "מאיה פדיקור",
-    "treatmentName": "מאיה פדיקור",
+    "treatmentName": "מאיה פדיקור ",
     "therapistName": "לורה",
     "startTime": "2021-07-06T15:00:00.000Z",
     "endTime": "2021-07-06T16:00:00.000Z",
@@ -6338,7 +6351,7 @@
   {
     "id": 17082,
     "clientName": "אלה, פדיקור",
-    "treatmentName": "אלה, פדיקור",
+    "treatmentName": "אלה, פדיקור ",
     "therapistName": "לורה",
     "startTime": "2021-10-10T14:30:00.000Z",
     "endTime": "2021-10-10T15:30:00.000Z",
@@ -6362,7 +6375,7 @@
   {
     "id": 17186,
     "clientName": "סבטה",
-    "treatmentName": "סבטה",
+    "treatmentName": "סבטה ",
     "therapistName": "לורה",
     "startTime": "2021-10-21T14:00:00.000Z",
     "endTime": "2021-10-21T15:00:00.000Z",
@@ -6482,7 +6495,7 @@
   {
     "id": 17750,
     "clientName": "טיפול אאודי",
-    "treatmentName": "טיפול אאודי",
+    "treatmentName": "טיפול אאודי ",
     "therapistName": "שירלי",
     "startTime": "2022-01-24T07:30:00.000Z",
     "endTime": "2022-01-24T10:30:00.000Z",
@@ -6494,7 +6507,7 @@
   {
     "id": 17799,
     "clientName": "טיול עם סיון",
-    "treatmentName": "טיול עם סיון",
+    "treatmentName": "טיול עם סיון ",
     "therapistName": "שירלי",
     "startTime": "2022-01-17T08:00:00.000Z",
     "endTime": "2022-01-17T09:00:00.000Z",
@@ -6578,7 +6591,7 @@
   {
     "id": 19990,
     "clientName": "רוחלה",
-    "treatmentName": "רוחלה",
+    "treatmentName": "רוחלה ",
     "therapistName": "שירלי",
     "startTime": "2022-01-30T09:30:00.000Z",
     "endTime": "2022-01-30T10:00:00.000Z",
@@ -6590,7 +6603,7 @@
   {
     "id": 19991,
     "clientName": "אנסטסיה",
-    "treatmentName": "אנסטסיה",
+    "treatmentName": "אנסטסיה ",
     "therapistName": "שירלי",
     "startTime": "2022-02-03T13:00:00.000Z",
     "endTime": "2022-02-03T14:00:00.000Z",
@@ -6614,7 +6627,7 @@
   {
     "id": 20022,
     "clientName": "פדיקור. סבטה",
-    "treatmentName": "פדיקור. סבטה",
+    "treatmentName": "פדיקור. סבטה ",
     "therapistName": "לורה",
     "startTime": "2022-02-01T16:00:00.000Z",
     "endTime": "2022-02-01T17:00:00.000Z",
@@ -6650,7 +6663,7 @@
   {
     "id": 20062,
     "clientName": "אנסטסיה",
-    "treatmentName": "אנסטסיה",
+    "treatmentName": "אנסטסיה ",
     "therapistName": "שירלי",
     "startTime": "2022-02-20T09:00:00.000Z",
     "endTime": "2022-02-20T10:00:00.000Z",
@@ -6662,7 +6675,7 @@
   {
     "id": 20063,
     "clientName": "אנסטסיה",
-    "treatmentName": "אנסטסיה",
+    "treatmentName": "אנסטסיה ",
     "therapistName": "לורה",
     "startTime": "2022-02-20T10:00:00.000Z",
     "endTime": "2022-02-20T11:00:00.000Z",
@@ -6698,7 +6711,7 @@
   {
     "id": 20233,
     "clientName": "סדנת פיצות טאבון",
-    "treatmentName": "סדנת פיצות טאבון",
+    "treatmentName": "סדנת פיצות טאבון ",
     "therapistName": "שירלי",
     "startTime": "2022-03-27T13:00:00.000Z",
     "endTime": "2022-03-27T19:00:00.000Z",
@@ -6710,7 +6723,7 @@
   {
     "id": 20256,
     "clientName": "ד״ר קלדרון",
-    "treatmentName": "ד״ר קלדרון",
+    "treatmentName": "ד״ר קלדרון ",
     "therapistName": "שירלי",
     "startTime": "2022-03-21T12:00:00.000Z",
     "endTime": "2022-03-21T13:00:00.000Z",
@@ -6758,7 +6771,7 @@
   {
     "id": 20304,
     "clientName": "זיו כחולי",
-    "treatmentName": "זיו כחולי",
+    "treatmentName": "זיו כחולי ",
     "therapistName": "לורה",
     "startTime": "2022-03-03T10:30:00.000Z",
     "endTime": "2022-03-03T12:15:00.000Z",
@@ -6782,7 +6795,7 @@
   {
     "id": 20343,
     "clientName": "אנטוניה פדיקור",
-    "treatmentName": "אנטוניה פדיקור",
+    "treatmentName": "אנטוניה פדיקור ",
     "therapistName": "לורה",
     "startTime": "2022-03-08T09:00:00.000Z",
     "endTime": "2022-03-08T10:00:00.000Z",
@@ -6794,7 +6807,7 @@
   {
     "id": 20357,
     "clientName": "נתנאלה",
-    "treatmentName": "נתנאלה",
+    "treatmentName": "נתנאלה ",
     "therapistName": "שירלי",
     "startTime": "2022-04-05T15:00:00.000Z",
     "endTime": "2022-04-05T20:30:00.000Z",
@@ -6806,7 +6819,7 @@
   {
     "id": 20378,
     "clientName": "שרון ייעוץ",
-    "treatmentName": "שרון ייעוץ",
+    "treatmentName": "שרון ייעוץ ",
     "therapistName": "שירלי",
     "startTime": "2022-03-10T13:00:00.000Z",
     "endTime": "2022-03-10T14:00:00.000Z",
@@ -6818,7 +6831,7 @@
   {
     "id": 20431,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": ". ",
     "therapistName": "אלה",
     "startTime": "2022-03-16T12:00:00.000Z",
     "endTime": "2022-03-16T13:30:00.000Z",
@@ -6854,7 +6867,7 @@
   {
     "id": 20506,
     "clientName": "אלבינה",
-    "treatmentName": "אלבינה",
+    "treatmentName": "אלבינה ",
     "therapistName": "שירלי",
     "startTime": "2022-04-01T08:00:00.000Z",
     "endTime": "2022-04-01T09:00:00.000Z",
@@ -6878,7 +6891,7 @@
   {
     "id": 20519,
     "clientName": "דורון ברדה",
-    "treatmentName": "דורון ברדה",
+    "treatmentName": "דורון ברדה ",
     "therapistName": "שירלי",
     "startTime": "2022-04-04T10:00:00.000Z",
     "endTime": "2022-04-04T11:00:00.000Z",
@@ -6890,7 +6903,7 @@
   {
     "id": 20525,
     "clientName": "12:50 ילנה מחולה",
-    "treatmentName": "12:50 ילנה מחולה",
+    "treatmentName": "12:50 ילנה מחולה ",
     "therapistName": "שירלי",
     "startTime": "2022-05-30T09:30:00.000Z",
     "endTime": "2022-05-30T10:30:00.000Z",
@@ -6902,7 +6915,7 @@
   {
     "id": 20526,
     "clientName": "12:30 נועה יריב ייעוץ גנטי",
-    "treatmentName": "12:30 נועה יריב ייעוץ גנטי",
+    "treatmentName": "12:30 נועה יריב ייעוץ גנטי ",
     "therapistName": "שירלי",
     "startTime": "2022-05-01T09:00:00.000Z",
     "endTime": "2022-05-01T11:00:00.000Z",
@@ -6926,7 +6939,7 @@
   {
     "id": 20559,
     "clientName": "דר טטיאנה",
-    "treatmentName": "דר טטיאנה",
+    "treatmentName": "דר טטיאנה ",
     "therapistName": "שירלי",
     "startTime": "2022-04-04T09:00:00.000Z",
     "endTime": "2022-04-04T10:00:00.000Z",
@@ -7166,7 +7179,7 @@
   {
     "id": 23884,
     "clientName": "כירורג שד",
-    "treatmentName": "כירורג שד",
+    "treatmentName": "כירורג שד ",
     "therapistName": "שירלי",
     "startTime": "2022-06-03T05:00:00.000Z",
     "endTime": "2022-06-03T06:00:00.000Z",
@@ -7190,7 +7203,7 @@
   {
     "id": 23928,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": " .",
     "therapistName": "אלה",
     "startTime": "2022-05-11T15:00:00.000Z",
     "endTime": "2022-05-11T19:00:00.000Z",
@@ -7286,7 +7299,7 @@
   {
     "id": 24175,
     "clientName": "ילנה מחולה",
-    "treatmentName": "ילנה מחולה",
+    "treatmentName": "ילנה מחולה ",
     "therapistName": "שירלי",
     "startTime": "2022-08-01T09:30:00.000Z",
     "endTime": "2022-08-01T10:30:00.000Z",
@@ -7310,7 +7323,7 @@
   {
     "id": 24232,
     "clientName": "הגר תיקון",
-    "treatmentName": "הגר תיקון",
+    "treatmentName": "הגר תיקון ",
     "therapistName": "עומר",
     "startTime": "2022-06-01T15:30:00.000Z",
     "endTime": "2022-06-01T16:30:00.000Z",
@@ -7418,7 +7431,7 @@
   {
     "id": 26403,
     "clientName": "ליה צוריאנו ג׳ל",
-    "treatmentName": "ליה צוריאנו ג׳ל",
+    "treatmentName": "ליה צוריאנו ג׳ל ",
     "therapistName": "עומר",
     "startTime": "2022-06-26T14:30:00.000Z",
     "endTime": "2022-06-26T15:30:00.000Z",
@@ -7454,7 +7467,7 @@
   {
     "id": 29564,
     "clientName": "גילי, ג׳ל ופדיקור",
-    "treatmentName": "גילי, ג׳ל ופדיקור",
+    "treatmentName": "גילי, ג׳ל ופדיקור ",
     "therapistName": "לורה",
     "startTime": "2022-07-06T09:00:00.000Z",
     "endTime": "2022-07-06T11:00:00.000Z",
@@ -7586,7 +7599,7 @@
   {
     "id": 29745,
     "clientName": "מרים בן ששון",
-    "treatmentName": "מרים בן ששון",
+    "treatmentName": "מרים בן ששון ",
     "therapistName": "לורה",
     "startTime": "2022-07-24T10:00:00.000Z",
     "endTime": "2022-07-24T11:45:00.000Z",
@@ -7598,7 +7611,7 @@
   {
     "id": 29758,
     "clientName": "פגישה עם רותי",
-    "treatmentName": "פגישה עם רותי",
+    "treatmentName": "פגישה עם רותי ",
     "therapistName": "שירלי",
     "startTime": "2022-08-01T06:30:00.000Z",
     "endTime": "2022-08-01T08:30:00.000Z",
@@ -7682,7 +7695,7 @@
   {
     "id": 29928,
     "clientName": "פדיקור וגבות",
-    "treatmentName": "פדיקור וגבות",
+    "treatmentName": "פדיקור וגבות ",
     "therapistName": "לורה",
     "startTime": "2022-08-03T07:30:00.000Z",
     "endTime": "2022-08-03T09:00:00.000Z",
@@ -7718,7 +7731,7 @@
   {
     "id": 29979,
     "clientName": "לורה פדיקןר",
-    "treatmentName": "לורה פדיקןר",
+    "treatmentName": "לורה פדיקןר ",
     "therapistName": "עומר",
     "startTime": "2022-08-09T08:00:00.000Z",
     "endTime": "2022-08-09T09:30:00.000Z",
@@ -7766,7 +7779,7 @@
   {
     "id": 30080,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": ". ",
     "therapistName": "לורה",
     "startTime": "2022-09-13T08:00:00.000Z",
     "endTime": "2022-09-13T12:30:00.000Z",
@@ -7886,7 +7899,7 @@
   {
     "id": 30221,
     "clientName": "הילה",
-    "treatmentName": "הילה",
+    "treatmentName": "הילה ",
     "therapistName": "שירלי",
     "startTime": "2022-08-31T17:00:00.000Z",
     "endTime": "2022-08-31T18:00:00.000Z",
@@ -7898,7 +7911,7 @@
   {
     "id": 30228,
     "clientName": "פגישת זום איתמר ורותי",
-    "treatmentName": "פגישת זום איתמר ורותי",
+    "treatmentName": "פגישת זום איתמר ורותי ",
     "therapistName": "שירלי",
     "startTime": "2022-09-05T07:30:00.000Z",
     "endTime": "2022-09-05T08:30:00.000Z",
@@ -8042,7 +8055,7 @@
   {
     "id": 30455,
     "clientName": "יום הולדת לאלון",
-    "treatmentName": "יום הולדת לאלון",
+    "treatmentName": "יום הולדת לאלון ",
     "therapistName": "שירלי",
     "startTime": "2022-10-24T07:30:00.000Z",
     "endTime": "2022-10-24T08:30:00.000Z",
@@ -8066,7 +8079,7 @@
   {
     "id": 30484,
     "clientName": "דורון ברדה פגישה",
-    "treatmentName": "דורון ברדה פגישה",
+    "treatmentName": "דורון ברדה פגישה ",
     "therapistName": "שירלי",
     "startTime": "2022-10-03T11:30:00.000Z",
     "endTime": "2022-10-03T13:00:00.000Z",
@@ -8138,7 +8151,7 @@
   {
     "id": 31694,
     "clientName": "פגישת זום איתמר אתר",
-    "treatmentName": "פגישת זום איתמר אתר",
+    "treatmentName": "פגישת זום איתמר אתר ",
     "therapistName": "שירלי",
     "startTime": "2022-10-25T08:30:00.000Z",
     "endTime": "2022-10-25T09:30:00.000Z",
@@ -8318,7 +8331,7 @@
   {
     "id": 31847,
     "clientName": "נעומי",
-    "treatmentName": "נעומי",
+    "treatmentName": "נעומי ",
     "therapistName": "לורה",
     "startTime": "2022-11-03T15:00:00.000Z",
     "endTime": "2022-11-03T16:00:00.000Z",
@@ -8426,7 +8439,7 @@
   {
     "id": 32027,
     "clientName": "גלי.",
-    "treatmentName": "גלי.",
+    "treatmentName": "גלי. ",
     "therapistName": "שירלי",
     "startTime": "2022-11-27T07:30:00.000Z",
     "endTime": "2022-11-27T08:30:00.000Z",
@@ -8726,7 +8739,7 @@
   {
     "id": 32253,
     "clientName": "נוגה",
-    "treatmentName": "נוגה",
+    "treatmentName": "נוגה ",
     "therapistName": "שירלי",
     "startTime": "2022-12-14T11:00:00.000Z",
     "endTime": "2022-12-14T12:00:00.000Z",
@@ -8810,7 +8823,7 @@
   {
     "id": 32358,
     "clientName": "איתמר.",
-    "treatmentName": "איתמר.",
+    "treatmentName": "איתמר. ",
     "therapistName": "שירלי",
     "startTime": "2022-12-27T11:00:00.000Z",
     "endTime": "2022-12-27T11:30:00.000Z",
@@ -8846,7 +8859,7 @@
   {
     "id": 32415,
     "clientName": "השתלמות",
-    "treatmentName": "השתלמות",
+    "treatmentName": "השתלמות ",
     "therapistName": "שירלי",
     "startTime": "2023-01-23T08:00:00.000Z",
     "endTime": "2023-01-23T09:00:00.000Z",
@@ -8906,7 +8919,7 @@
   {
     "id": 33482,
     "clientName": "צבע עופר",
-    "treatmentName": "צבע עופר",
+    "treatmentName": "צבע עופר ",
     "therapistName": "שירלי",
     "startTime": "2023-01-08T13:30:00.000Z",
     "endTime": "2023-01-08T15:00:00.000Z",
@@ -8954,7 +8967,7 @@
   {
     "id": 33542,
     "clientName": "9:15 ענבל תיקון ג׳ל",
-    "treatmentName": "9:15 ענבל תיקון ג׳ל",
+    "treatmentName": "9:15 ענבל תיקון ג׳ל ",
     "therapistName": "לורה",
     "startTime": "2023-01-18T07:00:00.000Z",
     "endTime": "2023-01-18T07:30:00.000Z",
@@ -9062,7 +9075,7 @@
   {
     "id": 33616,
     "clientName": "לצלם תמונות אווירה ותכשירים\nלהזמין קפה",
-    "treatmentName": "לצלם תמונות אווירה ותכשירים\nלהזמין קפה",
+    "treatmentName": "לצלם תמונות אווירה ותכשירים\nלהזמין קפה \n",
     "therapistName": "שירלי",
     "startTime": "2023-01-24T10:00:00.000Z",
     "endTime": "2023-01-24T11:00:00.000Z",
@@ -9086,7 +9099,7 @@
   {
     "id": 33630,
     "clientName": "דורון ברדה",
-    "treatmentName": "דורון ברדה",
+    "treatmentName": "דורון ברדה ",
     "therapistName": "שירלי",
     "startTime": "2023-02-27T08:00:00.000Z",
     "endTime": "2023-02-27T09:00:00.000Z",
@@ -9098,7 +9111,7 @@
   {
     "id": 33635,
     "clientName": "תור לנשים",
-    "treatmentName": "תור לנשים",
+    "treatmentName": "תור לנשים ",
     "therapistName": "שירלי",
     "startTime": "2023-02-26T14:30:00.000Z",
     "endTime": "2023-02-26T15:30:00.000Z",
@@ -9302,7 +9315,7 @@
   {
     "id": 33995,
     "clientName": "להתקשר למרפאה",
-    "treatmentName": "להתקשר למרפאה",
+    "treatmentName": "להתקשר למרפאה ",
     "therapistName": "שירלי",
     "startTime": "2023-03-02T10:15:00.000Z",
     "endTime": "2023-03-02T11:15:00.000Z",
@@ -9314,7 +9327,7 @@
   {
     "id": 34003,
     "clientName": "יובל. אקספרס ציפורן חודרנית",
-    "treatmentName": "יובל. אקספרס ציפורן חודרנית",
+    "treatmentName": "יובל. אקספרס ציפורן חודרנית ",
     "therapistName": "לורה",
     "startTime": "2023-03-02T15:00:00.000Z",
     "endTime": "2023-03-02T15:30:00.000Z",
@@ -9398,7 +9411,7 @@
   {
     "id": 34148,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": ". ",
     "therapistName": "שירלי",
     "startTime": "2023-03-16T14:30:00.000Z",
     "endTime": "2023-03-16T18:30:00.000Z",
@@ -9422,7 +9435,7 @@
   {
     "id": 34160,
     "clientName": "אנה חיימוביץ",
-    "treatmentName": "אנה חיימוביץ",
+    "treatmentName": "אנה חיימוביץ ",
     "therapistName": "שירלי",
     "startTime": "2023-03-29T17:00:00.000Z",
     "endTime": "2023-03-29T18:00:00.000Z",
@@ -9458,7 +9471,7 @@
   {
     "id": 34202,
     "clientName": "פגישה איתמר",
-    "treatmentName": "פגישה איתמר",
+    "treatmentName": "פגישה איתמר ",
     "therapistName": "שירלי",
     "startTime": "2023-03-22T11:00:00.000Z",
     "endTime": "2023-03-22T12:00:00.000Z",
@@ -9554,7 +9567,7 @@
   {
     "id": 35267,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-03-29T11:30:00.000Z",
     "endTime": "2023-03-29T12:30:00.000Z",
@@ -9590,7 +9603,7 @@
   {
     "id": 35305,
     "clientName": "אנה חיימוביץ",
-    "treatmentName": "אנה חיימוביץ",
+    "treatmentName": "אנה חיימוביץ ",
     "therapistName": "שירלי",
     "startTime": "2023-03-30T17:00:00.000Z",
     "endTime": "2023-03-30T18:00:00.000Z",
@@ -9746,7 +9759,7 @@
   {
     "id": 36414,
     "clientName": "לשמור על מורן",
-    "treatmentName": "לשמור על מורן",
+    "treatmentName": "לשמור על מורן ",
     "therapistName": "שירלי",
     "startTime": "2023-04-20T16:00:00.000Z",
     "endTime": "2023-04-20T18:00:00.000Z",
@@ -9758,7 +9771,7 @@
   {
     "id": 36441,
     "clientName": "גילי לק ג׳ל",
-    "treatmentName": "גילי לק ג׳ל",
+    "treatmentName": "גילי לק ג׳ל ",
     "therapistName": "לורה",
     "startTime": "2023-04-18T13:00:00.000Z",
     "endTime": "2023-04-18T14:00:00.000Z",
@@ -9770,7 +9783,7 @@
   {
     "id": 36462,
     "clientName": "גלי",
-    "treatmentName": "גלי",
+    "treatmentName": "גלי ",
     "therapistName": "שירלי",
     "startTime": "2023-04-24T06:00:00.000Z",
     "endTime": "2023-04-24T07:00:00.000Z",
@@ -9806,7 +9819,7 @@
   {
     "id": 36493,
     "clientName": "יריד של נתנאלה",
-    "treatmentName": "יריד של נתנאלה",
+    "treatmentName": "יריד של נתנאלה ",
     "therapistName": "שירלי",
     "startTime": "2023-05-17T14:15:00.000Z",
     "endTime": "2023-05-17T15:15:00.000Z",
@@ -9818,7 +9831,7 @@
   {
     "id": 36495,
     "clientName": "פגישה עם אולגה",
-    "treatmentName": "פגישה עם אולגה",
+    "treatmentName": "פגישה עם אולגה ",
     "therapistName": "שירלי",
     "startTime": "2023-04-25T10:30:00.000Z",
     "endTime": "2023-04-25T11:30:00.000Z",
@@ -9842,7 +9855,7 @@
   {
     "id": 36507,
     "clientName": "פגישה עם נינה.",
-    "treatmentName": "פגישה עם נינה.",
+    "treatmentName": "פגישה עם נינה. ",
     "therapistName": "שירלי",
     "startTime": "2023-04-27T06:30:00.000Z",
     "endTime": "2023-04-27T07:30:00.000Z",
@@ -9950,7 +9963,7 @@
   {
     "id": 36653,
     "clientName": "20:15 אנה",
-    "treatmentName": "20:15 אנה",
+    "treatmentName": "20:15 אנה ",
     "therapistName": "שירלי",
     "startTime": "2023-05-29T17:00:00.000Z",
     "endTime": "2023-05-29T18:00:00.000Z",
@@ -9986,7 +9999,7 @@
   {
     "id": 36645,
     "clientName": "מסג׳",
-    "treatmentName": "מסג׳",
+    "treatmentName": "מסג׳ ",
     "therapistName": "שירלי",
     "startTime": "2023-05-09T16:00:00.000Z",
     "endTime": "2023-05-09T17:00:00.000Z",
@@ -10010,7 +10023,7 @@
   {
     "id": 36678,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-05-11T11:00:00.000Z",
     "endTime": "2023-05-11T12:00:00.000Z",
@@ -10022,7 +10035,7 @@
   {
     "id": 36687,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-05-14T11:00:00.000Z",
     "endTime": "2023-05-14T12:00:00.000Z",
@@ -10070,7 +10083,7 @@
   {
     "id": 36726,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-05-21T10:30:00.000Z",
     "endTime": "2023-05-21T12:00:00.000Z",
@@ -10094,7 +10107,7 @@
   {
     "id": 36746,
     "clientName": "פגישה עדי",
-    "treatmentName": "פגישה עדי",
+    "treatmentName": "פגישה עדי ",
     "therapistName": "שירלי",
     "startTime": "2023-05-17T10:00:00.000Z",
     "endTime": "2023-05-17T11:00:00.000Z",
@@ -10106,7 +10119,7 @@
   {
     "id": 36749,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-05-23T11:15:00.000Z",
     "endTime": "2023-05-23T12:30:00.000Z",
@@ -10166,7 +10179,7 @@
   {
     "id": 36837,
     "clientName": "פגישה רותי וגלי",
-    "treatmentName": "פגישה רותי וגלי",
+    "treatmentName": "פגישה רותי וגלי ",
     "therapistName": "שירלי",
     "startTime": "2023-06-06T07:00:00.000Z",
     "endTime": "2023-06-06T09:00:00.000Z",
@@ -10310,7 +10323,7 @@
   {
     "id": 37021,
     "clientName": "לבדוק תור לרונית שעווה ערב לורה",
-    "treatmentName": "לבדוק תור לרונית שעווה ערב לורה",
+    "treatmentName": "לבדוק תור לרונית שעווה ערב לורה ",
     "therapistName": "שירלי",
     "startTime": "2023-06-18T05:00:00.000Z",
     "endTime": "2023-06-18T06:00:00.000Z",
@@ -10382,7 +10395,7 @@
   {
     "id": 38062,
     "clientName": "בדיקת מזוזות",
-    "treatmentName": "בדיקת מזוזות",
+    "treatmentName": "בדיקת מזוזות ",
     "therapistName": "שירלי",
     "startTime": "2023-06-21T09:00:00.000Z",
     "endTime": "2023-06-21T10:00:00.000Z",
@@ -10430,7 +10443,7 @@
   {
     "id": 38168,
     "clientName": "לבדוק עם אלה עיסוי",
-    "treatmentName": "לבדוק עם אלה עיסוי",
+    "treatmentName": "לבדוק עם אלה עיסוי ",
     "therapistName": "שירלי",
     "startTime": "2023-07-12T05:30:00.000Z",
     "endTime": "2023-07-12T06:30:00.000Z",
@@ -10646,7 +10659,7 @@
   {
     "id": 39395,
     "clientName": "גילי ג׳ל",
-    "treatmentName": "גילי ג׳ל",
+    "treatmentName": "גילי ג׳ל ",
     "therapistName": "לורה",
     "startTime": "2023-07-26T06:00:00.000Z",
     "endTime": "2023-07-26T07:00:00.000Z",
@@ -10766,7 +10779,7 @@
   {
     "id": 39534,
     "clientName": "תיקון",
-    "treatmentName": "תיקון",
+    "treatmentName": "תיקון ",
     "therapistName": "עומר",
     "startTime": "2023-08-06T12:00:00.000Z",
     "endTime": "2023-08-06T13:00:00.000Z",
@@ -10790,7 +10803,7 @@
   {
     "id": 39539,
     "clientName": "לחדש מרשם להב",
-    "treatmentName": "לחדש מרשם להב",
+    "treatmentName": "לחדש מרשם להב ",
     "therapistName": "שירלי",
     "startTime": "2023-10-02T06:30:00.000Z",
     "endTime": "2023-10-02T07:30:00.000Z",
@@ -10886,7 +10899,7 @@
   {
     "id": 39625,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-08-13T11:00:00.000Z",
     "endTime": "2023-08-13T12:00:00.000Z",
@@ -10898,7 +10911,7 @@
   {
     "id": 39626,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-08-20T11:00:00.000Z",
     "endTime": "2023-08-20T12:00:00.000Z",
@@ -10934,7 +10947,7 @@
   {
     "id": 39640,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-08-23T11:00:00.000Z",
     "endTime": "2023-08-23T12:00:00.000Z",
@@ -10946,7 +10959,7 @@
   {
     "id": 39666,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-09-13T11:00:00.000Z",
     "endTime": "2023-09-13T12:00:00.000Z",
@@ -10970,7 +10983,7 @@
   {
     "id": 39683,
     "clientName": "נירית",
-    "treatmentName": "נירית",
+    "treatmentName": "נירית ",
     "therapistName": "עומר",
     "startTime": "2023-09-18T14:30:00.000Z",
     "endTime": "2023-09-18T15:30:00.000Z",
@@ -10994,7 +11007,7 @@
   {
     "id": 39687,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-08-22T11:00:00.000Z",
     "endTime": "2023-08-22T12:00:00.000Z",
@@ -11018,7 +11031,7 @@
   {
     "id": 39711,
     "clientName": "הפסקה",
-    "treatmentName": "הפסקה",
+    "treatmentName": "הפסקה ",
     "therapistName": "לורה",
     "startTime": "2023-08-27T12:00:00.000Z",
     "endTime": "2023-08-27T13:00:00.000Z",
@@ -11354,7 +11367,7 @@
   {
     "id": 42112,
     "clientName": "לחדש מרשם ללהב",
-    "treatmentName": "לחדש מרשם ללהב",
+    "treatmentName": "לחדש מרשם ללהב ",
     "therapistName": "שירלי",
     "startTime": "2023-10-30T07:30:00.000Z",
     "endTime": "2023-10-30T08:30:00.000Z",
@@ -11402,7 +11415,7 @@
   {
     "id": 42152,
     "clientName": "פדיקור",
-    "treatmentName": "פדיקור",
+    "treatmentName": "פדיקור ",
     "therapistName": "לורה",
     "startTime": "2023-10-17T08:00:00.000Z",
     "endTime": "2023-10-17T09:00:00.000Z",
@@ -11438,7 +11451,7 @@
   {
     "id": 42171,
     "clientName": "מרים נחל עוז",
-    "treatmentName": "מרים נחל עוז",
+    "treatmentName": "מרים נחל עוז ",
     "therapistName": "שירלי",
     "startTime": "2023-10-18T09:00:00.000Z",
     "endTime": "2023-10-18T11:00:00.000Z",
@@ -11462,7 +11475,7 @@
   {
     "id": 42187,
     "clientName": "נחל עוז",
-    "treatmentName": "נחל עוז",
+    "treatmentName": "נחל עוז ",
     "therapistName": "שירלי",
     "startTime": "2023-10-19T08:00:00.000Z",
     "endTime": "2023-10-19T09:30:00.000Z",
@@ -11474,7 +11487,7 @@
   {
     "id": 42190,
     "clientName": "הבן של יעל סדן. פדיקור",
-    "treatmentName": "הבן של יעל סדן. פדיקור",
+    "treatmentName": "הבן של יעל סדן. פדיקור ",
     "therapistName": "לורה",
     "startTime": "2023-10-19T09:00:00.000Z",
     "endTime": "2023-10-19T10:00:00.000Z",
@@ -11762,7 +11775,7 @@
   {
     "id": 49586,
     "clientName": "דר׳ מחולה",
-    "treatmentName": "דר׳ מחולה",
+    "treatmentName": "דר׳ מחולה ",
     "therapistName": "שירלי",
     "startTime": "2024-01-15T10:00:00.000Z",
     "endTime": "2024-01-15T11:00:00.000Z",
@@ -11774,7 +11787,7 @@
   {
     "id": 49582,
     "clientName": "בדיקה לרכב",
-    "treatmentName": "בדיקה לרכב",
+    "treatmentName": "בדיקה לרכב ",
     "therapistName": "שירלי",
     "startTime": "2023-12-24T13:30:00.000Z",
     "endTime": "2023-12-24T20:00:00.000Z",
@@ -11798,7 +11811,7 @@
   {
     "id": 51628,
     "clientName": "13:24 רופא עור",
-    "treatmentName": "13:24 רופא עור",
+    "treatmentName": "13:24 רופא עור ",
     "therapistName": "שירלי",
     "startTime": "2024-01-14T11:00:00.000Z",
     "endTime": "2024-01-14T12:00:00.000Z",
@@ -11858,7 +11871,7 @@
   {
     "id": 51711,
     "clientName": "עדי",
-    "treatmentName": "עדי",
+    "treatmentName": "עדי ",
     "therapistName": "שירלי",
     "startTime": "2024-01-16T09:30:00.000Z",
     "endTime": "2024-01-16T12:30:00.000Z",
@@ -11930,7 +11943,7 @@
   {
     "id": 52639,
     "clientName": "פגישה",
-    "treatmentName": "פגישה",
+    "treatmentName": "פגישה ",
     "therapistName": "שירלי",
     "startTime": "2024-01-25T12:00:00.000Z",
     "endTime": "2024-01-25T13:00:00.000Z",
@@ -11954,7 +11967,7 @@
   {
     "id": 53681,
     "clientName": "דיקור עדן גורדון",
-    "treatmentName": "דיקור עדן גורדון",
+    "treatmentName": "דיקור עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-02-12T07:45:00.000Z",
     "endTime": "2024-02-12T09:15:00.000Z",
@@ -11966,7 +11979,7 @@
   {
     "id": 53679,
     "clientName": "ד״ר קלדרון",
-    "treatmentName": "ד״ר קלדרון",
+    "treatmentName": "ד״ר קלדרון ",
     "therapistName": "שירלי",
     "startTime": "2024-02-07T13:15:00.000Z",
     "endTime": "2024-02-07T15:00:00.000Z",
@@ -11990,7 +12003,7 @@
   {
     "id": 53726,
     "clientName": "עדן גורדון",
-    "treatmentName": "עדן גורדון",
+    "treatmentName": "עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-02-19T10:00:00.000Z",
     "endTime": "2024-02-19T11:00:00.000Z",
@@ -12026,7 +12039,7 @@
   {
     "id": 53732,
     "clientName": "מניקור",
-    "treatmentName": "מניקור",
+    "treatmentName": "מניקור ",
     "therapistName": "לורה",
     "startTime": "2024-02-13T08:00:00.000Z",
     "endTime": "2024-02-13T09:00:00.000Z",
@@ -12050,7 +12063,7 @@
   {
     "id": 53741,
     "clientName": "לימוזין",
-    "treatmentName": "לימוזין",
+    "treatmentName": "לימוזין ",
     "therapistName": "שירלי",
     "startTime": "2024-02-20T16:15:00.000Z",
     "endTime": "2024-02-20T17:15:00.000Z",
@@ -12086,7 +12099,7 @@
   {
     "id": 54806,
     "clientName": "אתי הפרשת חלה",
-    "treatmentName": "אתי הפרשת חלה",
+    "treatmentName": "אתי הפרשת חלה ",
     "therapistName": "שירלי",
     "startTime": "2024-03-07T17:00:00.000Z",
     "endTime": "2024-03-07T18:00:00.000Z",
@@ -12098,7 +12111,7 @@
   {
     "id": 54811,
     "clientName": "בדיקת דם",
-    "treatmentName": "בדיקת דם",
+    "treatmentName": "בדיקת דם ",
     "therapistName": "שירלי",
     "startTime": "2024-03-11T06:30:00.000Z",
     "endTime": "2024-03-11T07:30:00.000Z",
@@ -12122,7 +12135,7 @@
   {
     "id": 54868,
     "clientName": "עדן גורדון",
-    "treatmentName": "עדן גורדון",
+    "treatmentName": "עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-03-14T16:30:00.000Z",
     "endTime": "2024-03-14T17:30:00.000Z",
@@ -12158,7 +12171,7 @@
   {
     "id": 55930,
     "clientName": "ולנטינה",
-    "treatmentName": "ולנטינה",
+    "treatmentName": "ולנטינה ",
     "therapistName": "שירלי",
     "startTime": "2024-03-12T10:00:00.000Z",
     "endTime": "2024-03-12T12:00:00.000Z",
@@ -12194,7 +12207,7 @@
   {
     "id": 55951,
     "clientName": "פדיקור",
-    "treatmentName": "פדיקור",
+    "treatmentName": "פדיקור ",
     "therapistName": "טניה",
     "startTime": "2024-03-14T11:00:00.000Z",
     "endTime": "2024-03-14T12:00:00.000Z",
@@ -12230,7 +12243,7 @@
   {
     "id": 55991,
     "clientName": "ד״ר טטיאנה",
-    "treatmentName": "ד״ר טטיאנה",
+    "treatmentName": "ד״ר טטיאנה ",
     "therapistName": "שירלי",
     "startTime": "2024-03-17T11:00:00.000Z",
     "endTime": "2024-03-17T12:00:00.000Z",
@@ -12254,7 +12267,7 @@
   {
     "id": 56021,
     "clientName": "עדן גורדון",
-    "treatmentName": "עדן גורדון",
+    "treatmentName": "עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-03-25T10:00:00.000Z",
     "endTime": "2024-03-25T11:00:00.000Z",
@@ -12326,7 +12339,7 @@
   {
     "id": 57065,
     "clientName": "עדן 13:40",
-    "treatmentName": "עדן 13:40",
+    "treatmentName": "עדן 13:40 ",
     "therapistName": "שירלי",
     "startTime": "2024-03-29T10:00:00.000Z",
     "endTime": "2024-03-29T11:00:00.000Z",
@@ -12398,7 +12411,7 @@
   {
     "id": 59158,
     "clientName": "עדן גורדון",
-    "treatmentName": "עדן גורדון",
+    "treatmentName": "עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-04-24T05:30:00.000Z",
     "endTime": "2024-04-24T06:30:00.000Z",
@@ -12422,7 +12435,7 @@
   {
     "id": 59171,
     "clientName": "ד״ר קלדרון",
-    "treatmentName": "ד״ר קלדרון",
+    "treatmentName": "ד״ר קלדרון ",
     "therapistName": "שירלי",
     "startTime": "2024-04-15T11:30:00.000Z",
     "endTime": "2024-04-15T12:30:00.000Z",
@@ -12434,7 +12447,7 @@
   {
     "id": 59180,
     "clientName": "סקר גנטי\nשד הנשיא 29 חיפה\nקומת קרקע",
-    "treatmentName": "סקר גנטי\nשד הנשיא 29 חיפה\nקומת קרקע",
+    "treatmentName": "סקר גנטי\nשד הנשיא 29 חיפה\nקומת קרקע ",
     "therapistName": "שירלי",
     "startTime": "2024-04-17T05:00:00.000Z",
     "endTime": "2024-04-17T06:00:00.000Z",
@@ -12518,7 +12531,7 @@
   {
     "id": 59285,
     "clientName": "להפסיק פנגו",
-    "treatmentName": "להפסיק פנגו",
+    "treatmentName": "להפסיק פנגו ",
     "therapistName": "שירלי",
     "startTime": "2024-06-24T08:00:00.000Z",
     "endTime": "2024-06-24T09:00:00.000Z",
@@ -12554,7 +12567,7 @@
   {
     "id": 60352,
     "clientName": "עדן גורדון",
-    "treatmentName": "עדן גורדון",
+    "treatmentName": "עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-05-15T10:00:00.000Z",
     "endTime": "2024-05-15T11:00:00.000Z",
@@ -12566,7 +12579,7 @@
   {
     "id": 60353,
     "clientName": "עדן גורדון",
-    "treatmentName": "עדן גורדון",
+    "treatmentName": "עדן גורדון ",
     "therapistName": "שירלי",
     "startTime": "2024-05-22T07:00:00.000Z",
     "endTime": "2024-05-22T08:00:00.000Z",
@@ -12578,7 +12591,7 @@
   {
     "id": 60356,
     "clientName": "ירדנה",
-    "treatmentName": "ירדנה",
+    "treatmentName": "ירדנה ",
     "therapistName": "שירלי",
     "startTime": "2024-05-07T07:30:00.000Z",
     "endTime": "2024-05-07T08:30:00.000Z",
@@ -12638,7 +12651,7 @@
   {
     "id": 61514,
     "clientName": "יום הולדת למרגלית",
-    "treatmentName": "יום הולדת למרגלית",
+    "treatmentName": "יום הולדת למרגלית ",
     "therapistName": "שירלי",
     "startTime": "2024-06-02T05:30:00.000Z",
     "endTime": "2024-06-02T06:30:00.000Z",
@@ -12650,7 +12663,7 @@
   {
     "id": 62539,
     "clientName": "בדיקת דם",
-    "treatmentName": "בדיקת דם",
+    "treatmentName": "בדיקת דם ",
     "therapistName": "שירלי",
     "startTime": "2024-06-10T05:30:00.000Z",
     "endTime": "2024-06-10T06:30:00.000Z",
@@ -12662,7 +12675,7 @@
   {
     "id": 62542,
     "clientName": "14:10 עדן",
-    "treatmentName": "14:10 עדן",
+    "treatmentName": "14:10 עדן ",
     "therapistName": "שירלי",
     "startTime": "2024-06-02T11:00:00.000Z",
     "endTime": "2024-06-02T12:00:00.000Z",
@@ -12686,7 +12699,7 @@
   {
     "id": 62573,
     "clientName": "דיקור",
-    "treatmentName": "דיקור",
+    "treatmentName": "דיקור ",
     "therapistName": "שירלי",
     "startTime": "2024-06-16T07:00:00.000Z",
     "endTime": "2024-06-16T09:00:00.000Z",
@@ -12746,7 +12759,7 @@
   {
     "id": 64641,
     "clientName": "שושנה גבות",
-    "treatmentName": "שושנה גבות",
+    "treatmentName": "שושנה גבות ",
     "therapistName": "שירלי",
     "startTime": "2024-06-27T06:30:00.000Z",
     "endTime": "2024-06-27T07:00:00.000Z",
@@ -12806,7 +12819,7 @@
   {
     "id": 65672,
     "clientName": "עדן",
-    "treatmentName": "עדן",
+    "treatmentName": "עדן ",
     "therapistName": "שירלי",
     "startTime": "2024-07-16T06:00:00.000Z",
     "endTime": "2024-07-16T08:00:00.000Z",
@@ -12818,7 +12831,7 @@
   {
     "id": 65696,
     "clientName": "שקיפות עורפית. \n900 שקלים \n2500\n2000",
-    "treatmentName": "שקיפות עורפית. \n900 שקלים \n2500\n2000",
+    "treatmentName": "שקיפות עורפית. \n900 שקלים \n2500\n2000\n",
     "therapistName": "שירלי",
     "startTime": "2024-08-04T06:30:00.000Z",
     "endTime": "2024-08-04T08:30:00.000Z",
@@ -12830,7 +12843,7 @@
   {
     "id": 65708,
     "clientName": "אורלי .",
-    "treatmentName": "אורלי .",
+    "treatmentName": "אורלי . ",
     "therapistName": "שירלי",
     "startTime": "2024-07-09T06:30:00.000Z",
     "endTime": "2024-07-09T07:30:00.000Z",
@@ -12866,7 +12879,7 @@
   {
     "id": 66742,
     "clientName": "יום הולדת למאור",
-    "treatmentName": "יום הולדת למאור",
+    "treatmentName": "יום הולדת למאור ",
     "therapistName": "שירלי",
     "startTime": "2024-08-14T13:00:00.000Z",
     "endTime": "2024-08-14T15:00:00.000Z",
@@ -12950,7 +12963,7 @@
   {
     "id": 66791,
     "clientName": "יום הולדת לליאור.",
-    "treatmentName": "יום הולדת לליאור.",
+    "treatmentName": "יום הולדת לליאור. ",
     "therapistName": "שירלי",
     "startTime": "2024-08-15T15:30:00.000Z",
     "endTime": "2024-08-15T18:30:00.000Z",
@@ -12986,7 +12999,7 @@
   {
     "id": 66815,
     "clientName": "ד״ר קידר 11:30\nמיון יולדות קומה 7",
-    "treatmentName": "ד״ר קידר 11:30\nמיון יולדות קומה 7",
+    "treatmentName": "ד״ר קידר 11:30\nמיון יולדות קומה 7 ",
     "therapistName": "שירלי",
     "startTime": "2024-07-23T08:00:00.000Z",
     "endTime": "2024-07-23T10:00:00.000Z",
@@ -13178,7 +13191,7 @@
   {
     "id": 69015,
     "clientName": "עדן דיקור",
-    "treatmentName": "עדן דיקור",
+    "treatmentName": "עדן דיקור ",
     "therapistName": "שירלי",
     "startTime": "2024-08-19T09:00:00.000Z",
     "endTime": "2024-08-19T10:00:00.000Z",
@@ -13202,7 +13215,7 @@
   {
     "id": 69086,
     "clientName": "ד״ר מחולה",
-    "treatmentName": "ד״ר מחולה",
+    "treatmentName": "ד״ר מחולה ",
     "therapistName": "שירלי",
     "startTime": "2024-09-01T06:00:00.000Z",
     "endTime": "2024-09-01T07:00:00.000Z",
@@ -13274,7 +13287,7 @@
   {
     "id": 71114,
     "clientName": "ייעוץ פרקושל",
-    "treatmentName": "ייעוץ פרקושל",
+    "treatmentName": "ייעוץ פרקושל ",
     "therapistName": "שירלי",
     "startTime": "2024-09-05T08:30:00.000Z",
     "endTime": "2024-09-05T09:30:00.000Z",
@@ -13346,7 +13359,7 @@
   {
     "id": 73179,
     "clientName": "אלון ברנס טיפול פנים",
-    "treatmentName": "אלון ברנס טיפול פנים",
+    "treatmentName": "אלון ברנס טיפול פנים ",
     "therapistName": "שירלי",
     "startTime": "2024-09-29T12:30:00.000Z",
     "endTime": "2024-09-29T14:30:00.000Z",
@@ -13406,7 +13419,7 @@
   {
     "id": 75242,
     "clientName": "קלדרון 14-15:00",
-    "treatmentName": "קלדרון 14-15:00",
+    "treatmentName": "קלדרון 14-15:00\n",
     "therapistName": "שירלי",
     "startTime": "2024-10-30T13:00:00.000Z",
     "endTime": "2024-10-30T15:00:00.000Z",
@@ -13454,7 +13467,7 @@
   {
     "id": 75287,
     "clientName": "ייעוץ גנטי 16:00",
-    "treatmentName": "ייעוץ גנטי 16:00",
+    "treatmentName": "ייעוץ גנטי 16:00\n",
     "therapistName": "שירלי",
     "startTime": "2024-10-29T14:00:00.000Z",
     "endTime": "2024-10-29T15:00:00.000Z",
@@ -13466,7 +13479,7 @@
   {
     "id": 75321,
     "clientName": "עדן דיקור",
-    "treatmentName": "עדן דיקור",
+    "treatmentName": "עדן דיקור ",
     "therapistName": "שירלי",
     "startTime": "2024-10-28T15:00:00.000Z",
     "endTime": "2024-10-28T16:00:00.000Z",
@@ -13502,7 +13515,7 @@
   {
     "id": 76356,
     "clientName": "עדן",
-    "treatmentName": "עדן",
+    "treatmentName": "עדן ",
     "therapistName": "שירלי",
     "startTime": "2024-11-11T14:30:00.000Z",
     "endTime": "2024-11-11T15:30:00.000Z",
@@ -13610,7 +13623,7 @@
   {
     "id": 77519,
     "clientName": "טיטיאנה",
-    "treatmentName": "טיטיאנה",
+    "treatmentName": "טיטיאנה ",
     "therapistName": "שירלי",
     "startTime": "2024-12-18T13:45:00.000Z",
     "endTime": "2024-12-18T14:45:00.000Z",
@@ -13622,7 +13635,7 @@
   {
     "id": 77521,
     "clientName": "עדן",
-    "treatmentName": "עדן",
+    "treatmentName": "עדן ",
     "therapistName": "שירלי",
     "startTime": "2024-12-02T10:00:00.000Z",
     "endTime": "2024-12-02T11:00:00.000Z",
@@ -13706,7 +13719,7 @@
   {
     "id": 77667,
     "clientName": "יפה מהזורע \nטיפול פנים",
-    "treatmentName": "יפה מהזורע \nטיפול פנים",
+    "treatmentName": "יפה מהזורע \nטיפול פנים ",
     "therapistName": "שירלי",
     "startTime": "2024-12-18T08:00:00.000Z",
     "endTime": "2024-12-18T10:00:00.000Z",
@@ -13742,7 +13755,7 @@
   {
     "id": 77698,
     "clientName": "רימא כיף !",
-    "treatmentName": "רימא כיף !",
+    "treatmentName": "רימא כיף ! ",
     "therapistName": "שירלי",
     "startTime": "2024-12-30T07:30:00.000Z",
     "endTime": "2024-12-30T08:30:00.000Z",
@@ -13982,7 +13995,7 @@
   {
     "id": 79919,
     "clientName": "התאמה איפור",
-    "treatmentName": "התאמה איפור",
+    "treatmentName": "התאמה איפור ",
     "therapistName": "שירלי",
     "startTime": "2025-01-28T12:00:00.000Z",
     "endTime": "2025-01-28T13:00:00.000Z",
@@ -14006,7 +14019,7 @@
   {
     "id": 79965,
     "clientName": "יום הולדת לליאור",
-    "treatmentName": "יום הולדת לליאור",
+    "treatmentName": "יום הולדת לליאור ",
     "therapistName": "שירלי",
     "startTime": "2025-02-26T16:00:00.000Z",
     "endTime": "2025-02-26T18:00:00.000Z",
@@ -14018,7 +14031,7 @@
   {
     "id": 81989,
     "clientName": "דר׳ מחולה",
-    "treatmentName": "דר׳ מחולה",
+    "treatmentName": "דר׳ מחולה ",
     "therapistName": "שירלי",
     "startTime": "2025-04-28T09:30:00.000Z",
     "endTime": "2025-04-28T10:30:00.000Z",
@@ -14042,7 +14055,7 @@
   {
     "id": 82007,
     "clientName": "פרחים ועוגה",
-    "treatmentName": "פרחים ועוגה",
+    "treatmentName": " פרחים ועוגה ",
     "therapistName": "שירלי",
     "startTime": "2025-02-13T07:00:00.000Z",
     "endTime": "2025-02-13T08:00:00.000Z",
@@ -14054,7 +14067,7 @@
   {
     "id": 83043,
     "clientName": "משי גבות",
-    "treatmentName": "משי גבות",
+    "treatmentName": "משי גבות ",
     "therapistName": "שירלי",
     "startTime": "2025-02-26T11:30:00.000Z",
     "endTime": "2025-02-26T12:00:00.000Z",
@@ -14066,7 +14079,7 @@
   {
     "id": 84071,
     "clientName": "רופא שיניים",
-    "treatmentName": "רופא שיניים",
+    "treatmentName": "רופא שיניים ",
     "therapistName": "שירלי",
     "startTime": "2025-03-04T10:00:00.000Z",
     "endTime": "2025-03-04T11:00:00.000Z",
@@ -14366,7 +14379,7 @@
   {
     "id": 91608,
     "clientName": "ערב איטלקי",
-    "treatmentName": "ערב איטלקי",
+    "treatmentName": "ערב איטלקי ",
     "therapistName": "שירלי",
     "startTime": "2025-06-09T14:30:00.000Z",
     "endTime": "2025-06-09T15:30:00.000Z",
@@ -14378,7 +14391,7 @@
   {
     "id": 91609,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": ". ",
     "therapistName": "שירלי",
     "startTime": "2025-06-06T06:00:00.000Z",
     "endTime": "2025-06-06T10:00:00.000Z",
@@ -14402,7 +14415,7 @@
   {
     "id": 91619,
     "clientName": "מעשנה",
-    "treatmentName": "מעשנה",
+    "treatmentName": "מעשנה ",
     "therapistName": "שירלי",
     "startTime": "2025-06-16T14:30:00.000Z",
     "endTime": "2025-06-16T15:30:00.000Z",
@@ -14498,7 +14511,7 @@
   {
     "id": 92775,
     "clientName": "ד״ר מחולה",
-    "treatmentName": "ד״ר מחולה",
+    "treatmentName": "ד״ר מחולה ",
     "therapistName": "שירלי",
     "startTime": "2025-09-09T09:00:00.000Z",
     "endTime": "2025-09-09T11:00:00.000Z",
@@ -14558,7 +14571,7 @@
   {
     "id": 93964,
     "clientName": "לחדש מרשם ללהב",
-    "treatmentName": "לחדש מרשם ללהב",
+    "treatmentName": "לחדש מרשם ללהב ",
     "therapistName": "שירלי",
     "startTime": "2025-09-29T06:45:00.000Z",
     "endTime": "2025-09-29T07:45:00.000Z",
@@ -14570,7 +14583,7 @@
   {
     "id": 93969,
     "clientName": "נירית",
-    "treatmentName": "נירית",
+    "treatmentName": "נירית ",
     "therapistName": "לורה",
     "startTime": "2025-08-03T14:00:00.000Z",
     "endTime": "2025-08-03T15:00:00.000Z",
@@ -14594,7 +14607,7 @@
   {
     "id": 93985,
     "clientName": "השקה חוה",
-    "treatmentName": "השקה חוה",
+    "treatmentName": "השקה חוה ",
     "therapistName": "שירלי",
     "startTime": "2025-09-08T07:00:00.000Z",
     "endTime": "2025-09-08T08:00:00.000Z",
@@ -14630,7 +14643,7 @@
   {
     "id": 94987,
     "clientName": "יום כיף לאחיינים החמודים שלי \nוהכי חמוד מורן",
-    "treatmentName": "יום כיף לאחיינים החמודים שלי \nוהכי חמוד מורן",
+    "treatmentName": "יום כיף לאחיינים החמודים שלי \nוהכי חמוד מורן ",
     "therapistName": "שירלי",
     "startTime": "2025-08-25T06:00:00.000Z",
     "endTime": "2025-08-25T13:00:00.000Z",
@@ -14690,7 +14703,7 @@
   {
     "id": 95211,
     "clientName": "יפה",
-    "treatmentName": "יפה",
+    "treatmentName": "יפה ",
     "therapistName": "שירלי",
     "startTime": "2025-09-10T10:30:00.000Z",
     "endTime": "2025-09-10T11:30:00.000Z",
@@ -14762,7 +14775,7 @@
   {
     "id": 95354,
     "clientName": "שירלי לק",
-    "treatmentName": "שירלי לק",
+    "treatmentName": "שירלי לק ",
     "therapistName": "לורה",
     "startTime": "2025-10-09T12:00:00.000Z",
     "endTime": "2025-10-09T12:30:00.000Z",
@@ -14786,7 +14799,7 @@
   {
     "id": 96452,
     "clientName": "שריי שלומיוק",
-    "treatmentName": "שריי שלומיוק",
+    "treatmentName": "שריי שלומיוק ",
     "therapistName": "שירלי",
     "startTime": "2025-11-23T08:00:00.000Z",
     "endTime": "2025-11-23T10:00:00.000Z",
@@ -14822,7 +14835,7 @@
   {
     "id": 97450,
     "clientName": "13:30 רחלי",
-    "treatmentName": "13:30 רחלי",
+    "treatmentName": "13:30 רחלי ",
     "therapistName": "שירלי",
     "startTime": "2025-11-06T09:30:00.000Z",
     "endTime": "2025-11-06T10:00:00.000Z",
@@ -14894,7 +14907,7 @@
   {
     "id": 98562,
     "clientName": "אופירה",
-    "treatmentName": "אופירה",
+    "treatmentName": "אופירה ",
     "therapistName": "שירלי",
     "startTime": "2025-12-22T10:00:00.000Z",
     "endTime": "2025-12-22T11:00:00.000Z",
@@ -14906,7 +14919,7 @@
   {
     "id": 98569,
     "clientName": "יום הולדת לשירה",
-    "treatmentName": "יום הולדת לשירה",
+    "treatmentName": "יום הולדת לשירה ",
     "therapistName": "שירלי",
     "startTime": "2025-12-25T13:30:00.000Z",
     "endTime": "2025-12-25T18:30:00.000Z",
@@ -15134,7 +15147,7 @@
   {
     "id": 102847,
     "clientName": "אנה",
-    "treatmentName": "אנה",
+    "treatmentName": "אנה ",
     "therapistName": "שירלי",
     "startTime": "2026-02-16T11:00:00.000Z",
     "endTime": "2026-02-16T12:00:00.000Z",
@@ -15158,7 +15171,7 @@
   {
     "id": 102938,
     "clientName": "ארוחת בוקר",
-    "treatmentName": "ארוחת בוקר",
+    "treatmentName": "ארוחת בוקר ",
     "therapistName": "שירלי",
     "startTime": "2026-02-26T07:00:00.000Z",
     "endTime": "2026-02-26T09:30:00.000Z",
@@ -15182,7 +15195,7 @@
   {
     "id": 102962,
     "clientName": "דלי גבות",
-    "treatmentName": "דלי גבות",
+    "treatmentName": "דלי גבות ",
     "therapistName": "שירלי",
     "startTime": "2026-02-25T11:00:00.000Z",
     "endTime": "2026-02-25T11:30:00.000Z",
@@ -15338,7 +15351,7 @@
   {
     "id": 104123,
     "clientName": "שירלי :) לק ושעווה",
-    "treatmentName": "שירלי :) לק ושעווה",
+    "treatmentName": "שירלי :) לק ושעווה ",
     "therapistName": "לורה",
     "startTime": "2026-03-31T10:00:00.000Z",
     "endTime": "2026-03-31T11:00:00.000Z",
@@ -15386,7 +15399,7 @@
   {
     "id": 104202,
     "clientName": "כירורג שד 12:10",
-    "treatmentName": "כירורג שד 12:10",
+    "treatmentName": "כירורג שד 12:10 ",
     "therapistName": "שירלי",
     "startTime": "2026-05-12T08:30:00.000Z",
     "endTime": "2026-05-12T11:30:00.000Z",
@@ -15398,7 +15411,7 @@
   {
     "id": 104203,
     "clientName": "ילנה מחולה",
-    "treatmentName": "ילנה מחולה",
+    "treatmentName": "ילנה מחולה ",
     "therapistName": "שירלי",
     "startTime": "2026-06-22T09:30:00.000Z",
     "endTime": "2026-06-22T10:30:00.000Z",
@@ -15410,7 +15423,7 @@
   {
     "id": 104227,
     "clientName": "אופירה",
-    "treatmentName": "אופירה",
+    "treatmentName": "אופירה ",
     "therapistName": "שירלי",
     "startTime": "2026-04-27T08:00:00.000Z",
     "endTime": "2026-04-27T09:00:00.000Z",
@@ -15434,7 +15447,7 @@
   {
     "id": 104251,
     "clientName": "11:30 מנקה",
-    "treatmentName": "11:30 מנקה",
+    "treatmentName": "11:30 מנקה ",
     "therapistName": "שירלי",
     "startTime": "2026-04-29T05:00:00.000Z",
     "endTime": "2026-04-29T05:30:00.000Z",
@@ -15446,7 +15459,7 @@
   {
     "id": 105273,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": ". ",
     "therapistName": "שירלי",
     "startTime": "2026-04-30T06:00:00.000Z",
     "endTime": "2026-04-30T09:00:00.000Z",
@@ -15470,7 +15483,7 @@
   {
     "id": 105307,
     "clientName": ".",
-    "treatmentName": ".",
+    "treatmentName": ". ",
     "therapistName": "שירלי",
     "startTime": "2026-05-07T13:30:00.000Z",
     "endTime": "2026-05-07T17:30:00.000Z",
@@ -15482,7 +15495,7 @@
   {
     "id": 105323,
     "clientName": "אילנית ירדן קפה",
-    "treatmentName": "אילנית ירדן קפה",
+    "treatmentName": "אילנית ירדן קפה ",
     "therapistName": "שירלי",
     "startTime": "2026-05-10T07:00:00.000Z",
     "endTime": "2026-05-10T09:00:00.000Z",
@@ -15506,7 +15519,7 @@
   {
     "id": 105387,
     "clientName": "אלומית  התאמה",
-    "treatmentName": "אלומית  התאמה",
+    "treatmentName": "אלומית  התאמה ",
     "therapistName": "שירלי",
     "startTime": "2026-05-17T07:30:00.000Z",
     "endTime": "2026-05-17T08:30:00.000Z",
@@ -15518,7 +15531,7 @@
   {
     "id": 105395,
     "clientName": "שיקמה. שעווה",
-    "treatmentName": "שיקמה. שעווה",
+    "treatmentName": "שיקמה. שעווה ",
     "therapistName": "שירלי",
     "startTime": "2026-05-28T14:30:00.000Z",
     "endTime": "2026-05-28T16:00:00.000Z",
@@ -15542,7 +15555,7 @@
   {
     "id": 105423,
     "clientName": ".אזכרה 16:30",
-    "treatmentName": ".אזכרה 16:30",
+    "treatmentName": ".אזכרה 16:30 ",
     "therapistName": "שירלי",
     "startTime": "2026-05-24T13:00:00.000Z",
     "endTime": "2026-05-24T16:00:00.000Z",
@@ -15566,7 +15579,7 @@
   {
     "id": 106523,
     "clientName": "משרד הפנים דרכון",
-    "treatmentName": "משרד הפנים דרכון",
+    "treatmentName": "משרד הפנים דרכון ",
     "therapistName": "שירלי",
     "startTime": "2026-08-13T06:30:00.000Z",
     "endTime": "2026-08-13T07:30:00.000Z",
@@ -15578,7 +15591,7 @@
   {
     "id": 106542,
     "clientName": "דנה משגב.",
-    "treatmentName": "דנה משגב.",
+    "treatmentName": "דנה משגב. ",
     "therapistName": "שירלי",
     "startTime": "2026-06-23T12:30:00.000Z",
     "endTime": "2026-06-23T17:00:00.000Z",
@@ -15590,7 +15603,7 @@
   {
     "id": 106583,
     "clientName": "סברינה גבות",
-    "treatmentName": "סברינה גבות",
+    "treatmentName": "סברינה גבות ",
     "therapistName": "שירלי",
     "startTime": "2026-06-16T09:30:00.000Z",
     "endTime": "2026-06-16T10:00:00.000Z",
@@ -42914,7 +42927,7 @@
   {
     "id": 4091,
     "clientName": "רעות מזרחי",
-    "treatmentName": "רעות מזרחי",
+    "treatmentName": "רעות מזרחי ",
     "therapistName": "רחלי",
     "startTime": "2019-07-19T10:15:00.000Z",
     "endTime": "2019-07-19T11:15:00.000Z",
@@ -73322,7 +73335,7 @@
   {
     "id": 74,
     "clientName": "אמירה מזרחי",
-    "treatmentName": "אמירה מזרחי",
+    "treatmentName": "אמירה מזרחי ",
     "therapistName": "שירלי",
     "startTime": "2018-08-14T06:00:00.000Z",
     "endTime": "2018-08-14T08:00:00.000Z",
@@ -106130,7 +106143,7 @@
   {
     "id": 182,
     "clientName": "אור חיימוביץ",
-    "treatmentName": "אור חיימוביץ",
+    "treatmentName": "אור חיימוביץ ",
     "therapistName": "רחלי",
     "startTime": "2018-07-29T15:15:00.000Z",
     "endTime": "2018-07-29T15:45:00.000Z",
@@ -140822,7 +140835,7 @@
   {
     "id": 79954,
     "clientName": "אלינה קאופמן",
-    "treatmentName": "אלינה קאופמן",
+    "treatmentName": "אלינה קאופמן ",
     "therapistName": "שירלי",
     "startTime": "2025-02-06T08:30:00.000Z",
     "endTime": "2025-02-06T09:00:00.000Z",
@@ -175298,7 +175311,7 @@
   {
     "id": 58141,
     "clientName": "שרית דבח",
-    "treatmentName": "שרית דבח",
+    "treatmentName": "שרית דבח ",
     "therapistName": "שירלי",
     "startTime": "2024-04-07T09:30:00.000Z",
     "endTime": "2024-04-07T11:00:00.000Z",
@@ -195206,7 +195219,7 @@
   {
     "id": 30665,
     "clientName": "כרמל גיל",
-    "treatmentName": "כרמל גיל",
+    "treatmentName": "כרמל גיל ",
     "therapistName": "שירלי",
     "startTime": "2022-10-18T15:45:00.000Z",
     "endTime": "2022-10-18T16:00:00.000Z",

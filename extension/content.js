@@ -97,8 +97,13 @@ async function runSync() {
     // Merge without duplicates by ID
     const existingIds = new Set(mergedAppts.map(a => String(a.MeetingId || a.id || a.CalendarEventId || a.Id)));
     const newItems = apiAppointments.filter(item => {
-      const id = String(item.MeetingId || item.id || item.CalendarEventId || item.Id);
-      return !existingIds.has(id) && id !== 'undefined';
+      let id = String(item.MeetingId || item.id || item.CalendarEventId || item.Id || item.eventId || item.EventId);
+      if (id === 'undefined' || !id) {
+         // If it has no ID, don't drop it! Just assign a random ID so it gets passed to the backend.
+         item._tempId = `temp_${Math.random()}`;
+         id = item._tempId;
+      }
+      return !existingIds.has(id);
     });
     mergedAppts.push(...newItems);
     syncLogSources.push('appointments_api_fetch');
@@ -202,21 +207,29 @@ async function tryRelativeFetches(paths) {
     headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`;
   }
 
+  let allResults = [];
+
   for (const path of paths) {
     const url = `${origin}${path}`;
     try {
-      const res = await fetch(url, { method: 'GET', headers: headers });
+      // Encode spaces manually just in case
+      const fetchUrl = url.replace(/ /g, '%20');
+      const res = await fetch(fetchUrl, { method: 'GET', headers: headers });
       if (res.ok) {
         const data = await res.json();
         const array = extractArray(data);
         if (array && array.length > 0) {
-          console.log(`[Shirly Sync] Relative fetch succeeded: ${url}`);
-          return array;
+          console.log(`[Shirly Sync] Relative fetch succeeded: ${url} (found ${array.length} items)`);
+          allResults = allResults.concat(array);
         }
       }
     } catch (e) {
-      // ignore and continue
+      console.log(`[Shirly Sync] Fetch relative ${path} failed:`, e);
     }
+  }
+  
+  if (allResults.length > 0) {
+    return allResults;
   }
   return null;
 }
