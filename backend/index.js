@@ -124,6 +124,6 @@ app.post('/api/sync-extension', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.get('/api/debug-log', (req, res) => { try { res.json(JSON.parse(fs.readFileSync('data/last-raw-payload.json', 'utf8'))); } catch(e) { res.status(404).json({error: e.message}); } }); app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
