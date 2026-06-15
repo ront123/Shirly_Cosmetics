@@ -28,9 +28,15 @@ window.addEventListener("message", (event) => {
     } else if (event.data.type === 'APPOINTMENTS_INTERCEPTED') {
       if (!cachedAppointments) cachedAppointments = [];
       const incoming = event.data.data || [];
-      const existingIds = new Set(cachedAppointments.map(a => String(a.MeetingId || a.id || a.CalendarEventId)));
+      const existingIds = new Set(cachedAppointments.map(a => {
+        return String(a.MeetingId || a.id || a.CalendarEventId || a.Id || a._tempId);
+      }));
       const newItems = incoming.filter(item => {
-        const id = String(item.MeetingId || item.id || item.CalendarEventId);
+        let id = String(item.MeetingId || item.id || item.CalendarEventId || item.Id || item.eventId || item.EventId);
+        if (id === 'undefined' || !id) {
+           item._tempId = `temp_${Math.random()}`;
+           id = item._tempId;
+        }
         return !existingIds.has(id);
       });
       cachedAppointments.push(...newItems);
