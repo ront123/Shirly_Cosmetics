@@ -41,6 +41,25 @@ const clientsRoutes = require('./routes/clients');
 
 app.use('/api/treatments', treatmentsRoutes);
 app.use('/api/appointments', appointmentsRoutes);
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const { pool } = require('./config/db');
+    const result = await pool.query(`
+      SELECT a.*, c.first_name, c.last_name, c.phone_number, 
+             t.name as treatment_name, t.duration_minutes, t.color_code,
+             u.name as therapist_name
+      FROM appointments a
+      LEFT JOIN clients c ON a.client_id = c.id
+      LEFT JOIN treatment_types t ON a.treatment_id = t.id
+      LEFT JOIN users u ON a.therapist_id = u.id
+      ORDER BY a.start_time DESC LIMIT 5
+    `);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message, stack: err.stack });
+  }
+});
+
 app.use('/api/clients', clientsRoutes);
 
 app.get('/api/health', (req, res) => {
