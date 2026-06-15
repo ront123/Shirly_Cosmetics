@@ -186,18 +186,10 @@ function getWeekRange() {
 
 function getAppointmentPaths() {
   const range = getWeekRange();
-  const filter = `$filter=Start ge ${range.start} and Start le ${range.end}`;
+  const filter = `$filter=StartDateTime ge datetime'${range.start}.000Z' and EndDateTime le datetime'${range.end}.000Z'`;
   return [
     `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
-    `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting($expand=Customer)`,
-    `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting`,
-    `/odata/CalendarEvents?${filter}`,
-    `/api/Calendar/Meetings?start=${range.start}&end=${range.end}`,
-    `/odata/Meetings?${filter}&$expand=CalendarEvent,Customer,Employee,Treatment`,
-    `/odata/Meetings?${filter}&$expand=CalendarEvent,Customer,Employee`,
-    `/odata/Meetings?${filter}`,
-    '/api/appointments',
-    '/api/meetings'
+    `/api/Calendar/Meetings?start=${range.start}&end=${range.end}`
   ];
 }
 
