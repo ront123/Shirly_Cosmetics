@@ -36,20 +36,18 @@ exports.getAppointments = async (req, res) => {
 
     res.json(formatted);
   } catch (err) {
-    console.warn('⚠️ Database query failed, falling back to static appointments.json file:', err.message);
+    console.warn('⚠️ Database query failed, returning error as appointment:', err.message);
     
-    // Fallback: load from static JSON file
-    try {
-      const apptsPath = path.join(__dirname, '../../frontend/src/data/appointments.json');
-      if (fs.existsSync(apptsPath)) {
-        const fileData = fs.readFileSync(apptsPath, 'utf8');
-        return res.json(JSON.parse(fileData));
-      }
-    } catch (fallbackErr) {
-      console.error('❌ Fallback failed:', fallbackErr.message);
-    }
-    
-    res.status(500).json({ error: 'Server error' });
+    // Return the exact error as a dummy appointment to see it in the UI
+    return res.json([{
+      id: 999999,
+      clientName: 'DB ERROR',
+      treatmentName: err.message,
+      therapistName: 'שגיאה',
+      startTime: new Date().toISOString(),
+      endTime: new Date(Date.now() + 3600000).toISOString(),
+      status: 'scheduled'
+    }]);
   }
 };
 
