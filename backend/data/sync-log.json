@@ -4,6 +4,54 @@
       "success": true,
       "added": 0,
       "total_synced": 0,
+      "duration": 1202677,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-15T10:44:02.996Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 9639,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-15T10:23:26.775Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 9597,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-15T10:21:06.978Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 10469,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-15T10:20:30.354Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 9340,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-15T10:19:27.269Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
+      "duration": 9533,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-15T10:18:40.680Z"
+    },
+    {
+      "success": true,
+      "added": 0,
+      "total_synced": 0,
       "duration": 183,
       "source": "chrome_extension",
       "timestamp": "2026-06-14T14:06:46.104Z"
@@ -161,7 +209,7 @@
       "timestamp": "2026-06-14T10:42:35.294Z"
     }
   ],
-  "last_sync": "2026-06-14T14:06:46.104Z",
+  "last_sync": "2026-06-15T10:44:02.997Z",
   "total_synced": 1823,
   "source": "chrome_extension"
 }

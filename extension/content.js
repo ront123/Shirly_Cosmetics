@@ -84,18 +84,27 @@ async function runSync() {
   }
 
   // --- Step 2: Resolve Appointments ---
+  console.log("[Shirly Sync] ALWAYS trying relative API fetches to ensure we don't miss CalendarEvents (like breaks)...");
+  const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
+  
+  let mergedAppts = [];
   if (cachedAppointments && cachedAppointments.length > 0) {
-    console.log("[Shirly Sync] Using cached appointments from network interception");
-    finalAppointments = cachedAppointments;
+    mergedAppts = [...cachedAppointments];
     syncLogSources.push(`appointments_network (${lastInterceptedAppointmentsUrl})`);
-  } else {
-    console.log("[Shirly Sync] No cached appointments. Trying relative API fetches...");
-    const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
-    if (apiAppointments && apiAppointments.length > 0) {
-      finalAppointments = apiAppointments;
-      syncLogSources.push('appointments_api_fetch');
-    }
   }
+  
+  if (apiAppointments && apiAppointments.length > 0) {
+    // Merge without duplicates by ID
+    const existingIds = new Set(mergedAppts.map(a => String(a.MeetingId || a.id || a.CalendarEventId || a.Id)));
+    const newItems = apiAppointments.filter(item => {
+      const id = String(item.MeetingId || item.id || item.CalendarEventId || item.Id);
+      return !existingIds.has(id) && id !== 'undefined';
+    });
+    mergedAppts.push(...newItems);
+    syncLogSources.push('appointments_api_fetch');
+  }
+  
+  finalAppointments = mergedAppts;
 
   // If we found neither customers nor appointments
   if (finalCustomers.length === 0 && finalAppointments.length === 0) {

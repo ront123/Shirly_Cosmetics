@@ -244,7 +244,7 @@ function mapAppointment(raw, index) {
   }
 
   return {
-    id: raw.MeetingId || raw.id || raw.AppointmentId || `appt_${Date.now()}_${index}`,
+    id: raw.MeetingId || raw.CalendarEventId || raw.Id || raw.id || raw.AppointmentId || `appt_${Date.now()}_${index}`,
     clientId: easybizyClientId,
     clientName: clientName || 'לקוח לא מזוהה',
     clientPhone: clientPhone,

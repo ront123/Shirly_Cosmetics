@@ -215,8 +215,22 @@ export default function CalendarView() {
   // Base list of appointments
   const baseAppointments = appointments;
 
-  // Dynamically extract unique therapist names
-  const uniqueTherapists = [...new Set(baseAppointments.map(a => a.therapistName))].filter(Boolean);
+  // Dynamically extract unique therapist names from recent appointments (last 30 days) to avoid showing historical staff
+  const recentThreshold = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const recentAppointments = baseAppointments.filter(a => new Date(a.startTime).getTime() > recentThreshold);
+  let uniqueTherapists = [...new Set(recentAppointments.map(a => a.therapistName))].filter(Boolean);
+  
+  // If no recent appts, fallback to defaults
+  if (uniqueTherapists.length === 0) {
+    uniqueTherapists = ['שירלי', 'לורה'];
+  }
+  
+  // Ensure Shirley is always first
+  uniqueTherapists.sort((a, b) => {
+    if (a.includes('שירלי')) return -1;
+    if (b.includes('שירלי')) return 1;
+    return a.localeCompare(b);
+  });
 
   // Apply filters
   const filteredAppointments = baseAppointments.filter(appt => {
