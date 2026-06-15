@@ -21,7 +21,7 @@ function formatPhone(p) {
   if (!p) return '';
   const s = String(p).replace(/\D/g, '');
   if (s.length === 10) return `${s.slice(0, 3)}-${s.slice(3)}`;
-  return s;
+  return s.slice(0, 20);
 }
 
 function parseDate(val) {
@@ -436,10 +436,19 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     }
   });
 
-  if (clientsToInsert.length > 0) {
+  // Deduplicate clientsToInsert by phone number before inserting
+  const seenPhones = new Set();
+  const dedupedClientsToInsert = clientsToInsert.filter(c => {
+    if (!c.phone) return true;
+    if (seenPhones.has(c.phone)) return false;
+    seenPhones.add(c.phone);
+    return true;
+  });
+
+  if (dedupedClientsToInsert.length > 0) {
     const BATCH_SIZE = 500;
-    for (let i = 0; i < clientsToInsert.length; i += BATCH_SIZE) {
-      const batch = clientsToInsert.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < dedupedClientsToInsert.length; i += BATCH_SIZE) {
+      const batch = dedupedClientsToInsert.slice(i, i + BATCH_SIZE);
       const values = [];
       const placeholders = [];
       batch.forEach((c, idx) => {
@@ -450,6 +459,19 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
       const query = `
         INSERT INTO clients (first_name, last_name, phone_number, email, last_visit_date, date_of_birth, visits, avg_invoice, easybizy_id, address, source, gender, balance)
         VALUES ${placeholders.join(', ')}
+        ON CONFLICT (phone_number) DO UPDATE SET
+          first_name = EXCLUDED.first_name,
+          last_name = EXCLUDED.last_name,
+          email = EXCLUDED.email,
+          last_visit_date = EXCLUDED.last_visit_date,
+          date_of_birth = EXCLUDED.date_of_birth,
+          visits = EXCLUDED.visits,
+          avg_invoice = EXCLUDED.avg_invoice,
+          easybizy_id = EXCLUDED.easybizy_id,
+          address = EXCLUDED.address,
+          source = EXCLUDED.source,
+          gender = EXCLUDED.gender,
+          balance = EXCLUDED.balance
         RETURNING id, phone_number, easybizy_id
       `;
       const res = await pool.query(query, values);
