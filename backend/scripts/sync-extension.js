@@ -462,15 +462,19 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
   }
 
   if (clientsToUpdate.length > 0) {
-    for (const c of clientsToUpdate) {
-      await pool.query(
-        `UPDATE clients 
-         SET first_name = $1, last_name = $2, phone_number = $3, email = $4, last_visit_date = $5, 
-             date_of_birth = $6, visits = $7, avg_invoice = $8, easybizy_id = $9, address = $10, source = $11,
-             gender = $12, balance = $13
-         WHERE id = $14`,
-        [c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.gender, c.balance, c.id]
-      );
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < clientsToUpdate.length; i += BATCH_SIZE) {
+      const batch = clientsToUpdate.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(c => 
+        pool.query(
+          `UPDATE clients 
+           SET first_name = $1, last_name = $2, phone_number = $3, email = $4, last_visit_date = $5, 
+               date_of_birth = $6, visits = $7, avg_invoice = $8, easybizy_id = $9, address = $10, source = $11,
+               gender = $12, balance = $13
+           WHERE id = $14`,
+          [c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.gender, c.balance, c.id]
+        )
+      ));
     }
     console.log(`Updated ${clientsToUpdate.length} existing clients in PostgreSQL.`);
   }
@@ -613,13 +617,17 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
   }
 
   if (apptsToUpdate.length > 0) {
-    for (const a of apptsToUpdate) {
-      await pool.query(
-        `UPDATE appointments 
-         SET client_id = $1, therapist_id = $2, treatment_id = $3, start_time = $4, end_time = $5, status = $6, notes = $7, easybizy_id = $8, title = $9
-         WHERE id = $10`,
-        [a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.title, a.id]
-      );
+    const BATCH_SIZE = 50;
+    for (let i = 0; i < apptsToUpdate.length; i += BATCH_SIZE) {
+      const batch = apptsToUpdate.slice(i, i + BATCH_SIZE);
+      await Promise.all(batch.map(a => 
+        pool.query(
+          `UPDATE appointments 
+           SET client_id = $1, therapist_id = $2, treatment_id = $3, start_time = $4, end_time = $5, status = $6, notes = $7, easybizy_id = $8, title = $9
+           WHERE id = $10`,
+          [a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.title, a.id]
+        )
+      ));
     }
     console.log(`Updated ${apptsToUpdate.length} appointments in PostgreSQL.`);
   }
