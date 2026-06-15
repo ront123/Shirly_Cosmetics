@@ -519,24 +519,24 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     const raw = rawAppointments[idx];
     const mapped = mapAppointment(raw, idx);
 
-    // Identify if it's a break event
-    const isBreakEvent = (mapped.clientName && ['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה'].some(kw => mapped.clientName.includes(kw))) || (!raw.Customer && !raw.client && !raw.CustomerId && !raw.id_customer && !raw.Meeting && !raw.meeting);
-
     let clientId = null;
-    
-    if (!isBreakEvent) {
-      let customerRaw = raw.Customer || raw.client || (raw.Meeting && (raw.Meeting.Customer || raw.Meeting.client));
-      if (customerRaw && typeof customerRaw === 'object') {
-        const cPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || '');
-        const cEasybizyId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
-        if (cEasybizyId && clientByEasybizyId.has(cEasybizyId)) {
-          clientId = clientByEasybizyId.get(cEasybizyId);
-        } else if (cPhone && clientByPhone.has(cPhone)) {
-          clientId = clientByPhone.get(cPhone);
-        }
-      }
+    let isBreakEvent = false;
 
-      if (!clientId && mapped.clientName) {
+    let customerRaw = raw.Customer || raw.client || (raw.Meeting && (raw.Meeting.Customer || raw.Meeting.client));
+    if (customerRaw && typeof customerRaw === 'object') {
+      const cPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || '');
+      const cEasybizyId = String(customerRaw.CustomerId || customerRaw.Id || customerRaw.id || '');
+      if (cEasybizyId && clientByEasybizyId.has(cEasybizyId)) {
+        clientId = clientByEasybizyId.get(cEasybizyId);
+      } else if (cPhone && clientByPhone.has(cPhone)) {
+        clientId = clientByPhone.get(cPhone);
+      }
+    }
+
+    if (!clientId && mapped.clientName) {
+      if (['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה'].some(kw => mapped.clientName.includes(kw))) {
+        isBreakEvent = true;
+      } else {
         const nameParts = mapped.clientName.split(/\s+/);
         const firstName = nameParts[0] || 'לקוח';
         const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
@@ -557,9 +557,14 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
           clientByPhone.set(`placeholder_${Date.now()}_${idx}`, clientId);
         }
       }
-
-      if (!clientId) continue; // Non-break appointments must have a client
     }
+
+    if (!clientId && !isBreakEvent) {
+       // If no client was found or created, and it's not explicitly named as a break, it must be a nameless break block
+       isBreakEvent = true;
+    }
+
+    if (!isBreakEvent && !clientId) continue; // Should never happen now, but for safety
 
     const therapistId = await ensureTherapist(mapped.therapistName);
     const treatmentId = await ensureTreatment(mapped.treatmentName);
