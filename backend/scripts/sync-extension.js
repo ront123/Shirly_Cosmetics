@@ -34,8 +34,11 @@ function parseDate(val) {
 function parseDateISO(val) {
   if (!val) return new Date().toISOString();
   if (typeof val === 'string') {
+    // Strip trailing 'Z' or '+00:00' to treat it as naive local time (matching API)
+    const cleanVal = val.replace(/Z$/, '').replace(/\+00:00$/, '');
+    
     // Check for MM/DD/YYYY HH:MM
-    const match = val.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+    const match = cleanVal.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
     if (match) {
       const m = parseInt(match[1], 10);
       const d = parseInt(match[2], 10);
@@ -48,6 +51,11 @@ function parseDateISO(val) {
         return dateObj.toISOString();
       }
     }
+    
+    try {
+      const d = new Date(cleanVal);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    } catch (e) {}
   }
   
   try {
@@ -138,7 +146,9 @@ function mapAppointment(raw, index) {
     clientName = raw.clientName || raw.ClientName || raw.customerName || raw.CustomerName || raw.customer_name || raw.client_name || raw.Client || raw.client || '';
   }
   
-  const isBreak = !easybizyClientId && !raw.Customer && !raw.client && !raw.CustomerId && !raw.MobileFirst && !meetingRaw;
+  const eventType = String(raw.CalendarEventType || raw.calendareventtype || raw.Type || raw.type || '').toLowerCase();
+  const isBreak = (!easybizyClientId && !raw.Customer && !raw.client && !raw.CustomerId && !raw.MobileFirst && !meetingRaw) || 
+                  eventType === 'block' || eventType === 'break' || eventType.includes('block') || eventType.includes('break');
 
   // If it is a break event, use Subject/Title as clientName
   if (isBreak && !clientName) {

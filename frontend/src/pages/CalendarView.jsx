@@ -84,10 +84,10 @@ const isBreakEvent = (appt) => {
   const treatment = String(appt.treatmentName || '').toLowerCase();
   const notes = String(appt.notes || '').toLowerCase();
   const keywords = ['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה', 'אירוע כללי'];
-  return keywords.some(kw => name.includes(kw) || treatment.includes(kw) || notes.includes(kw)) || 
-         (!appt.clientId && !appt.clientPhone && 
-          (name.includes('הפסקה') || name.includes('ארוחה') || name.includes('חסום') || name.includes('נעול') || 
-           treatment.includes('הפסקה') || treatment.includes('ארוחה') || treatment.includes('חסום') || treatment.includes('נעול')));
+  
+  // A break event is defined as containing break keywords, OR having no associated client (clientId is falsy)
+  return !appt.clientId || 
+         keywords.some(kw => name.includes(kw) || treatment.includes(kw) || notes.includes(kw));
 };
 
 // Interval overlapping grouping algorithm

@@ -28,16 +28,29 @@ window.addEventListener("message", (event) => {
     } else if (event.data.type === 'APPOINTMENTS_INTERCEPTED') {
       if (!cachedAppointments) cachedAppointments = [];
       const incoming = event.data.data || [];
-      const existingIds = new Set(cachedAppointments.map(a => {
-        return String(a.MeetingId || a.id || a.CalendarEventId || a.Id || a._tempId);
-      }));
+      const existingIds = new Set();
+      cachedAppointments.forEach(a => {
+        if (a.MeetingId) existingIds.add(String(a.MeetingId));
+        if (a.CalendarEventId) existingIds.add(String(a.CalendarEventId));
+        if (a.Id) existingIds.add(String(a.Id));
+        if (a.id) existingIds.add(String(a.id));
+        if (a._tempId) existingIds.add(String(a._tempId));
+      });
       const newItems = incoming.filter(item => {
-        let id = String(item.MeetingId || item.id || item.CalendarEventId || item.Id || item.eventId || item.EventId);
-        if (id === 'undefined' || !id) {
+        let id = item.CalendarEventId || item.Id || item.MeetingId || item.id || item.eventId || item.EventId;
+        if (!id) {
            item._tempId = `temp_${Math.random()}`;
            id = item._tempId;
         }
-        return !existingIds.has(id);
+        id = String(id);
+        if (existingIds.has(id)) return false;
+        
+        if (item.MeetingId) existingIds.add(String(item.MeetingId));
+        if (item.CalendarEventId) existingIds.add(String(item.CalendarEventId));
+        if (item.Id) existingIds.add(String(item.Id));
+        if (item.id) existingIds.add(String(item.id));
+        if (item._tempId) existingIds.add(String(item._tempId));
+        return true;
       });
       cachedAppointments.push(...newItems);
       lastInterceptedAppointmentsUrl = event.data.url;
@@ -101,15 +114,29 @@ async function runSync() {
   
   if (apiAppointments && apiAppointments.length > 0) {
     // Merge without duplicates by ID
-    const existingIds = new Set(mergedAppts.map(a => String(a.MeetingId || a.id || a.CalendarEventId || a.Id)));
+    const existingIds = new Set();
+    mergedAppts.forEach(a => {
+      if (a.MeetingId) existingIds.add(String(a.MeetingId));
+      if (a.CalendarEventId) existingIds.add(String(a.CalendarEventId));
+      if (a.Id) existingIds.add(String(a.Id));
+      if (a.id) existingIds.add(String(a.id));
+      if (a._tempId) existingIds.add(String(a._tempId));
+    });
     const newItems = apiAppointments.filter(item => {
-      let id = String(item.MeetingId || item.id || item.CalendarEventId || item.Id || item.eventId || item.EventId);
-      if (id === 'undefined' || !id) {
-         // If it has no ID, don't drop it! Just assign a random ID so it gets passed to the backend.
+      let id = item.CalendarEventId || item.Id || item.MeetingId || item.id || item.eventId || item.EventId;
+      if (!id) {
          item._tempId = `temp_${Math.random()}`;
          id = item._tempId;
       }
-      return !existingIds.has(id);
+      id = String(id);
+      if (existingIds.has(id)) return false;
+
+      if (item.MeetingId) existingIds.add(String(item.MeetingId));
+      if (item.CalendarEventId) existingIds.add(String(item.CalendarEventId));
+      if (item.Id) existingIds.add(String(item.Id));
+      if (item.id) existingIds.add(String(item.id));
+      if (item._tempId) existingIds.add(String(item._tempId));
+      return true;
     });
     mergedAppts.push(...newItems);
     syncLogSources.push('appointments_api_fetch');
@@ -197,10 +224,37 @@ function getWeekRange() {
 
 function getAppointmentPaths() {
   const range = getWeekRange();
-  const filter = `$filter=StartDateTime ge datetime'${range.start}.000Z' and EndDateTime le datetime'${range.end}.000Z'`;
+  
+  // Format range dates without .000Z for standard OData v3 datetime naive literal
+  const startStr = range.start.split('.')[0];
+  const endStr = range.end.split('.')[0];
+
+  const fV3_StartEnd = `$filter=Start ge datetime'${startStr}' and End le datetime'${endStr}'`;
+  const fV3_StartEndDateTime = `$filter=StartDateTime ge datetime'${startStr}' and EndDateTime le datetime'${endStr}'`;
+  
+  const fV4_StartEnd = `$filter=Start ge ${startStr}Z and End le ${endStr}Z`;
+  const fV4_StartEndDateTime = `$filter=StartDateTime ge ${startStr}Z and EndDateTime le ${endStr}Z`;
+
+  const fV3_Old = `$filter=StartDateTime ge datetime'${range.start}.000Z' and EndDateTime le datetime'${range.end}.000Z'`;
+
   return [
-    `/odata/CalendarEvents?${filter}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
-    `/api/Calendar/Meetings?start=${range.start}&end=${range.end}`
+    // 1. OData V3 (datetime literal format - most common in ASP.NET OData)
+    `/odata/CalendarEvents?${fV3_StartEndDateTime}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
+    `/odata/CalendarEvents?${fV3_StartEnd}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
+    
+    // 2. OData V4 (ISO string without datetime prefix)
+    `/odata/CalendarEvents?${fV4_StartEndDateTime}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
+    `/odata/CalendarEvents?${fV4_StartEnd}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
+
+    // 3. Fallbacks: Old query & query without date filter
+    `/odata/CalendarEvents?${fV3_Old}&$expand=Employee,Meeting($expand=Customer,Treatment)`,
+    `/odata/CalendarEvents?$expand=Employee,Meeting($expand=Customer,Treatment)&$top=1500`,
+    `/odata/CalendarEvents?$expand=Employee,Meeting&$top=1500`,
+    `/odata/CalendarEvents?$top=1500`,
+
+    // 4. Standard APIs
+    `/api/Calendar/Meetings?start=${range.start}&end=${range.end}`,
+    `/api/Calendar/Events?start=${range.start}&end=${range.end}`
   ];
 }
 

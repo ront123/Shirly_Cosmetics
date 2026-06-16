@@ -2,6 +2,14 @@
   "runs": [
     {
       "success": true,
+      "added": 1,
+      "total_synced": 1,
+      "duration": 10841,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-16T06:06:26.427Z"
+    },
+    {
+      "success": true,
       "added": 0,
       "total_synced": 0,
       "duration": 5277,
@@ -257,7 +265,7 @@
       "timestamp": "2026-06-14T10:42:35.294Z"
     }
   ],
-  "last_sync": "2026-06-15T13:23:25.357Z",
-  "total_synced": 1823,
+  "last_sync": "2026-06-16T06:06:26.427Z",
+  "total_synced": 1824,
   "source": "chrome_extension"
 }
