@@ -58,6 +58,10 @@
     if (!data) return null;
     if (Array.isArray(data)) return data;
     if (data.value && Array.isArray(data.value)) return data.value;
+    if (data.d) {
+      if (Array.isArray(data.d)) return data.d;
+      if (data.d.results && Array.isArray(data.d.results)) return data.d.results;
+    }
     if (data.data && Array.isArray(data.data)) return data.data;
     if (data.items && Array.isArray(data.items)) return data.items;
     if (data.customers && Array.isArray(data.customers)) return data.customers;

@@ -93,67 +93,41 @@ async function runSync() {
 
   // --- Step 1: Resolve Customers ---
   remoteLog("Starting customer resolution...");
-  const apiCustomers = await tryRelativeFetches(getCustomerPaths());
-  remoteLog(`Customer resolution completed. Found ${apiCustomers ? apiCustomers.length : 0} customers via API.`);
-  
-  if (apiCustomers && apiCustomers.length > 0) {
-    finalCustomers = apiCustomers;
-    syncLogSources.push('customers_api_fetch');
-  } else if (cachedCustomers && cachedCustomers.length > 0) {
+  if (cachedCustomers && cachedCustomers.length > 0) {
     remoteLog(`Using cached customers (${cachedCustomers.length})`);
     finalCustomers = cachedCustomers;
     syncLogSources.push(`customers_network (${lastInterceptedCustomersUrl})`);
   } else {
-    remoteLog("Falling back to DOM customer scraping...");
-    const domCustomers = scrapeDOMCustomers();
-    remoteLog(`Scraped ${domCustomers ? domCustomers.length : 0} customers from DOM.`);
-    if (domCustomers && domCustomers.length > 0) {
-      finalCustomers = domCustomers;
-      syncLogSources.push('customers_dom_scraping');
+    const apiCustomers = await tryRelativeFetches(getCustomerPaths());
+    remoteLog(`Customer resolution completed. Found ${apiCustomers ? apiCustomers.length : 0} customers via API.`);
+    if (apiCustomers && apiCustomers.length > 0) {
+      finalCustomers = apiCustomers;
+      syncLogSources.push('customers_api_fetch');
+    } else {
+      remoteLog("Falling back to DOM customer scraping...");
+      const domCustomers = scrapeDOMCustomers();
+      remoteLog(`Scraped ${domCustomers ? domCustomers.length : 0} customers from DOM.`);
+      if (domCustomers && domCustomers.length > 0) {
+        finalCustomers = domCustomers;
+        syncLogSources.push('customers_dom_scraping');
+      }
     }
   }
 
   // --- Step 2: Resolve Appointments ---
   remoteLog("Starting appointment resolution...");
-  const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
-  remoteLog(`Appointment resolution completed. Found ${apiAppointments ? apiAppointments.length : 0} appointments via API.`);
-  
   let mergedAppts = [];
   if (cachedAppointments && cachedAppointments.length > 0) {
     remoteLog(`Using cached appointments (${cachedAppointments.length})`);
     mergedAppts = [...cachedAppointments];
     syncLogSources.push(`appointments_network (${lastInterceptedAppointmentsUrl})`);
-  }
-  
-  if (apiAppointments && apiAppointments.length > 0) {
-    // Merge without duplicates by ID
-    const existingIds = new Set();
-    mergedAppts.forEach(a => {
-      if (a.MeetingId) existingIds.add(String(a.MeetingId));
-      if (a.CalendarEventId) existingIds.add(String(a.CalendarEventId));
-      if (a.Id) existingIds.add(String(a.Id));
-      if (a.id) existingIds.add(String(a.id));
-      if (a._tempId) existingIds.add(String(a._tempId));
-    });
-    const newItems = apiAppointments.filter(item => {
-      let id = item.CalendarEventId || item.Id || item.MeetingId || item.id || item.eventId || item.EventId;
-      if (!id) {
-         item._tempId = `temp_${Math.random()}`;
-         id = item._tempId;
-      }
-      id = String(id);
-      if (existingIds.has(id)) return false;
-
-      if (item.MeetingId) existingIds.add(String(item.MeetingId));
-      if (item.CalendarEventId) existingIds.add(String(item.CalendarEventId));
-      if (item.Id) existingIds.add(String(item.Id));
-      if (item.id) existingIds.add(String(item.id));
-      if (item._tempId) existingIds.add(String(item._tempId));
-      return true;
-    });
-    remoteLog(`Merged ${newItems.length} new items from API into appointments.`);
-    mergedAppts.push(...newItems);
-    syncLogSources.push('appointments_api_fetch');
+  } else {
+    const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
+    remoteLog(`Appointment resolution completed. Found ${apiAppointments ? apiAppointments.length : 0} appointments via API.`);
+    if (apiAppointments && apiAppointments.length > 0) {
+      mergedAppts = apiAppointments;
+      syncLogSources.push('appointments_api_fetch');
+    }
   }
   
   finalAppointments = mergedAppts;
@@ -288,7 +262,7 @@ async function tryRelativeFetches(paths) {
     const path = paths[idx];
     const url = `${origin}${path}`;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 35000); // 35 seconds to allow large payloads to load
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds to allow large payloads to load
 
     remoteLog(`[Path ${idx+1}/${paths.length}] Fetching ${path}...`);
 
@@ -350,6 +324,10 @@ function extractArray(data) {
   if (!data) return null;
   if (Array.isArray(data)) return data;
   if (data.value && Array.isArray(data.value)) return data.value;
+  if (data.d) {
+    if (Array.isArray(data.d)) return data.d;
+    if (data.d.results && Array.isArray(data.d.results)) return data.d.results;
+  }
   if (data.data && Array.isArray(data.data)) return data.data;
   if (data.items && Array.isArray(data.items)) return data.items;
   if (data.customers && Array.isArray(data.customers)) return data.customers;

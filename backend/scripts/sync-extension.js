@@ -147,8 +147,14 @@ function mapAppointment(raw, index) {
   }
   
   const eventType = String(raw.CalendarEventType || raw.calendareventtype || raw.Type || raw.type || '').toLowerCase();
-  const isBreak = (!easybizyClientId && !raw.Customer && !raw.client && !raw.CustomerId && !raw.MobileFirst && !meetingRaw) || 
-                  eventType === 'block' || eventType === 'break' || eventType.includes('block') || eventType.includes('break');
+  const titleText = String(raw.Title || raw.title || raw.Subject || raw.subject || '');
+  const hasBreakKeywords = /הפסקה|ארוחה|ארוחת|חסום|חסימה|break|block|lunch|נעול|נעילה/i.test(titleText);
+  const isBreak = eventType === 'block' || 
+                  eventType === 'break' || 
+                  eventType.includes('block') || 
+                  eventType.includes('break') ||
+                  hasBreakKeywords ||
+                  (!easybizyClientId && !raw.Customer && !raw.client && !raw.CustomerId && !raw.MobileFirst && !meetingRaw && eventType !== 'meeting');
 
   // If it is a break event, use Subject/Title as clientName
   if (isBreak && !clientName) {
@@ -379,10 +385,15 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
   const clientByEasybizyId = new Map();
   const clientByPhone = new Map();
   const clientMapById = new Map();
+  const clientByName = new Map();
   dbClientsRes.rows.forEach(r => {
     clientMapById.set(r.id, r);
     if (r.easybizy_id) clientByEasybizyId.set(String(r.easybizy_id), r.id);
     if (r.phone_number) clientByPhone.set(r.phone_number, r.id);
+    const fullName = `${String(r.first_name || '').trim()} ${String(r.last_name || '').trim()}`.trim().toLowerCase();
+    if (fullName) {
+      clientByName.set(fullName, r.id);
+    }
   });
 
   const clientsToInsert = [];
@@ -507,12 +518,16 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
           source = EXCLUDED.source,
           gender = EXCLUDED.gender,
           balance = EXCLUDED.balance
-        RETURNING id, phone_number, easybizy_id
+        RETURNING id, first_name, last_name, phone_number, easybizy_id
       `;
       const res = await pool.query(query, values);
       res.rows.forEach(r => {
         if (r.phone_number) clientByPhone.set(r.phone_number, r.id);
         if (r.easybizy_id) clientByEasybizyId.set(String(r.easybizy_id), r.id);
+        const fullName = `${String(r.first_name || '').trim()} ${String(r.last_name || '').trim()}`.trim().toLowerCase();
+        if (fullName) {
+          clientByName.set(fullName, r.id);
+        }
       });
     }
     console.log(`Inserted ${clientsToInsert.length} new clients to PostgreSQL.`);
@@ -532,6 +547,14 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
           [c.firstName, c.lastName, c.phone, c.email, c.lastVisit, c.dob, c.visits, c.avgInvoice, c.easybizyId, c.address, c.source, c.gender, c.balance, c.id]
         )
       ));
+      batch.forEach(c => {
+        if (c.phone) clientByPhone.set(c.phone, c.id);
+        if (c.easybizyId) clientByEasybizyId.set(String(c.easybizyId), c.id);
+        const fullName = `${String(c.firstName || '').trim()} ${String(c.lastName || '').trim()}`.trim().toLowerCase();
+        if (fullName) {
+          clientByName.set(fullName, c.id);
+        }
+      });
     }
     console.log(`Updated ${clientsToUpdate.length} existing clients in PostgreSQL.`);
   }
@@ -557,6 +580,7 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     let clientId = null;
     let isBreakEvent = mapped.isExplicitBreak || false;
 
+    // 1. Resolve client via nested customer object (if exists)
     let customerRaw = raw.Customer || raw.client || (raw.Meeting && (raw.Meeting.Customer || raw.Meeting.client));
     if (customerRaw && typeof customerRaw === 'object') {
       const cPhone = formatPhone(customerRaw.MobileFirst || customerRaw.Mobile || customerRaw.Phone || customerRaw.phone || '');
@@ -568,28 +592,37 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
       }
     }
 
+    // 2. Resolve client via flat properties on mapped object
+    if (!clientId) {
+      if (mapped.clientId && clientByEasybizyId.has(String(mapped.clientId))) {
+        clientId = clientByEasybizyId.get(String(mapped.clientId));
+      } else if (mapped.clientPhone && clientByPhone.has(mapped.clientPhone)) {
+        clientId = clientByPhone.get(mapped.clientPhone);
+      }
+    }
+
+    // 3. Resolve client via cached name lookup, or insert fallback
     if (!clientId && mapped.clientName) {
       if (['הפסקה', 'ארוחה', 'ארוחת', 'חסום', 'חסימה', 'break', 'block', 'lunch', 'נעול', 'נעילה'].some(kw => mapped.clientName.includes(kw))) {
         isBreakEvent = true;
       } else {
-        const nameParts = mapped.clientName.split(/\s+/);
-        const firstName = nameParts[0] || 'לקוח';
-        const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
-        
-        const matchRes = await pool.query(
-          'SELECT id FROM clients WHERE first_name = $1 AND last_name = $2 LIMIT 1',
-          [firstName, lastName]
-        );
-        if (matchRes.rows.length > 0) {
-          clientId = matchRes.rows[0].id;
+        const fullNameKey = mapped.clientName.trim().toLowerCase();
+        if (clientByName.has(fullNameKey)) {
+          clientId = clientByName.get(fullNameKey);
         } else {
+          const nameParts = mapped.clientName.split(/\s+/);
+          const firstName = nameParts[0] || 'לקוח';
+          const lastName = nameParts.slice(1).join(' ') || 'לא-מזוהה';
+          const placeholderPhone = `placeholder_${Date.now()}_${idx}`;
+          
           const insertClientRes = await pool.query(
             `INSERT INTO clients (first_name, last_name, phone_number) 
              VALUES ($1, $2, $3) RETURNING id`,
-            [firstName, lastName, `placeholder_${Date.now()}_${idx}`]
+            [firstName, lastName, placeholderPhone]
           );
           clientId = insertClientRes.rows[0].id;
-          clientByPhone.set(`placeholder_${Date.now()}_${idx}`, clientId);
+          clientByPhone.set(placeholderPhone, clientId);
+          clientByName.set(fullNameKey, clientId);
         }
       }
     }
