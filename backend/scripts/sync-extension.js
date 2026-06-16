@@ -375,10 +375,12 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
 
   // --- 2. SYNC CLIENTS ---
   console.log('👤 [Postgres Sync] מסנכרן לקוחות...');
-  const dbClientsRes = await pool.query('SELECT id, phone_number, easybizy_id FROM clients');
+  const dbClientsRes = await pool.query('SELECT * FROM clients');
   const clientByEasybizyId = new Map();
   const clientByPhone = new Map();
+  const clientMapById = new Map();
   dbClientsRes.rows.forEach(r => {
+    clientMapById.set(r.id, r);
     if (r.easybizy_id) clientByEasybizyId.set(String(r.easybizy_id), r.id);
     if (r.phone_number) clientByPhone.set(r.phone_number, r.id);
   });
@@ -441,7 +443,29 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     };
 
     if (existingId) {
-      clientsToUpdate.push({ id: existingId, ...clientObj });
+      const existingClient = clientMapById.get(existingId);
+      if (existingClient) {
+        const hasChanged = 
+          existingClient.first_name !== firstName ||
+          existingClient.last_name !== lastName ||
+          existingClient.phone_number !== phone ||
+          (existingClient.email || '') !== (email || '') ||
+          (existingClient.easybizy_id || '') !== (easybizyId || '') ||
+          (existingClient.address || '') !== (address || '') ||
+          (existingClient.source || '') !== (source || '') ||
+          (existingClient.gender || '') !== (gender || '') ||
+          Number(existingClient.balance || 0) !== Number(balance || 0) ||
+          Number(existingClient.visits || 0) !== Number(visits || 0) ||
+          Number(existingClient.avg_invoice || 0) !== Number(avgInvoice || 0) ||
+          (existingClient.last_visit_date ? new Date(existingClient.last_visit_date).getTime() : 0) !== (lastVisit ? new Date(lastVisit).getTime() : 0) ||
+          (existingClient.date_of_birth ? new Date(existingClient.date_of_birth).getTime() : 0) !== (dob ? new Date(dob).getTime() : 0);
+
+        if (hasChanged) {
+          clientsToUpdate.push({ id: existingId, ...clientObj });
+        }
+      } else {
+        clientsToUpdate.push({ id: existingId, ...clientObj });
+      }
     } else {
       clientsToInsert.push(clientObj);
     }
@@ -677,28 +701,29 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
   const syncedDates = syncedDatesArray || [...new Set(mappedAppts.map(a => a.startTime.slice(0, 10)).filter(Boolean))];
 
   if (syncedDates.length > 0) {
-    console.log('🧹 [Postgres Sync] מנקה פגישות שנמחקו או הוזזו בימים המסונכרנים...');
-    for (const dateStr of syncedDates) {
-      const startOfDay = `${dateStr} 00:00:00`;
-      const endOfDay = `${dateStr} 23:59:59`;
-      
-      if (remoteApptIds.length > 0) {
-        await pool.query(
-          `DELETE FROM appointments 
-           WHERE start_time >= $1 AND start_time <= $2 
-           AND easybizy_id IS NOT NULL
-           AND easybizy_id NOT IN (${remoteApptIds.map((_, i) => `$${i + 3}`).join(', ')})`,
-          [startOfDay, endOfDay, ...remoteApptIds]
-        );
-      } else {
-        await pool.query(
-          `DELETE FROM appointments 
-           WHERE start_time >= $1 AND start_time <= $2
-           AND easybizy_id IS NOT NULL`,
-          [startOfDay, endOfDay]
-        );
-      }
+    console.log('🧹 [Postgres Sync] מנקה פגישות שנמחקו או הוזזו בימים המסונכרנים (בשאילתה אחת)...');
+    
+    const conditions = [];
+    const values = [];
+    syncedDates.forEach((dateStr, index) => {
+      const base = index * 2;
+      conditions.push(`(start_time >= $${base + 1} AND start_time <= $${base + 2})`);
+      values.push(`${dateStr} 00:00:00`, `${dateStr} 23:59:59`);
+    });
+    
+    const baseIndex = values.length;
+    let query = `
+      DELETE FROM appointments 
+      WHERE (${conditions.join(' OR ')}) 
+      AND easybizy_id IS NOT NULL
+    `;
+    
+    if (remoteApptIds.length > 0) {
+      query += ` AND easybizy_id NOT IN (${remoteApptIds.map((_, i) => `$${baseIndex + i + 1}`).join(', ')})`;
+      values.push(...remoteApptIds);
     }
+    
+    await pool.query(query, values);
   }
 
   console.log('✅ [Postgres Sync] הסנכרון לבסיס הנתונים הושלם בהצלחה.');

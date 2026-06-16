@@ -4,6 +4,22 @@
       "success": true,
       "added": 1,
       "total_synced": 1,
+      "duration": 14781,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-16T08:20:51.169Z"
+    },
+    {
+      "success": true,
+      "added": 1,
+      "total_synced": 1,
+      "duration": 9691,
+      "source": "chrome_extension",
+      "timestamp": "2026-06-16T08:20:26.889Z"
+    },
+    {
+      "success": true,
+      "added": 1,
+      "total_synced": 1,
       "duration": 10841,
       "source": "chrome_extension",
       "timestamp": "2026-06-16T06:06:26.427Z"
@@ -265,7 +281,7 @@
       "timestamp": "2026-06-14T10:42:35.294Z"
     }
   ],
-  "last_sync": "2026-06-16T06:06:26.427Z",
-  "total_synced": 1824,
+  "last_sync": "2026-06-16T08:20:51.169Z",
+  "total_synced": 1826,
   "source": "chrome_extension"
 }
