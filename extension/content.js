@@ -3,6 +3,15 @@ let lastInterceptedCustomersUrl = null;
 let cachedAppointments = null;
 let lastInterceptedAppointmentsUrl = null;
 
+function remoteLog(msg) {
+  console.log(`[Shirly Sync] ${msg}`);
+  fetch('https://shirly-cosmetics-api.onrender.com/api/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: msg })
+  }).catch(() => {});
+}
+
 // Inject the network interceptor script into the page context
 try {
   const script = document.createElement('script');
@@ -62,14 +71,14 @@ window.addEventListener("message", (event) => {
 // Listen for requests from the extension popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "sync_customers") {
-    console.log("[Shirly Sync] Received sync request from popup");
+    remoteLog("Popup triggered sync action.");
     runSync()
       .then(result => {
-        console.log("[Shirly Sync] Sync result:", result);
+        remoteLog(`Sync completed successfully. Sent response back to popup. Result keys: ${Object.keys(result)}`);
         sendResponse(result);
       })
       .catch(err => {
-        console.error("[Shirly Sync] Sync failed with unexpected error:", err);
+        remoteLog(`Sync failed with error: ${err.message}`);
         sendResponse({ success: false, error: err.message });
       });
     return true; // Keep message channel open for async response
@@ -77,25 +86,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function runSync() {
+  remoteLog("runSync started.");
   let finalCustomers = [];
   let finalAppointments = [];
   let syncLogSources = [];
 
   // --- Step 1: Resolve Customers ---
-  // Try relative fetches first (to get full lists without pagination limits)
-  console.log("[Shirly Sync] Attempting relative API fetches for customers...");
+  remoteLog("Starting customer resolution...");
   const apiCustomers = await tryRelativeFetches(getCustomerPaths());
+  remoteLog(`Customer resolution completed. Found ${apiCustomers ? apiCustomers.length : 0} customers via API.`);
+  
   if (apiCustomers && apiCustomers.length > 0) {
     finalCustomers = apiCustomers;
     syncLogSources.push('customers_api_fetch');
   } else if (cachedCustomers && cachedCustomers.length > 0) {
-    // Fallback to intercepted data (which might be paginated)
-    console.log("[Shirly Sync] API fetches failed. Using cached customer data from network interception");
+    remoteLog(`Using cached customers (${cachedCustomers.length})`);
     finalCustomers = cachedCustomers;
     syncLogSources.push(`customers_network (${lastInterceptedCustomersUrl})`);
   } else {
-    console.log("[Shirly Sync] No cached customers or API success. Trying DOM scraping for customers...");
+    remoteLog("Falling back to DOM customer scraping...");
     const domCustomers = scrapeDOMCustomers();
+    remoteLog(`Scraped ${domCustomers ? domCustomers.length : 0} customers from DOM.`);
     if (domCustomers && domCustomers.length > 0) {
       finalCustomers = domCustomers;
       syncLogSources.push('customers_dom_scraping');
@@ -103,11 +114,13 @@ async function runSync() {
   }
 
   // --- Step 2: Resolve Appointments ---
-  console.log("[Shirly Sync] ALWAYS trying relative API fetches to ensure we don't miss CalendarEvents (like breaks)...");
+  remoteLog("Starting appointment resolution...");
   const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
+  remoteLog(`Appointment resolution completed. Found ${apiAppointments ? apiAppointments.length : 0} appointments via API.`);
   
   let mergedAppts = [];
   if (cachedAppointments && cachedAppointments.length > 0) {
+    remoteLog(`Using cached appointments (${cachedAppointments.length})`);
     mergedAppts = [...cachedAppointments];
     syncLogSources.push(`appointments_network (${lastInterceptedAppointmentsUrl})`);
   }
@@ -138,11 +151,13 @@ async function runSync() {
       if (item._tempId) existingIds.add(String(item._tempId));
       return true;
     });
+    remoteLog(`Merged ${newItems.length} new items from API into appointments.`);
     mergedAppts.push(...newItems);
     syncLogSources.push('appointments_api_fetch');
   }
   
   finalAppointments = mergedAppts;
+  remoteLog(`Final lists resolved. Customers: ${finalCustomers.length}, Appointments: ${finalAppointments.length}`);
 
   // If we found neither customers nor appointments
   if (finalCustomers.length === 0 && finalAppointments.length === 0) {
@@ -267,10 +282,15 @@ async function tryRelativeFetches(paths) {
     headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`;
   }
 
-  for (const path of paths) {
+  remoteLog(`tryRelativeFetches starting loop for ${paths.length} paths...`);
+
+  for (let idx = 0; idx < paths.length; idx++) {
+    const path = paths[idx];
     const url = `${origin}${path}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 35000); // 35 seconds to allow large payloads to load
+
+    remoteLog(`[Path ${idx+1}/${paths.length}] Fetching ${path}...`);
 
     try {
       // Encode spaces manually just in case
@@ -283,19 +303,24 @@ async function tryRelativeFetches(paths) {
       
       clearTimeout(timeoutId);
 
+      remoteLog(`[Path ${idx+1}/${paths.length}] Fetch response status: ${res.status}`);
+
       if (res.ok) {
         const data = await res.json();
         const array = extractArray(data);
         if (array && array.length > 0) {
-          console.log(`[Shirly Sync] Relative fetch succeeded: ${url} (found ${array.length} items)`);
+          remoteLog(`[Path ${idx+1}/${paths.length}] Success! Found ${array.length} items.`);
           return array; // Return immediately on first successful result
+        } else {
+          remoteLog(`[Path ${idx+1}/${paths.length}] Success but array is empty or null.`);
         }
       }
     } catch (e) {
       clearTimeout(timeoutId);
-      console.log(`[Shirly Sync] Fetch relative ${path} failed or timed out:`, e);
+      remoteLog(`[Path ${idx+1}/${paths.length}] Failed: ${e.message}`);
     }
   }
+  remoteLog("tryRelativeFetches completed with null (no path succeeded).");
   return null;
 }
 

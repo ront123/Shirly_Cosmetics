@@ -124,6 +124,35 @@ app.post('/api/sync-extension', async (req, res) => {
   }
 });
 
-app.get('/api/debug-log', (req, res) => { try { res.json(JSON.parse(fs.readFileSync('data/last-raw-payload.json', 'utf8'))); } catch(e) { res.status(404).json({error: e.message}); } }); app.listen(port, () => {
+app.post('/api/log', (req, res) => {
+  try {
+    const { message } = req.body;
+    const logPath = path.join(__dirname, 'data/remote-debug.log');
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(logPath, `[${timestamp}] ${message}\n`);
+    console.log(`📡 [Remote Log] ${message}`);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/log', (req, res) => {
+  try {
+    const logPath = path.join(__dirname, 'data/remote-debug.log');
+    if (fs.existsSync(logPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.send(fs.readFileSync(logPath, 'utf8'));
+    } else {
+      res.send('No logs yet.');
+    }
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+app.get('/api/debug-log', (req, res) => { try { res.json(JSON.parse(fs.readFileSync('data/last-raw-payload.json', 'utf8'))); } catch(e) { res.status(404).json({error: e.message}); } }); 
+
+app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
