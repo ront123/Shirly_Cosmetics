@@ -475,7 +475,7 @@ function SendGroupMessageModal({ selectedClients, onClose, onClearSelection }) {
   const handleSendSingle = (client) => {
     const cleanPhone = client.phone.replace(/\D/g, '');
     const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
-    const msgText = template.replace(/\[שם_הלקוחה\]/g, client.name);
+    const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
     window.open(url, '_blank');
     setSentStatus(prev => ({ ...prev, [client.id]: true }));
@@ -487,7 +487,7 @@ function SendGroupMessageModal({ selectedClients, onClose, onClearSelection }) {
       setTimeout(() => {
         const cleanPhone = client.phone.replace(/\D/g, '');
         const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
-        const msgText = template.replace(/\[שם_הלקוחה\]/g, client.name);
+        const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
         const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
         window.open(url, '_blank');
         setSentStatus(prev => ({ ...prev, [client.id]: true }));
