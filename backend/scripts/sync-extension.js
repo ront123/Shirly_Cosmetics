@@ -33,35 +33,59 @@ function parseDate(val) {
 
 function parseDateISO(val) {
   if (!val) return new Date().toISOString();
-  if (typeof val === 'string') {
-    // Strip trailing 'Z' or '+00:00' to treat it as naive local time (matching API)
-    const cleanVal = val.replace(/Z$/, '').replace(/\+00:00$/, '');
-    
-    // Check for MM/DD/YYYY HH:MM
-    const match = cleanVal.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
-    if (match) {
-      const m = parseInt(match[1], 10);
-      const d = parseInt(match[2], 10);
-      const y = parseInt(match[3], 10);
-      const h = parseInt(match[4], 10);
-      const min = parseInt(match[5], 10);
-      
-      const dateObj = new Date(y, m - 1, d, h, min);
-      if (!isNaN(dateObj.getTime())) {
-        return dateObj.toISOString();
-      }
-    }
-    
-    try {
-      const d = new Date(cleanVal);
-      if (!isNaN(d.getTime())) return d.toISOString();
-    } catch (e) {}
-  }
+  let cleanVal = String(val).replace(/Z$/, '').replace(/\+00:00$/, '').trim();
   
+  let y, m, d, h = 0, min = 0;
+  
+  // 1. Try format MM/DD/YYYY HH:MM or M/D/YYYY H:M
+  let match = cleanVal.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2}))?/);
+  if (match) {
+    m = parseInt(match[1], 10);
+    d = parseInt(match[2], 10);
+    y = parseInt(match[3], 10);
+    if (match[4]) h = parseInt(match[4], 10);
+    if (match[5]) min = parseInt(match[5], 10);
+  } else {
+    // 2. Try ISO format YYYY-MM-DDTHH:mm:ss or YYYY-MM-DD HH:mm:ss
+    match = cleanVal.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2}))?/);
+    if (match) {
+      y = parseInt(match[1], 10);
+      m = parseInt(match[2], 10);
+      d = parseInt(match[3], 10);
+      if (match[4]) h = parseInt(match[4], 10);
+      if (match[5]) min = parseInt(match[5], 10);
+    }
+  }
+
+  if (y && m && d) {
+    try {
+      const utcDate = new Date(Date.UTC(y, m - 1, d, h, min));
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Jerusalem',
+        year: 'numeric', month: 'numeric', day: 'numeric',
+        hour: 'numeric', minute: 'numeric', second: 'numeric',
+        hour12: false
+      });
+      const parts = formatter.formatToParts(utcDate);
+      const f = {};
+      parts.forEach(p => {
+        if (p.type !== 'literal') f[p.type] = parseInt(p.value, 10);
+      });
+      
+      const formattedDate = new Date(Date.UTC(f.year, f.month - 1, f.day, f.hour, f.minute));
+      const diffMs = formattedDate.getTime() - utcDate.getTime();
+      return new Date(utcDate.getTime() - diffMs).toISOString();
+    } catch (e) {
+      console.error('Failed to parse timezone date:', e);
+    }
+  }
+
+  // Fallback to standard parser
   try {
-    const d = new Date(val);
-    if (!isNaN(d.getTime())) return d.toISOString();
+    const dObj = new Date(val);
+    if (!isNaN(dObj.getTime())) return dObj.toISOString();
   } catch (e) {}
+  
   return new Date().toISOString();
 }
 
