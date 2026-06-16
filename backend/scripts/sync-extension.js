@@ -585,7 +585,7 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
 
   // --- 3. SYNC APPOINTMENTS ---
   console.log('📅 [Postgres Sync] מסנכרן פגישות...');
-  const dbApptsRes = await pool.query('SELECT id, easybizy_id, client_id, start_time, status, notes, title FROM appointments');
+  const dbApptsRes = await pool.query('SELECT id, easybizy_id, client_id, therapist_id, treatment_id, start_time, end_time, status, notes, title FROM appointments');
   const apptByEasybizyId = new Map();
   const apptByClientTime = new Map();
   dbApptsRes.rows.forEach(r => {
@@ -725,7 +725,12 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
       batch.forEach((a, idx) => {
         const base = idx * 9;
         placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9})`);
-        values.push(a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.title);
+        
+        // Convert to UTC digit strings to bypass local Node process timezone formatting
+        const startStrUTC = new Date(a.startTime).toISOString().replace('T', ' ').slice(0, 19);
+        const endStrUTC = new Date(a.endTime).toISOString().replace('T', ' ').slice(0, 19);
+        
+        values.push(a.clientId, a.therapistId, a.treatmentId, startStrUTC, endStrUTC, a.status, a.notes, a.easybizyId, a.title);
       });
       const query = `
         INSERT INTO appointments (client_id, therapist_id, treatment_id, start_time, end_time, status, notes, easybizy_id, title)
@@ -740,14 +745,16 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     const BATCH_SIZE = 50;
     for (let i = 0; i < apptsToUpdate.length; i += BATCH_SIZE) {
       const batch = apptsToUpdate.slice(i, i + BATCH_SIZE);
-      await Promise.all(batch.map(a => 
-        pool.query(
+      await Promise.all(batch.map(a => {
+        const startStrUTC = new Date(a.startTime).toISOString().replace('T', ' ').slice(0, 19);
+        const endStrUTC = new Date(a.endTime).toISOString().replace('T', ' ').slice(0, 19);
+        return pool.query(
           `UPDATE appointments 
            SET client_id = $1, therapist_id = $2, treatment_id = $3, start_time = $4, end_time = $5, status = $6, notes = $7, easybizy_id = $8, title = $9
            WHERE id = $10`,
-          [a.clientId, a.therapistId, a.treatmentId, a.startTime, a.endTime, a.status, a.notes, a.easybizyId, a.title, a.id]
-        )
-      ));
+          [a.clientId, a.therapistId, a.treatmentId, startStrUTC, endStrUTC, a.status, a.notes, a.easybizyId, a.title, a.id]
+        );
+      }));
     }
     console.log(`Updated ${apptsToUpdate.length} appointments in PostgreSQL.`);
   }
@@ -765,7 +772,21 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     syncedDates.forEach((dateStr, index) => {
       const base = index * 2;
       conditions.push(`(start_time >= $${base + 1} AND start_time <= $${base + 2})`);
-      values.push(`${dateStr} 00:00:00`, `${dateStr} 23:59:59`);
+      
+      const parts = dateStr.split('-');
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const d = parseInt(parts[2], 10);
+      
+      // Calculate local Israel day bounds in UTC
+      const startLocal = parseDateISO(`${m}/${d}/${y} 00:00`);
+      const endLocal = parseDateISO(`${m}/${d}/${y} 23:59:59`);
+      
+      // Format as UTC YYYY-MM-DD HH:mm:ss strings
+      const startStrUTC = new Date(startLocal).toISOString().replace('T', ' ').slice(0, 19);
+      const endStrUTC = new Date(endLocal).toISOString().replace('T', ' ').slice(0, 19);
+      
+      values.push(startStrUTC, endStrUTC);
     });
     
     const baseIndex = values.length;

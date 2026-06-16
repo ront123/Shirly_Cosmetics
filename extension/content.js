@@ -117,17 +117,19 @@ async function runSync() {
   // --- Step 2: Resolve Appointments ---
   remoteLog("Starting appointment resolution...");
   let mergedAppts = [];
-  if (cachedAppointments && cachedAppointments.length > 0) {
-    remoteLog(`Using cached appointments (${cachedAppointments.length})`);
+  
+  // Prioritize active API fetch for the full week range (includes breaks and all therapists).
+  // Use cached data as fallback only if the API fetch fails.
+  const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
+  remoteLog(`API appointment fetch completed. Found ${apiAppointments ? apiAppointments.length : 0} appointments.`);
+  
+  if (apiAppointments && apiAppointments.length > 0) {
+    mergedAppts = apiAppointments;
+    syncLogSources.push('appointments_api_fetch');
+  } else if (cachedAppointments && cachedAppointments.length > 0) {
+    remoteLog(`Using cached appointments as fallback (${cachedAppointments.length})`);
     mergedAppts = [...cachedAppointments];
-    syncLogSources.push(`appointments_network (${lastInterceptedAppointmentsUrl})`);
-  } else {
-    const apiAppointments = await tryRelativeFetches(getAppointmentPaths());
-    remoteLog(`Appointment resolution completed. Found ${apiAppointments ? apiAppointments.length : 0} appointments via API.`);
-    if (apiAppointments && apiAppointments.length > 0) {
-      mergedAppts = apiAppointments;
-      syncLogSources.push('appointments_api_fetch');
-    }
+    syncLogSources.push(`appointments_network_fallback (${lastInterceptedAppointmentsUrl})`);
   }
   
   finalAppointments = mergedAppts;
