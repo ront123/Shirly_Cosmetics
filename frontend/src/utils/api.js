@@ -1,5 +1,5 @@
 export const API_URL = import.meta.env.MODE === 'development' 
-  ? 'http://127.0.0.1:5000/api'
+  ? 'http://127.0.0.1:5001/api'
   : 'https://shirly-cosmetics-api.onrender.com/api';
 
 export const fetchTreatments = async () => {

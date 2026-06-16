@@ -1,18 +1,12 @@
-import { useState } from 'react';
-import { Plus, Send, Calendar, Edit2, Trash2, CheckCircle, Clock, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Send, Calendar, Edit2, Trash2, CheckCircle, Clock, FileText, Search, Mail, Check, Users } from 'lucide-react';
+import { fetchClients } from '../utils/api';
 
 const STATUS_MAP = {
   sent:      { label: 'נשלח',    badge: 'badge-green',  icon: CheckCircle },
   scheduled: { label: 'מתוזמן',  badge: 'badge-violet', icon: Clock       },
   draft:     { label: 'טיוטה',   badge: 'badge-amber',  icon: FileText    },
 };
-
-const AUDIENCES = [
-  { key: 'inactive', label: 'לקוחות רדומות',    count: 42  },
-  { key: 'all',      label: 'כל הלקוחות',        count: 147 },
-  { key: 'recent',   label: 'ביקרו לאחרונה',     count: 38  },
-  { key: 'birthday', label: 'יום הולדת החודש',   count: 9   },
-];
 
 const INIT = [
   { id: 1, name: 'מבצע קיץ 2026',       audience: 'כל הלקוחות',     count: 85,  status: 'sent',      date: '01/05/26', opened: 72 },
@@ -22,7 +16,7 @@ const INIT = [
 ];
 
 /* ─── Modal: New Campaign ──────────────────────────────────────────────── */
-function NewCampaignModal({ onClose, onSave }) {
+function NewCampaignModal({ onClose, onSave, clients }) {
   const [step,     setStep]     = useState(1);
   const [name,     setName]     = useState('');
   const [audience, setAudience] = useState('');
@@ -31,9 +25,39 @@ function NewCampaignModal({ onClose, onSave }) {
   const [date,     setDate]     = useState('');
   const [time,     setTime]     = useState('10:00');
 
-  const sel = AUDIENCES.find(a => a.key === audience);
-  const canNext1 = name && audience;
+  // Manual list selection state
+  const [selectedManualIds, setSelectedManualIds] = useState(new Set());
+  const [clientSearch, setClientSearch] = useState('');
+
+  const thisMonth = new Date().getMonth() + 1;
+  const totalClients = clients.length;
+  const inactiveCount = clients.filter(c => c.status === 'inactive').length;
+  const recentCount = clients.filter(c => c.status === 'active').length;
+  const birthdayCount = clients.filter(c => c.birthday && parseInt(c.birthday.slice(5, 7), 10) === thisMonth).length;
+
+  const dynamicAudiences = [
+    { key: 'all',      label: 'כל הלקוחות',        count: totalClients },
+    { key: 'inactive', label: 'לקוחות רדומות',    count: inactiveCount },
+    { key: 'recent',   label: 'ביקרו לאחרונה',     count: recentCount   },
+    { key: 'birthday', label: 'יום הולדת החודש',   count: birthdayCount },
+    { key: 'manual',   label: 'בחירה ידנית',       count: selectedManualIds.size }
+  ];
+
+  const sel = dynamicAudiences.find(a => a.key === audience);
+  const canNext1 = name && audience && (audience !== 'manual' || selectedManualIds.size > 0);
   const canNext2 = msg.length >= 10;
+
+  const filteredClients = clients.filter(c => 
+    c.name.toLowerCase().includes(clientSearch.toLowerCase()) || 
+    c.phone.includes(clientSearch)
+  );
+
+  const selectedFiltered = filteredClients.filter(c => selectedManualIds.has(c.id));
+  const unselectedFiltered = filteredClients.filter(c => !selectedManualIds.has(c.id));
+  const displayedClients = [
+    ...selectedFiltered,
+    ...unselectedFiltered.slice(0, 50)
+  ];
 
   const save = () => {
     onSave({
@@ -42,6 +66,9 @@ function NewCampaignModal({ onClose, onSave }) {
       status: sendMode === 'now' ? 'sent' : 'scheduled',
       date: sendMode === 'now' ? new Date().toLocaleDateString('he-IL') : `${date} ${time}`,
       opened: 0,
+      messageText: msg,
+      targetAudienceKey: audience,
+      manualClientIds: audience === 'manual' ? Array.from(selectedManualIds) : []
     });
     onClose();
   };
@@ -102,7 +129,7 @@ function NewCampaignModal({ onClose, onSave }) {
               <div>
                 <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>קהל יעד *</label>
                 <div className="grid grid-cols-2 gap-2">
-                  {AUDIENCES.map(a => (
+                  {dynamicAudiences.map(a => (
                     <button key={a.key} onClick={() => setAudience(a.key)}
                       className="flex items-center justify-between rounded-xl text-right transition-all"
                       style={{ padding: '10px 14px', cursor: 'pointer',
@@ -113,6 +140,69 @@ function NewCampaignModal({ onClose, onSave }) {
                     </button>
                   ))}
                 </div>
+                {audience === 'manual' && (
+                  <div className="space-y-3 mt-3 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+                    <div className="relative">
+                      <Search size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-faint)' }} />
+                      <input 
+                        className="input-dark" 
+                        style={{ paddingRight: 32, fontSize: 13 }}
+                        placeholder="חיפוש לקוחה..."
+                        value={clientSearch}
+                        onChange={e => setClientSearch(e.target.value)}
+                      />
+                    </div>
+                    <div className="rounded-xl overflow-hidden max-h-48 overflow-y-auto space-y-1 p-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                      <label className="flex items-center gap-2.5 p-2 rounded-lg cursor-pointer hover:bg-black/10">
+                        <input 
+                          type="checkbox"
+                          checked={filteredClients.length > 0 && filteredClients.every(c => selectedManualIds.has(c.id))}
+                          onChange={() => {
+                            const allSelected = filteredClients.every(c => selectedManualIds.has(c.id));
+                            setSelectedManualIds(prev => {
+                              const next = new Set(prev);
+                              filteredClients.forEach(c => {
+                                if (allSelected) next.delete(c.id);
+                                else next.add(c.id);
+                              });
+                              return next;
+                            });
+                          }}
+                          style={{ cursor: 'pointer', width: 14, height: 14, accentColor: 'var(--accent)' }}
+                        />
+                        <span className="font-bold text-xs" style={{ color: 'var(--text-primary)' }}>בחר הכל מסוננים</span>
+                      </label>
+                      
+                      {displayedClients.map(c => (
+                        <label key={c.id} className="flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-black/10">
+                          <div className="flex items-center gap-2.5">
+                            <input 
+                              type="checkbox"
+                              checked={selectedManualIds.has(c.id)}
+                              onChange={() => {
+                                setSelectedManualIds(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(c.id)) next.delete(c.id);
+                                  else next.add(c.id);
+                                  return next;
+                                });
+                              }}
+                              style={{ cursor: 'pointer', width: 14, height: 14, accentColor: 'var(--accent)' }}
+                            />
+                            <span className="font-medium text-xs" style={{ color: 'var(--text-primary)' }}>{c.name}</span>
+                          </div>
+                          <span className="text-xs" style={{ color: 'var(--text-muted)' }} dir="ltr">{c.phone}</span>
+                        </label>
+                      ))}
+
+                      {unselectedFiltered.length > 50 && (
+                        <div className="text-center p-2 text-xs" style={{ color: 'var(--text-faint)', borderTop: '1px solid var(--border)' }}>
+                          מציג {displayedClients.length} מתוך {filteredClients.length} לקוחות. השתמש בחיפוש למציאת לקוחות נוספים.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </>}
 
@@ -201,11 +291,155 @@ function NewCampaignModal({ onClose, onSave }) {
   );
 }
 
+/* ─── Modal: WhatsApp Group Sender ─────────────────────────────────────────────── */
+function SendGroupMessageModal({ selectedClients, messageTemplate, onClose }) {
+  const [template, setTemplate] = useState(messageTemplate || '');
+  const [sentStatus, setSentStatus] = useState({}); // client.id -> boolean
+
+  const handleSendSingle = (client) => {
+    const cleanPhone = client.phone.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
+    const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
+    const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
+    window.open(url, '_blank');
+    setSentStatus(prev => ({ ...prev, [client.id]: true }));
+  };
+
+  const handleSendAll = () => {
+    let delay = 0;
+    selectedClients.forEach(client => {
+      setTimeout(() => {
+        const cleanPhone = client.phone.replace(/\D/g, '');
+        const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
+        const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
+        const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
+        window.open(url, '_blank');
+        setSentStatus(prev => ({ ...prev, [client.id]: true }));
+      }, delay);
+      delay += 1200; // 1.2s delay to prevent browser blockages
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full" style={{ maxWidth: 560, margin: '0 16px' }}>
+        <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-3">
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Mail size={16} style={{ color: 'var(--accent)' }} />
+              </div>
+              <h3 className="font-black" style={{ color: 'var(--text-primary)' }}>שליחת קמפיין ב-WhatsApp</h3>
+            </div>
+            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>תוכן ההודעה</label>
+              <textarea className="input-dark resize-none font-sans" rows={5}
+                value={template}
+                onChange={e => setTemplate(e.target.value)}
+                placeholder="הקלד את ההודעה כאן..."
+                style={{ direction: 'rtl', width: '100%' }}
+              />
+              <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>💡 השתמש בתג <b>[שם_הלקוחה]</b> כדי להחליף אוטומטית בשם הלקוחה.</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+                רשימת נמענים ({selectedClients.length})
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {selectedClients.map(client => (
+                  <div key={client.id} className="flex items-center justify-between p-2.5 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                    <div>
+                      <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{client.name}</span>
+                      <span className="text-xs block" style={{ color: 'var(--text-muted)', marginTop: 2 }} dir="ltr">{client.phone}</span>
+                    </div>
+                    <button 
+                      onClick={() => handleSendSingle(client)}
+                      className="btn-ghost"
+                      style={{ fontSize: 12, padding: '4px 10px', height: 'auto', background: sentStatus[client.id] ? 'var(--green-light)' : 'transparent', color: sentStatus[client.id] ? 'var(--green)' : 'var(--text-secondary)', borderColor: sentStatus[client.id] ? 'var(--green-border)' : 'var(--border)' }}
+                    >
+                      {sentStatus[client.id] ? '✓ נפתח' : 'פתח צ\'אט'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="rounded-xl p-3 text-xs" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', color: 'var(--amber)', lineHeight: 1.5 }}>
+              ⚠️ שים לב: פתיחת מספר צ'אטים במקביל תפתח כרטיסיות חדשות בדפדפן. אם הדפדפן חוסם חלונות קופצים (Pop-ups), יש לאשר פתיחת פופ-אפים מהאתר הנוכחי.
+            </div>
+          </div>
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <button onClick={onClose} className="btn-ghost">סגור</button>
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSendAll}
+                className="btn-primary" 
+                style={{ background: '#25d366', color: '#fff', border: 'none', boxShadow: '0 2px 10px rgba(37,211,102,0.3)' }}
+              >
+                פתח את כל הצ'אטים
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Campaigns Page ─────────────────────────────────────────────── */
 export default function Campaigns() {
   const [campaigns, setCampaigns] = useState(INIT);
   const [showModal, setShowModal] = useState(false);
   const [filter,    setFilter]    = useState('all');
+  const [clients,   setClients]   = useState([]);
+  
+  // Group sending state
+  const [groupClients, setGroupClients] = useState([]);
+  const [groupMsgText, setGroupMsgText] = useState('');
+  const [showGroupSender, setShowGroupSender] = useState(false);
+
+  useEffect(() => {
+    fetchClients()
+      .then(data => {
+        if (data && data.length > 0) {
+          setClients(data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch clients:', err));
+  }, []);
+
+  const handleSaveCampaign = (c) => {
+    setCampaigns(prev => [c, ...prev]);
+
+    if (c.status === 'sent') {
+      const thisMonth = new Date().getMonth() + 1;
+      let targetList = [];
+      if (c.targetAudienceKey === 'all') {
+        targetList = clients;
+      } else if (c.targetAudienceKey === 'inactive') {
+        targetList = clients.filter(x => x.status === 'inactive');
+      } else if (c.targetAudienceKey === 'recent') {
+        targetList = clients.filter(x => x.status === 'active');
+      } else if (c.targetAudienceKey === 'birthday') {
+        targetList = clients.filter(x => x.birthday && parseInt(x.birthday.slice(5, 7), 10) === thisMonth);
+      } else if (c.targetAudienceKey === 'manual') {
+        const manualIdsSet = new Set(c.manualClientIds || []);
+        targetList = clients.filter(x => manualIdsSet.has(x.id));
+      }
+
+      if (targetList.length > 0) {
+        setGroupClients(targetList);
+        setGroupMsgText(c.messageText || '');
+        setShowGroupSender(true);
+      }
+    }
+  };
 
   const FILTERS = [
     { key: 'all',      label: 'הכל'      },
@@ -224,7 +458,14 @@ export default function Campaigns() {
 
   return (
     <div dir="rtl" className="space-y-6">
-      {showModal && <NewCampaignModal onClose={() => setShowModal(false)} onSave={c => setCampaigns(p => [c, ...p])} />}
+      {showModal && <NewCampaignModal onClose={() => setShowModal(false)} onSave={handleSaveCampaign} clients={clients} />}
+      {showGroupSender && (
+        <SendGroupMessageModal 
+          selectedClients={groupClients} 
+          messageTemplate={groupMsgText}
+          onClose={() => setShowGroupSender(false)} 
+        />
+      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">
