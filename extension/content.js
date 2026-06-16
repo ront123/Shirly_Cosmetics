@@ -267,29 +267,34 @@ async function tryRelativeFetches(paths) {
     headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`;
   }
 
-  let allResults = [];
-
   for (const path of paths) {
     const url = `${origin}${path}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     try {
       // Encode spaces manually just in case
       const fetchUrl = url.replace(/ /g, '%20');
-      const res = await fetch(fetchUrl, { method: 'GET', headers: headers });
+      const res = await fetch(fetchUrl, { 
+        method: 'GET', 
+        headers: headers,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const data = await res.json();
         const array = extractArray(data);
         if (array && array.length > 0) {
           console.log(`[Shirly Sync] Relative fetch succeeded: ${url} (found ${array.length} items)`);
-          allResults = allResults.concat(array);
+          return array; // Return immediately on first successful result
         }
       }
     } catch (e) {
-      console.log(`[Shirly Sync] Fetch relative ${path} failed:`, e);
+      clearTimeout(timeoutId);
+      console.log(`[Shirly Sync] Fetch relative ${path} failed or timed out:`, e);
     }
-  }
-  
-  if (allResults.length > 0) {
-    return allResults;
   }
   return null;
 }
