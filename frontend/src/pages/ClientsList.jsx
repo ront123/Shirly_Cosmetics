@@ -466,6 +466,109 @@ function ExcelImportModal({ onClose, onImport }) {
 }
 
 /* ══════════════════════════════════════════════════════════
+   SEND GROUP MESSAGE MODAL
+══════════════════════════════════════════════════════════ */
+function SendGroupMessageModal({ selectedClients, onClose, onClearSelection }) {
+  const [template, setTemplate] = useState('היי [שם_הלקוחה], מה שלומך? 🌸\nרציתי להציע לך...');
+  const [sentStatus, setSentStatus] = useState({}); // client.id -> boolean
+
+  const handleSendSingle = (client) => {
+    const cleanPhone = client.phone.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
+    const msgText = template.replace(/\[שם_הלקוחה\]/g, client.name);
+    const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
+    window.open(url, '_blank');
+    setSentStatus(prev => ({ ...prev, [client.id]: true }));
+  };
+
+  const handleSendAll = () => {
+    let delay = 0;
+    selectedClients.forEach(client => {
+      setTimeout(() => {
+        const cleanPhone = client.phone.replace(/\D/g, '');
+        const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
+        const msgText = template.replace(/\[שם_הלקוחה\]/g, client.name);
+        const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
+        window.open(url, '_blank');
+        setSentStatus(prev => ({ ...prev, [client.id]: true }));
+      }, delay);
+      delay += 1200; // 1.2s delay to prevent browser blockages
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full" style={{ maxWidth: 560, margin: '0 16px' }}>
+        <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-3">
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Mail size={16} style={{ color: 'var(--accent)' }} />
+              </div>
+              <h3 className="font-black" style={{ color: 'var(--text-primary)' }}>שליחת הודעה קבוצתית</h3>
+            </div>
+            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>תוכן ההודעה</label>
+              <textarea className="input-dark resize-none font-sans" rows={5}
+                value={template}
+                onChange={e => setTemplate(e.target.value)}
+                placeholder="הקלד את ההודעה כאן..."
+                style={{ direction: 'rtl', width: '100%' }}
+              />
+              <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>💡 השתמש בתג <b>[שם_הלקוחה]</b> כדי להחליף אוטומטית בשם הלקוחה.</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
+                רשימת נמענים ({selectedClients.length})
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                {selectedClients.map(client => (
+                  <div key={client.id} className="flex items-center justify-between p-2.5 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                    <div>
+                      <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{client.name}</span>
+                      <span className="text-xs block" style={{ color: 'var(--text-muted)', marginTop: 2 }} dir="ltr">{client.phone}</span>
+                    </div>
+                    <button 
+                      onClick={() => handleSendSingle(client)}
+                      className="btn-ghost"
+                      style={{ fontSize: 12, padding: '4px 10px', height: 'auto', background: sentStatus[client.id] ? 'var(--green-light)' : 'transparent', color: sentStatus[client.id] ? 'var(--green)' : 'var(--text-secondary)', borderColor: sentStatus[client.id] ? 'var(--green-border)' : 'var(--border)' }}
+                    >
+                      {sentStatus[client.id] ? '✓ נפתח' : 'פתח צ\'אט'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="rounded-xl p-3 text-xs" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', color: 'var(--amber)', lineHeight: 1.5 }}>
+              ⚠️ שים לב: פתיחת מספר צ'אטים במקביל תפתח כרטיסיות חדשות בדפדפן. אם הדפדפן חוסם חלונות קופצים (Pop-ups), יש לאשר פתיחת פופ-אפים מהאתר הנוכחי.
+            </div>
+          </div>
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <button onClick={onClose} className="btn-ghost">סגור</button>
+            <div className="flex gap-2">
+              <button 
+                onClick={handleSendAll}
+                className="btn-primary" 
+                style={{ background: '#25d366', color: '#fff', border: 'none', boxShadow: '0 2px 10px rgba(37,211,102,0.3)' }}
+              >
+                פתח את כל הצ'אטים
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
    MAIN PAGE
 ══════════════════════════════════════════════════════════ */
 export default function ClientsList() {
@@ -475,6 +578,9 @@ export default function ClientsList() {
   const [showNew,     setShowNew]     = useState(false);
   const [showImport,  setShowImport]  = useState(false);
   const [selected,    setSelected]    = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [showGroupMsg, setShowGroupMsg] = useState(false);
+  const [groupClients, setGroupClients] = useState([]);
 
   useEffect(() => {
     fetchClients()
@@ -492,7 +598,10 @@ export default function ClientsList() {
   const thisMonth = new Date().getMonth() + 1;
 
   const visible = clients.filter(c => {
-    const matchSearch = c.name.includes(search) || c.phone.includes(search) || (c.email || '').toLowerCase().includes(search.toLowerCase());
+    const matchSearch = 
+      c.name.toLowerCase().includes(search.toLowerCase()) || 
+      c.phone.includes(search) || 
+      (c.email || '').toLowerCase().includes(search.toLowerCase());
     let matchFilter = true;
     if (filter === 'active')   matchFilter = c.status === 'active';
     if (filter === 'inactive') matchFilter = c.status === 'inactive';
@@ -502,6 +611,35 @@ export default function ClientsList() {
     }
     return matchSearch && matchFilter;
   });
+
+  const handleSelectClient = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    const allVisibleSelected = visible.length > 0 && visible.every(c => selectedIds.has(c.id));
+    if (allVisibleSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        visible.forEach(c => next.delete(c.id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        visible.forEach(c => next.add(c.id));
+        return next;
+      });
+    }
+  };
 
   const stats = {
     total:    clients.length,
@@ -515,6 +653,16 @@ export default function ClientsList() {
       {showNew    && <NewClientModal   onClose={() => setShowNew(false)}    onSave={addClient} />}
       {showImport && <ExcelImportModal onClose={() => setShowImport(false)} onImport={addBulk} />}
       {selected   && <ClientPanel client={selected} onClose={() => setSelected(null)} />}
+      {showGroupMsg && (
+        <SendGroupMessageModal 
+          selectedClients={groupClients} 
+          onClose={() => setShowGroupMsg(false)} 
+          onClearSelection={() => {
+            setSelectedIds(new Set());
+            setShowGroupMsg(false);
+          }}
+        />
+      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -580,6 +728,14 @@ export default function ClientsList() {
             <table className="w-full" dir="rtl">
               <thead style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
                 <tr>
+                  <th className="py-3 px-4 w-1 text-right">
+                    <input 
+                      type="checkbox" 
+                      checked={visible.length > 0 && visible.every(c => selectedIds.has(c.id))}
+                      onChange={handleSelectAll}
+                      style={{ cursor: 'pointer', width: 15, height: 15, accentColor: 'var(--accent)' }}
+                    />
+                  </th>
                   {['לקוחה', 'טלפון', 'מגדר', 'ביקור אחרון', 'ביקורים', 'ממוצע חשבונית', 'סה"כ הוצאה', 'יתרת לקוח', 'סטטוס', ''].map((h, i) => (
                     <th key={i} className="text-right text-xs font-bold py-3 px-4" style={{ color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
@@ -592,6 +748,15 @@ export default function ClientsList() {
                     style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.15s ease' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    {/* Checkbox */}
+                    <td className="py-3 px-4 w-1" onClick={e => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.has(c.id)}
+                        onChange={() => handleSelectClient(c.id)}
+                        style={{ cursor: 'pointer', width: 15, height: 15, accentColor: 'var(--accent)' }}
+                      />
+                    </td>
                     {/* Name */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
@@ -658,6 +823,47 @@ export default function ClientsList() {
       <p style={{ fontSize: 12, color: 'var(--text-faint)', textAlign: 'center' }}>
         מוצגות {visible.length} מתוך {clients.length} לקוחות
       </p>
+
+      {/* Floating Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-40 flex items-center justify-between gap-6 px-6 py-4 rounded-2xl shadow-2xl animate-fade-in"
+          style={{ 
+            background: 'var(--bg-surface)', 
+            border: '1.5px solid var(--accent)', 
+            width: '90%', 
+            maxWidth: 600,
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="font-black text-sm px-2.5 py-1 rounded-lg" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+              {selectedIds.size}
+            </div>
+            <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>לקוחות נבחרו</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => {
+                const selectedList = clients.filter(c => selectedIds.has(c.id));
+                setGroupClients(selectedList);
+                setShowGroupMsg(true);
+              }}
+              className="btn-primary"
+              style={{ background: 'var(--accent)', color: '#fff', fontSize: 13, gap: 6 }}
+            >
+              <Mail size={14} /> שליחת הודעה
+            </button>
+            <button 
+              onClick={() => setSelectedIds(new Set())}
+              className="btn-ghost"
+              style={{ fontSize: 13 }}
+            >
+              ביטול
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

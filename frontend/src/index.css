@@ -213,5 +213,10 @@ html, body {
   to   { transform: translateX(0);     opacity: 1; }
 }
 
+@keyframes slideUp {
+  from { transform: translate(-50%, 40px); opacity: 0; }
+  to   { transform: translate(-50%, 0);     opacity: 1; }
+}
+
 .w-full { width: 100%; }
 
