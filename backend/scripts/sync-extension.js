@@ -480,23 +480,49 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     if (existingId) {
       const existingClient = clientMapById.get(existingId);
       if (existingClient) {
+        // Safe mapping: use remote value if it's set/non-zero, otherwise preserve the existing DB value
+        const finalEmail = email || existingClient.email || '';
+        const finalLastVisit = lastVisit || (existingClient.last_visit_date ? new Date(existingClient.last_visit_date) : null);
+        const finalDob = dob || (existingClient.date_of_birth ? new Date(existingClient.date_of_birth) : null);
+        const finalVisits = visits > 0 ? visits : (parseInt(existingClient.visits, 10) || 0);
+        const finalAvgInvoice = avgInvoice > 0 ? avgInvoice : (Math.round(parseFloat(existingClient.avg_invoice)) || 0);
+        const finalAddress = address || existingClient.address || '';
+        const finalSource = source || existingClient.source || '';
+        const finalGender = gender || existingClient.gender || '';
+        const finalBalance = balance !== 0 ? balance : (parseFloat(existingClient.balance) || 0);
+
         const hasChanged = 
           existingClient.first_name !== firstName ||
           existingClient.last_name !== lastName ||
           existingClient.phone_number !== phone ||
-          (existingClient.email || '') !== (email || '') ||
+          (existingClient.email || '') !== finalEmail ||
           (existingClient.easybizy_id || '') !== (easybizyId || '') ||
-          (existingClient.address || '') !== (address || '') ||
-          (existingClient.source || '') !== (source || '') ||
-          (existingClient.gender || '') !== (gender || '') ||
-          Number(existingClient.balance || 0) !== Number(balance || 0) ||
-          Number(existingClient.visits || 0) !== Number(visits || 0) ||
-          Number(existingClient.avg_invoice || 0) !== Number(avgInvoice || 0) ||
-          (existingClient.last_visit_date ? new Date(existingClient.last_visit_date).getTime() : 0) !== (lastVisit ? new Date(lastVisit).getTime() : 0) ||
-          (existingClient.date_of_birth ? new Date(existingClient.date_of_birth).getTime() : 0) !== (dob ? new Date(dob).getTime() : 0);
+          (existingClient.address || '') !== finalAddress ||
+          (existingClient.source || '') !== finalSource ||
+          (existingClient.gender || '') !== finalGender ||
+          Number(existingClient.balance || 0) !== finalBalance ||
+          Number(existingClient.visits || 0) !== finalVisits ||
+          Number(existingClient.avg_invoice || 0) !== finalAvgInvoice ||
+          (existingClient.last_visit_date ? new Date(existingClient.last_visit_date).getTime() : 0) !== (finalLastVisit ? new Date(finalLastVisit).getTime() : 0) ||
+          (existingClient.date_of_birth ? new Date(existingClient.date_of_birth).getTime() : 0) !== (finalDob ? new Date(finalDob).getTime() : 0);
 
         if (hasChanged) {
-          clientsToUpdate.push({ id: existingId, ...clientObj });
+          clientsToUpdate.push({
+            id: existingId,
+            firstName,
+            lastName,
+            phone: phone || existingClient.phone_number,
+            email: finalEmail,
+            lastVisit: finalLastVisit,
+            dob: finalDob,
+            visits: finalVisits,
+            avgInvoice: finalAvgInvoice,
+            easybizyId,
+            address: finalAddress,
+            source: finalSource,
+            gender: finalGender,
+            balance: finalBalance
+          });
         }
       } else {
         clientsToUpdate.push({ id: existingId, ...clientObj });
@@ -532,16 +558,16 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
         ON CONFLICT (phone_number) DO UPDATE SET
           first_name = EXCLUDED.first_name,
           last_name = EXCLUDED.last_name,
-          email = EXCLUDED.email,
-          last_visit_date = EXCLUDED.last_visit_date,
-          date_of_birth = EXCLUDED.date_of_birth,
-          visits = EXCLUDED.visits,
-          avg_invoice = EXCLUDED.avg_invoice,
-          easybizy_id = EXCLUDED.easybizy_id,
-          address = EXCLUDED.address,
-          source = EXCLUDED.source,
-          gender = EXCLUDED.gender,
-          balance = EXCLUDED.balance
+          email = CASE WHEN EXCLUDED.email <> '' THEN EXCLUDED.email ELSE clients.email END,
+          last_visit_date = CASE WHEN EXCLUDED.last_visit_date IS NOT NULL THEN EXCLUDED.last_visit_date ELSE clients.last_visit_date END,
+          date_of_birth = CASE WHEN EXCLUDED.date_of_birth IS NOT NULL THEN EXCLUDED.date_of_birth ELSE clients.date_of_birth END,
+          visits = CASE WHEN EXCLUDED.visits > 0 THEN EXCLUDED.visits ELSE clients.visits END,
+          avg_invoice = CASE WHEN EXCLUDED.avg_invoice > 0 THEN EXCLUDED.avg_invoice ELSE clients.avg_invoice END,
+          easybizy_id = COALESCE(EXCLUDED.easybizy_id, clients.easybizy_id),
+          address = CASE WHEN EXCLUDED.address <> '' THEN EXCLUDED.address ELSE clients.address END,
+          source = CASE WHEN EXCLUDED.source <> '' THEN EXCLUDED.source ELSE clients.source END,
+          gender = COALESCE(EXCLUDED.gender, clients.gender),
+          balance = CASE WHEN EXCLUDED.balance <> 0 THEN EXCLUDED.balance ELSE clients.balance END
         RETURNING id, first_name, last_name, phone_number, easybizy_id
       `;
       const res = await pool.query(query, values);
@@ -802,6 +828,44 @@ async function syncToPostgres(rawCustomers, rawAppointments, syncedDatesArray = 
     }
     
     await pool.query(query, values);
+  }
+
+  // --- 5. RECALCULATE CLIENT STATISTICS FROM APPOINTMENTS ---
+  try {
+    console.log('📊 [Postgres Sync] מעדכן סטטיסטיקות לקוחות מתוך הפגישות...');
+    await pool.query(`
+      WITH client_stats AS (
+        SELECT 
+          client_id,
+          COUNT(*) as actual_visits,
+          MAX(start_time) as actual_last_visit
+        FROM appointments
+        WHERE status != 'cancelled'
+          AND start_time <= NOW()
+          AND client_id IS NOT NULL
+        GROUP BY client_id
+      )
+      UPDATE clients c
+      SET 
+        visits = GREATEST(COALESCE(c.visits, 0), COALESCE(s.actual_visits, 0)),
+        last_visit_date = COALESCE(
+          (
+            SELECT MAX(v)
+            FROM (
+              SELECT c.last_visit_date AS v
+              UNION ALL
+              SELECT s.actual_last_visit AS v
+            ) uv
+            WHERE v IS NOT NULL
+          ),
+          c.last_visit_date
+        )
+      FROM client_stats s
+      WHERE c.id = s.client_id
+    `);
+    console.log('📊 [Postgres Sync] סטטיסטיקות הלקוחות עודכנו בהצלחה.');
+  } catch (recalcErr) {
+    console.warn('⚠️ [Postgres Sync] שגיאה בעדכון סטטיסטיקות לקוחות:', recalcErr.message);
   }
 
   console.log('✅ [Postgres Sync] הסנכרון לבסיס הנתונים הושלם בהצלחה.');
