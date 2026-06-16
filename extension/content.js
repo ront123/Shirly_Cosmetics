@@ -270,7 +270,7 @@ async function tryRelativeFetches(paths) {
   for (const path of paths) {
     const url = `${origin}${path}`;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 35000); // 35 seconds to allow large payloads to load
 
     try {
       // Encode spaces manually just in case
