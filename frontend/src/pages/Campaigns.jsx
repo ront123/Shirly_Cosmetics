@@ -445,7 +445,7 @@ function SendGroupMessageModal({ selectedClients, messageTemplate, onClose }) {
     const cleanPhone = client.phone.replace(/\D/g, '');
     const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
     const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
-    const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
+    const url = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msgText)}`;
     window.open(url, '_blank');
     setSentStatus(prev => ({ ...prev, [client.id]: true }));
   };
@@ -457,7 +457,7 @@ function SendGroupMessageModal({ selectedClients, messageTemplate, onClose }) {
         const cleanPhone = client.phone.replace(/\D/g, '');
         const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
         const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
-        const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(msgText)}`;
+        const url = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msgText)}`;
         window.open(url, '_blank');
         setSentStatus(prev => ({ ...prev, [client.id]: true }));
       }, delay);
