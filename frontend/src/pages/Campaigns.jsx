@@ -839,6 +839,7 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
   const [linkPos, setLinkPos] = useState({ x: 50, y: 55 });
   const [showBookingLink, setShowBookingLink] = useState(false);
   const [bookingLinkPos, setBookingLinkPos] = useState({ x: 50, y: 70 });
+  const [bookingUrl, setBookingUrl] = useState(window.location.origin + '/book');
   const [scheduleType, setScheduleType] = useState('recurring'); // recurring, once
   const [selectedDays, setSelectedDays] = useState([]);
   const [selectedHours, setSelectedHours] = useState([]);
@@ -969,6 +970,7 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
       linkPos,
       showBookingLink,
       bookingLinkPos,
+      bookingUrl: bookingUrl.trim(),
       scheduleType,
       selectedDays,
       selectedHours,
@@ -1126,9 +1128,19 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
                   </span>
                 </label>
                 {showBookingLink && (
-                  <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, marginRight: 24 }}>
-                    כפתור "לתיאום תור" יקשר לעמוד התורים שלך. תוכלי לגרור אותו לכל מקום בתצוגה המקדימה.
-                  </p>
+                  <div className="mt-3 space-y-2 pr-6">
+                    <label className="block text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>קישור לעמוד התורים *</label>
+                    <input 
+                      className="input-dark" 
+                      style={{ fontSize: 12, padding: '6px 10px' }}
+                      placeholder="לדוגמא: https://shirly-cosmetics.vercel.app/book" 
+                      value={bookingUrl} 
+                      onChange={e => setBookingUrl(e.target.value)} 
+                    />
+                    <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
+                      כפתור "לתיאום תור" יקשר לכתובת זו. תוכלי לגרור אותו לכל מקום בתצוגה המקדימה.
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -1313,7 +1325,7 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
                   )}
 
                   {showBookingLink && (
-                    <a href="/book" onClick={e => e.preventDefault()}
+                    <a href={bookingUrl} onClick={e => e.preventDefault()}
                       className="flex items-center gap-1.5 text-center font-black px-3.5 py-1.5 rounded-full text-[9px] tracking-wider pointer-events-auto cursor-grab active:cursor-grabbing select-none"
                       onMouseDown={e => handleDragStart(e, 'booking', bookingLinkPos, setBookingLinkPos)}
                       onTouchStart={e => handleTouchStart(e, 'booking', bookingLinkPos, setBookingLinkPos)}
