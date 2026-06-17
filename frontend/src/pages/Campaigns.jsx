@@ -558,42 +558,50 @@ const getDisplayLink = (url) => {
 
 /* ─── Modal: Meta Authorization Simulator ─────────────────────────── */
 function MetaAuthModal({ onClose, onConnect }) {
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1); // 1: Login Form, 2: Loading, 3: Account Selector
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [progress, setProgress] = useState(0);
-  const [username, setUsername] = useState('shirly_cosmetics');
+  const [selectedProfile, setSelectedProfile] = useState('shirly_cosmetics');
 
-  const handleConnect = () => {
-    setLoading(true);
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) return;
+    setStep(2);
     setProgress(10);
   };
 
   useEffect(() => {
-    if (!loading) return;
+    if (step !== 2) return;
     const interval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setTimeout(() => {
-            onConnect({
-              username: username.trim().toLowerCase().replace(/^@/, ''),
-              name: username.toLowerCase().includes('shirly') ? 'שירלי קוסמטיקס' : username,
-              avatar: null,
-              followers: 1247
-            });
-            onClose();
-          }, 400);
+            setStep(3);
+          }, 300);
           return 100;
         }
         return prev + 15;
       });
-    }, 150);
+    }, 120);
     return () => clearInterval(interval);
-  }, [loading, username]);
+  }, [step]);
+
+  const handleConnect = () => {
+    onConnect({
+      username: selectedProfile.trim().toLowerCase().replace(/^@/, ''),
+      name: selectedProfile.toLowerCase().includes('shirly') ? 'שירלי קוסמטיקס' : selectedProfile,
+      avatar: null,
+      followers: 1247
+    });
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center" dir="rtl"
       style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
-      onClick={e => e.target === e.currentTarget && !loading && onClose()}>
+      onClick={e => e.target === e.currentTarget && step !== 2 && onClose()}>
       <div className="w-full" style={{ maxWidth: 460, margin: '0 16px' }}>
         <div className="card overflow-hidden" style={{ background: '#1877f2', border: '1px solid rgba(255,255,255,0.1)' }}>
           {/* Header */}
@@ -604,77 +612,142 @@ function MetaAuthModal({ onClose, onConnect }) {
               </div>
               <span className="font-black text-sm text-white">התחברות עם Meta</span>
             </div>
-            {!loading && <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 18 }}>✕</button>}
+            {step !== 2 && <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 18 }}>✕</button>}
           </div>
 
           {/* Body */}
-          <div className="px-6 py-8 text-center text-white space-y-6">
-            {!loading ? (
-              <>
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="flex items-center justify-center font-bold" style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                    <Instagram size={28} />
+          <div className="px-6 py-8 text-white">
+            {step === 1 && (
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="flex flex-col items-center space-y-2 mb-2">
+                  <div className="flex items-center justify-center font-bold text-white text-3xl" style={{ fontFamily: 'sans-serif', fontWeight: 800 }}>
+                    facebook
                   </div>
-                  <h4 className="font-extrabold text-lg">קישור חשבון אינסטגרם עסקי</h4>
-                  <p className="text-xs text-blue-100 max-w-sm mx-auto leading-relaxed">
-                    כדי לתזמן ולפרסם סטוריז באופן אוטומטי, יש להעניק הרשאות ניהול ל-Shirly Cosmetics דרך Meta Business Suite.
+                  <p className="text-xs text-blue-100 text-center leading-relaxed">
+                    התחברי לחשבון הפייסבוק שמנהל את הדף העסקי שלך כדי לקשר את חשבון האינסטגרם
                   </p>
                 </div>
 
-                <div className="space-y-2 text-right">
-                  <label className="block text-xs font-bold text-blue-100">שם משתמש באינסטגרם (Username) *</label>
-                  <div className="relative">
-                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>@</span>
+                <div className="space-y-3">
+                  <div className="text-right">
+                    <label className="block text-xs font-bold text-blue-100 mb-1">אימייל או מספר טלפון</label>
                     <input 
                       type="text" 
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2.5 pl-3 text-white placeholder-white/30 outline-none text-left" 
-                      style={{ paddingRight: 28, direction: 'ltr' }}
-                      value={username}
-                      onChange={e => setUsername(e.target.value)}
-                      placeholder="username"
+                      required
+                      placeholder="example@email.com"
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 outline-none text-left" 
+                      style={{ direction: 'ltr' }}
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="text-right">
+                    <label className="block text-xs font-bold text-blue-100 mb-1">סיסמה</label>
+                    <input 
+                      type="password" 
+                      required
+                      placeholder="••••••••"
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 outline-none text-left" 
+                      style={{ direction: 'ltr' }}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
                     />
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-black/15 p-4 text-xs text-right space-y-2 text-blue-50 border border-white/5">
-                  <p className="font-bold text-white mb-1">הרשאות מבוקשות:</p>
-                  <div className="flex items-start gap-2">
-                    <span className="text-[10px] mt-0.5">✓</span>
-                    <span>ניהול ופרסום סטוריז ותוכן בחשבון האינסטגרם שלך</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-[10px] mt-0.5">✓</span>
-                    <span>גישה לפרטי הפרופיל (שם משתמש, תמונת פרופיל)</span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="py-8 space-y-4">
+                <button 
+                  type="submit" 
+                  disabled={!email.trim() || !password.trim()}
+                  className="w-full py-3 mt-4 bg-white text-[#1877f2] font-black text-sm rounded-xl hover:bg-blue-50 transition-all border-none cursor-pointer shadow-md"
+                  style={{ opacity: (email.trim() && password.trim()) ? 1 : 0.6 }}
+                >
+                  התחברי
+                </button>
+              </form>
+            )}
+
+            {step === 2 && (
+              <div className="py-8 text-center space-y-4">
                 <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
                 <div className="space-y-1">
-                  <p className="font-bold text-sm">מתחבר ל-Meta API...</p>
-                  <p className="text-xs text-blue-200">יוצר חיבור מאובטח ומאמת הרשאות</p>
+                  <p className="font-bold text-sm">מאמת פרטי התחברות ב-Meta...</p>
+                  <p className="text-xs text-blue-200">אנא המתיני בזמן שמתבצע אימות מאובטח</p>
                 </div>
                 <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden max-w-xs mx-auto">
                   <div className="bg-white h-full transition-all duration-150" style={{ width: `${progress}%` }}></div>
                 </div>
               </div>
             )}
+
+            {step === 3 && (
+              <div className="space-y-5">
+                <div className="flex flex-col items-center space-y-2 mb-2 text-center">
+                  <div className="flex items-center justify-center font-bold" style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <Instagram size={24} />
+                  </div>
+                  <h4 className="font-extrabold text-base">בחרי חשבון אינסטגרם עסקי</h4>
+                  <p className="text-xs text-blue-100 max-w-sm mx-auto leading-relaxed">
+                    נמצאו החשבונות הבאים המקושרים לדפי הפייסבוק שבניהולך. בחרי את החשבון לקישור:
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center justify-between p-3.5 rounded-xl bg-white/10 hover:bg-white/15 transition-all cursor-pointer border border-white/10">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center font-black text-xs"
+                        style={{ 
+                          width: 32, 
+                          height: 32, 
+                          borderRadius: '50%', 
+                          background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', 
+                          color: '#fff' 
+                        }}>
+                        ש
+                      </div>
+                      <div className="text-right">
+                        <span className="font-bold text-sm block">שירלי קוסמטיקס</span>
+                        <span className="text-xs text-blue-100 block" dir="ltr">@shirly_cosmetics</span>
+                      </div>
+                    </div>
+                    <input 
+                      type="radio" 
+                      name="insta_profile" 
+                      value="shirly_cosmetics"
+                      checked={selectedProfile === 'shirly_cosmetics'}
+                      onChange={() => setSelectedProfile('shirly_cosmetics')}
+                      style={{ width: 18, height: 18, accentColor: '#fff', cursor: 'pointer' }}
+                    />
+                  </label>
+
+                  <div className="rounded-xl bg-black/15 p-4 text-xs text-right space-y-1.5 text-blue-50 border border-white/5">
+                    <p className="font-bold text-white mb-1">הרשאות שיוענקו ל-Shirly Cosmetics:</p>
+                    <div className="flex items-start gap-2">
+                      <span className="text-[10px] mt-0.5">✓</span>
+                      <span>ניהול ופרסום סטוריז ותוכן בחשבון האינסטגרם שלך</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-[10px] mt-0.5">✓</span>
+                      <span>קריאת נתוני עוקבים ופרופיל בסיסיים</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleConnect}
+                  className="w-full py-3 mt-4 bg-white text-[#1877f2] font-black text-sm rounded-xl hover:bg-blue-50 transition-all border-none cursor-pointer shadow-md"
+                >
+                  אשר וקשר חשבון נבחר
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
-          {!loading && (
+          {step === 1 && (
             <div className="flex items-center justify-between px-6 py-4 bg-black/10" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <button onClick={onClose} className="text-white hover:underline bg-transparent border-none text-xs font-semibold cursor-pointer">
                 ביטול
-              </button>
-              <button 
-                onClick={handleConnect}
-                disabled={!username.trim()}
-                className="px-5 py-2.5 bg-white text-[#1877f2] font-black text-xs rounded-xl hover:bg-blue-50 transition-all border-none cursor-pointer shadow-md"
-                style={{ opacity: username.trim() ? 1 : 0.6 }}
-              >
-                אישור והתחברות
               </button>
             </div>
           )}
@@ -851,14 +924,27 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
 
               <div>
                 <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>העלאת תמונת סטורי *</label>
-                <div onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-dashed hover:bg-black/10"
-                  style={{ height: 100, background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
-                  <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileChange} />
-                  <Upload size={20} style={{ color: 'var(--text-muted)', marginBottom: 6 }} />
-                  <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                    {image ? 'לחצי להחלפת תמונה' : 'בחרי תמונה מהמחשב'}
-                  </span>
+                <div className="relative flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-dashed hover:bg-black/10"
+                  style={{ height: 100, background: 'var(--bg-elevated)', borderColor: 'var(--border)', position: 'relative' }}>
+                  <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange}
+                    style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%', zIndex: 10 }} />
+                  
+                  {image ? (
+                    <div className="absolute inset-0 flex items-center justify-between p-3" style={{ pointerEvents: 'none' }}>
+                      <img src={image} alt="Story Preview Thumbnail" style={{ height: '100%', width: 60, borderRadius: 8, objectFit: 'cover' }} />
+                      <div className="text-right flex-1 pr-3 flex flex-col justify-center">
+                        <span className="text-xs font-bold" style={{ color: 'var(--green)' }}>✓ תמונה נבחרה בהצלחה</span>
+                        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>לחצי כאן להחלפת תמונה</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center" style={{ pointerEvents: 'none' }}>
+                      <Upload size={20} style={{ color: 'var(--text-muted)', marginBottom: 6 }} />
+                      <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                        בחרי תמונה מהמחשב
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
