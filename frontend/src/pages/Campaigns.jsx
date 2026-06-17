@@ -537,12 +537,32 @@ function SendGroupMessageModal({ selectedClients, messageTemplate, onClose }) {
   );
 }
 
+/* ─── Helper: Get display domain for Instagram Link Sticker ───────── */
+const getDisplayLink = (url) => {
+  if (!url) return '';
+  try {
+    let clean = url.trim();
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = 'https://' + clean;
+    }
+    const parsed = new URL(clean);
+    let hostname = parsed.hostname;
+    if (hostname.startsWith('www.')) {
+      hostname = hostname.slice(4);
+    }
+    return hostname.toUpperCase();
+  } catch (e) {
+    return url.toUpperCase();
+  }
+};
+
 /* ─── Modal: New Instagram Story Campaign ─────────────────────────── */
 function NewInstagramStoryModal({ onClose, onSave }) {
   const [name, setName] = useState('');
   const [image, setImage] = useState('');
   const [stickerText, setStickerText] = useState('');
   const [stickerColor, setStickerColor] = useState('neon-green'); // neon-green, hot-pink, amber, neon-cyan, white
+  const [linkUrl, setLinkUrl] = useState(''); // Link URL
   const [scheduleType, setScheduleType] = useState('recurring'); // recurring, once
   const [selectedDays, setSelectedDays] = useState([]);
   const [selectedHours, setSelectedHours] = useState([]);
@@ -590,6 +610,7 @@ function NewInstagramStoryModal({ onClose, onSave }) {
       image,
       stickerText: stickerText.trim(),
       stickerColor,
+      linkUrl: linkUrl.trim(),
       scheduleType,
       selectedDays,
       selectedHours,
@@ -649,6 +670,11 @@ function NewInstagramStoryModal({ onClose, onSave }) {
               <div>
                 <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>טקסט מדבקה (Sticker Text) *</label>
                 <input className="input-dark" placeholder="לדוגמא: מבצע טיפולי פנים רק היום! 🌸" value={stickerText} onChange={e => setStickerText(e.target.value)} />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>קישור לאתר (אופציונלי)</label>
+                <input className="input-dark" placeholder="לדוגמא: www.shirly-cosmetics.co.il" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} />
               </div>
 
               <div>
@@ -777,8 +803,9 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                   </div>
                 )}
 
-                {stickerText && (
-                  <div className="absolute inset-0 flex items-center justify-center p-3 pointer-events-none" style={{ zIndex: 4 }}>
+                {/* Sticker and Link overlays */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 pointer-events-none space-y-3" style={{ zIndex: 4 }}>
+                  {stickerText && (
                     <div className="text-center font-bold px-3.5 py-2 rounded-xl text-xs break-words max-w-[90%]"
                       style={{
                         background: stickerColorsMap[stickerColor].bg,
@@ -789,8 +816,22 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                       }}>
                       {stickerText}
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {linkUrl && (
+                    <div className="flex items-center gap-1.5 text-center font-black px-3.5 py-1.5 rounded-full text-[9px] tracking-wider"
+                      style={{
+                        background: 'rgba(255,255,255,0.95)',
+                        color: '#3897f0',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
+                        transform: 'rotate(2deg)',
+                        fontFamily: 'Heebo, sans-serif'
+                      }}>
+                      <span>🔗</span>
+                      <span dir="ltr">{getDisplayLink(linkUrl)}</span>
+                    </div>
+                  )}
+                </div>
 
                 <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between" style={{ zIndex: 5 }}>
                   <div className="flex-1 rounded-full px-3 py-1.5 flex items-center" style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(5px)', border: '1px solid rgba(255,255,255,0.2)' }}>
@@ -1269,26 +1310,43 @@ export default function Campaigns() {
                     </div>
                   </div>
 
-                  <img src={selectedInstaForPreview.image} alt="Selected Story" className="w-full h-full object-cover" />
-
-                  <div className="absolute inset-0 flex items-center justify-center p-2 pointer-events-none" style={{ zIndex: 4 }}>
-                    <div className="text-center font-bold px-3 py-1.5 rounded-lg text-[10px] break-words max-w-[85%]"
-                      style={{
-                        background: {
-                          'neon-green': '#25d366',
-                          'hot-pink': '#e1306c',
-                          'amber': '#f59e0b',
-                          'neon-cyan': '#00f2fe',
-                          'white': '#ffffff',
-                        }[selectedInstaForPreview.stickerColor || 'neon-green'],
-                        color: (selectedInstaForPreview.stickerColor === 'hot-pink') ? '#fff' : '#000',
-                        boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                        transform: 'rotate(-3deg)',
-                        fontFamily: 'Heebo, sans-serif'
-                      }}>
-                      {selectedInstaForPreview.stickerText}
-                    </div>
-                  </div>
+                   <img src={selectedInstaForPreview.image} alt="Selected Story" className="w-full h-full object-cover" />
+ 
+                   {/* Sticker and Link overlays */}
+                   <div className="absolute inset-0 flex flex-col items-center justify-center p-2 pointer-events-none space-y-2.5" style={{ zIndex: 4 }}>
+                     {selectedInstaForPreview.stickerText && (
+                       <div className="text-center font-bold px-3 py-1.5 rounded-lg text-[10px] break-words max-w-[85%]"
+                         style={{
+                           background: {
+                             'neon-green': '#25d366',
+                             'hot-pink': '#e1306c',
+                             'amber': '#f59e0b',
+                             'neon-cyan': '#00f2fe',
+                             'white': '#ffffff',
+                           }[selectedInstaForPreview.stickerColor || 'neon-green'],
+                           color: (selectedInstaForPreview.stickerColor === 'hot-pink') ? '#fff' : '#000',
+                           boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                           transform: 'rotate(-3deg)',
+                           fontFamily: 'Heebo, sans-serif'
+                         }}>
+                         {selectedInstaForPreview.stickerText}
+                       </div>
+                     )}
+ 
+                     {selectedInstaForPreview.linkUrl && (
+                       <div className="flex items-center gap-1 text-center font-black px-3 py-1 rounded-full text-[8px] tracking-wider"
+                         style={{
+                           background: 'rgba(255,255,255,0.95)',
+                           color: '#3897f0',
+                           boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
+                           transform: 'rotate(2deg)',
+                           fontFamily: 'Heebo, sans-serif'
+                         }}>
+                         <span>🔗</span>
+                         <span dir="ltr">{getDisplayLink(selectedInstaForPreview.linkUrl)}</span>
+                       </div>
+                     )}
+                   </div>
 
                 </div>
               ) : (
