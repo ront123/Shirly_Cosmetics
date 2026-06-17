@@ -25,9 +25,14 @@ function NewCampaignModal({ onClose, onSave, clients }) {
   const [date,     setDate]     = useState('');
   const [time,     setTime]     = useState('10:00');
 
-  // Manual list selection state
+  // Manual list selection state (used in Step 1 if manual is chosen)
   const [selectedManualIds, setSelectedManualIds] = useState(new Set());
   const [clientSearch, setClientSearch] = useState('');
+
+  // Resolved recipients state (used in Step 2 for editing the target recipients list)
+  const [recipientIds, setRecipientIds] = useState(new Set());
+  const [recipientSearch, setRecipientSearch] = useState('');
+  const [lastResolvedAudience, setLastResolvedAudience] = useState('');
 
   const thisMonth = new Date().getMonth() + 1;
   const totalClients = clients.length;
@@ -45,7 +50,8 @@ function NewCampaignModal({ onClose, onSave, clients }) {
 
   const sel = dynamicAudiences.find(a => a.key === audience);
   const canNext1 = name && audience && (audience !== 'manual' || selectedManualIds.size > 0);
-  const canNext2 = msg.length >= 10;
+  const canNext2 = recipientIds.size > 0;
+  const canNext3 = msg.length >= 10;
 
   const filteredClients = clients.filter(c => 
     c.name.toLowerCase().includes(clientSearch.toLowerCase()) || 
@@ -59,21 +65,59 @@ function NewCampaignModal({ onClose, onSave, clients }) {
     ...unselectedFiltered.slice(0, 50)
   ];
 
+  const filteredRecipientClients = clients.filter(c => 
+    c.name.toLowerCase().includes(recipientSearch.toLowerCase()) || 
+    c.phone.includes(recipientSearch)
+  );
+
+  const selectedFilteredRecipients = filteredRecipientClients.filter(c => recipientIds.has(c.id));
+  const unselectedFilteredRecipients = filteredRecipientClients.filter(c => !recipientIds.has(c.id));
+  const displayedRecipients = [
+    ...selectedFilteredRecipients,
+    ...unselectedFilteredRecipients.slice(0, 50)
+  ];
+
+  const getInitialSelectedIds = () => {
+    const thisMonth = new Date().getMonth() + 1;
+    if (audience === 'all') {
+      return new Set(clients.map(c => c.id));
+    } else if (audience === 'inactive') {
+      return new Set(clients.filter(c => c.status === 'inactive').map(c => c.id));
+    } else if (audience === 'recent') {
+      return new Set(clients.filter(c => c.status === 'active').map(c => c.id));
+    } else if (audience === 'birthday') {
+      return new Set(clients.filter(c => c.birthday && parseInt(c.birthday.slice(5, 7), 10) === thisMonth).map(c => c.id));
+    } else if (audience === 'manual') {
+      return new Set(selectedManualIds);
+    }
+    return new Set();
+  };
+
+  const nextStep = () => {
+    if (step === 1) {
+      if (audience !== lastResolvedAudience || recipientIds.size === 0) {
+        setRecipientIds(getInitialSelectedIds());
+        setLastResolvedAudience(audience);
+      }
+    }
+    setStep(step + 1);
+  };
+
   const save = () => {
     onSave({
       id: Date.now(), name,
-      audience: sel?.label || '', count: sel?.count || 0,
+      audience: sel?.label || '', count: recipientIds.size,
       status: sendMode === 'now' ? 'sent' : 'scheduled',
       date: sendMode === 'now' ? new Date().toLocaleDateString('he-IL') : `${date} ${time}`,
       opened: 0,
       messageText: msg,
       targetAudienceKey: audience,
-      manualClientIds: audience === 'manual' ? Array.from(selectedManualIds) : []
+      recipientIds: Array.from(recipientIds)
     });
     onClose();
   };
 
-  const STEPS = ['שם וקהל', 'הודעה', 'תזמון'];
+  const STEPS = ['שם וקהל', 'נמענים', 'הודעה', 'תזמון'];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center"
@@ -206,8 +250,90 @@ function NewCampaignModal({ onClose, onSave, clients }) {
               </div>
             </>}
 
-            {/* Step 2 */}
+            {/* Step 2: Recipients list customization */}
             {step === 2 && <>
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>עריכת רשימת נמענים לקמפיין</label>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+                    נבחרו {recipientIds.size} לקוחות
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Search size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-faint)' }} />
+                    <input 
+                      className="input-dark" 
+                      style={{ paddingRight: 32, fontSize: 13 }}
+                      placeholder="חיפוש נמענים..."
+                      value={recipientSearch}
+                      onChange={e => setRecipientSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="rounded-xl overflow-hidden max-h-60 overflow-y-auto space-y-1 p-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                    <label className="flex items-center gap-2.5 p-2 rounded-lg cursor-pointer hover:bg-black/10">
+                      <input 
+                        type="checkbox"
+                        checked={filteredRecipientClients.length > 0 && filteredRecipientClients.every(c => recipientIds.has(c.id))}
+                        onChange={() => {
+                          const allSelected = filteredRecipientClients.every(c => recipientIds.has(c.id));
+                          setRecipientIds(prev => {
+                            const next = new Set(prev);
+                            filteredRecipientClients.forEach(c => {
+                              if (allSelected) next.delete(c.id);
+                              else next.add(c.id);
+                            });
+                            return next;
+                          });
+                        }}
+                        style={{ cursor: 'pointer', width: 14, height: 14, accentColor: 'var(--accent)' }}
+                      />
+                      <span className="font-bold text-xs" style={{ color: 'var(--text-primary)' }}>בחר הכל מסוננים</span>
+                    </label>
+                    
+                    {displayedRecipients.map(c => (
+                      <label key={c.id} className="flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-black/10">
+                        <div className="flex items-center gap-2.5">
+                          <input 
+                            type="checkbox"
+                            checked={recipientIds.has(c.id)}
+                            onChange={() => {
+                              setRecipientIds(prev => {
+                                const next = new Set(prev);
+                                if (next.has(c.id)) next.delete(c.id);
+                                else next.add(c.id);
+                                return next;
+                              });
+                            }}
+                            style={{ cursor: 'pointer', width: 14, height: 14, accentColor: 'var(--accent)' }}
+                          />
+                          <span className="font-medium text-xs" style={{ color: 'var(--text-primary)' }}>{c.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xxs px-1.5 py-0.5 rounded-md" style={{ 
+                            fontSize: 10,
+                            background: c.status === 'active' ? 'var(--green-light)' : 'var(--border)', 
+                            color: c.status === 'active' ? 'var(--green)' : 'var(--text-muted)' 
+                          }}>
+                            {c.status === 'active' ? 'פעילה' : 'לא פעילה'}
+                          </span>
+                          <span className="text-xs" style={{ color: 'var(--text-muted)' }} dir="ltr">{c.phone}</span>
+                        </div>
+                      </label>
+                    ))}
+
+                    {unselectedFilteredRecipients.length > 50 && (
+                      <div className="text-center p-2 text-xs" style={{ color: 'var(--text-faint)', borderTop: '1px solid var(--border)' }}>
+                        מציג {displayedRecipients.length} מתוך {filteredRecipientClients.length} לקוחות. השתמש בחיפוש למציאת לקוחות נוספים.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>}
+
+            {/* Step 3 */}
+            {step === 3 && <>
               <div>
                 <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>תוכן ההודעה *</label>
                 <textarea className="input-dark resize-none" rows={5}
@@ -231,8 +357,8 @@ function NewCampaignModal({ onClose, onSave, clients }) {
               </div>
             </>}
 
-            {/* Step 3 */}
-            {step === 3 && <>
+            {/* Step 4 */}
+            {step === 4 && <>
               <div className="grid grid-cols-2 gap-3">
                 {[{ key: 'now', label: 'שלח עכשיו', sub: 'שליחה מיידית', icon: Send }, { key: 'schedule', label: 'תזמן', sub: 'בחרי תאריך ושעה', icon: Calendar }].map(m => (
                   <button key={m.key} onClick={() => setSendMode(m.key)}
@@ -261,7 +387,7 @@ function NewCampaignModal({ onClose, onSave, clients }) {
                 <p className="font-bold text-sm mb-2" style={{ color: 'var(--text-primary)' }}>סיכום</p>
                 {[
                   ['שם', name],
-                  ['קהל', `${sel?.label} (${sel?.count} לקוחות)`],
+                  ['קהל', `${sel?.label} (${recipientIds.size} לקוחות)`],
                   ['שליחה', sendMode === 'now' ? 'מיידית' : `${date} ${time}`],
                 ].map(([k, v], i) => (
                   <div key={i} className="flex justify-between py-1.5" style={{ borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
@@ -278,8 +404,8 @@ function NewCampaignModal({ onClose, onSave, clients }) {
             <button onClick={() => step > 1 ? setStep(step - 1) : onClose()} className="btn-ghost">
               {step === 1 ? 'ביטול' : '← חזור'}
             </button>
-            {step < 3
-              ? <button className="btn-primary" onClick={() => setStep(step + 1)} disabled={step === 1 && !canNext1} style={{ opacity: step === 1 && !canNext1 ? 0.5 : 1 }}>המשך →</button>
+            {step < 4
+              ? <button className="btn-primary" onClick={nextStep} disabled={(step === 1 && !canNext1) || (step === 2 && !canNext2) || (step === 3 && !canNext3)} style={{ opacity: ((step === 1 && !canNext1) || (step === 2 && !canNext2) || (step === 3 && !canNext3)) ? 0.5 : 1 }}>המשך →</button>
               : <button onClick={save} className="btn-primary" style={{ background: '#25d366', boxShadow: '0 2px 12px rgba(37,211,102,0.35)' }}>
                   <Send size={15} /> {sendMode === 'now' ? 'שלח עכשיו' : 'תזמן קמפיין'}
                 </button>
@@ -418,19 +544,24 @@ export default function Campaigns() {
     setCampaigns(prev => [c, ...prev]);
 
     if (c.status === 'sent') {
-      const thisMonth = new Date().getMonth() + 1;
       let targetList = [];
-      if (c.targetAudienceKey === 'all') {
-        targetList = clients;
-      } else if (c.targetAudienceKey === 'inactive') {
-        targetList = clients.filter(x => x.status === 'inactive');
-      } else if (c.targetAudienceKey === 'recent') {
-        targetList = clients.filter(x => x.status === 'active');
-      } else if (c.targetAudienceKey === 'birthday') {
-        targetList = clients.filter(x => x.birthday && parseInt(x.birthday.slice(5, 7), 10) === thisMonth);
-      } else if (c.targetAudienceKey === 'manual') {
-        const manualIdsSet = new Set(c.manualClientIds || []);
-        targetList = clients.filter(x => manualIdsSet.has(x.id));
+      if (c.recipientIds && c.recipientIds.length > 0) {
+        const idsSet = new Set(c.recipientIds);
+        targetList = clients.filter(x => idsSet.has(x.id));
+      } else {
+        const thisMonth = new Date().getMonth() + 1;
+        if (c.targetAudienceKey === 'all') {
+          targetList = clients;
+        } else if (c.targetAudienceKey === 'inactive') {
+          targetList = clients.filter(x => x.status === 'inactive');
+        } else if (c.targetAudienceKey === 'recent') {
+          targetList = clients.filter(x => x.status === 'active');
+        } else if (c.targetAudienceKey === 'birthday') {
+          targetList = clients.filter(x => x.birthday && parseInt(x.birthday.slice(5, 7), 10) === thisMonth);
+        } else if (c.targetAudienceKey === 'manual') {
+          const manualIdsSet = new Set(c.manualClientIds || []);
+          targetList = clients.filter(x => manualIdsSet.has(x.id));
+        }
       }
 
       if (targetList.length > 0) {
