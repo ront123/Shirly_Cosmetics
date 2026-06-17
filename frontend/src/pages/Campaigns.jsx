@@ -794,37 +794,38 @@ function MetaAuthModal({ onClose, onConnect }) {
 }
 
 /* ─── Helper: Get sticker positioning style ───────────────────────── */
-const getPositionStyles = (stickerPos, linkPos) => {
-  let stickerStyle = { position: 'absolute', left: '50%', transform: 'translateX(-50%) rotate(-3deg)', zIndex: 4 };
-  let linkStyle = { position: 'absolute', left: '50%', transform: 'translateX(-50%) rotate(2deg)', zIndex: 4 };
-
-  // Sticker text positioning
-  if (stickerPos === 'top') {
-    stickerStyle.top = '14%';
-  } else if (stickerPos === 'bottom') {
-    stickerStyle.bottom = '22%';
-  } else {
-    stickerStyle.top = '44%';
-  }
-
-  // Link sticker positioning
-  if (linkPos === 'top') {
-    linkStyle.top = stickerPos === 'top' ? '25%' : '14%';
-  } else if (linkPos === 'bottom') {
-    linkStyle.bottom = '14%';
-    if (stickerPos === 'bottom') {
-      stickerStyle.bottom = '25%'; // Offset sticker upwards if in same position
+const getStickerStyle = (campaign, type) => {
+  let pos = { x: 50, y: 50 };
+  let rotation = '0deg';
+  if (type === 'sticker') {
+    rotation = '-3deg';
+    if (campaign.stickerPos) pos = campaign.stickerPos;
+    else {
+      if (campaign.stickerPosition === 'top') pos = { x: 50, y: 20 };
+      else if (campaign.stickerPosition === 'bottom') pos = { x: 50, y: 65 };
+      else pos = { x: 50, y: 40 };
     }
-  } else {
-    if (stickerPos === 'center') {
-      stickerStyle.top = '34%';
-      linkStyle.top = '48%';
-    } else {
-      linkStyle.top = '44%';
+  } else if (type === 'link') {
+    rotation = '2deg';
+    if (campaign.linkPos) pos = campaign.linkPos;
+    else {
+      if (campaign.linkPosition === 'top') pos = { x: 50, y: 30 };
+      else if (campaign.linkPosition === 'bottom') pos = { x: 50, y: 75 };
+      else pos = { x: 50, y: 50 };
     }
+  } else if (type === 'booking') {
+    rotation = '-1deg';
+    if (campaign.bookingLinkPos) pos = campaign.bookingLinkPos;
+    else pos = { x: 50, y: 80 };
   }
-
-  return { stickerStyle, linkStyle };
+  
+  return {
+    position: 'absolute',
+    left: `${pos.x}%`,
+    top: `${pos.y}%`,
+    transform: `translate(-50%, -50%) rotate(${rotation})`,
+    zIndex: 4
+  };
 };
 
 /* ─── Modal: New Instagram Story Campaign ─────────────────────────── */
@@ -834,8 +835,10 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
   const [stickerText, setStickerText] = useState('');
   const [stickerColor, setStickerColor] = useState('neon-green'); // neon-green, hot-pink, amber, neon-cyan, white
   const [linkUrl, setLinkUrl] = useState(''); // Link URL
-  const [stickerPosition, setStickerPosition] = useState('center'); // top, center, bottom
-  const [linkPosition, setLinkPosition] = useState('center'); // top, center, bottom
+  const [stickerPos, setStickerPos] = useState({ x: 50, y: 35 });
+  const [linkPos, setLinkPos] = useState({ x: 50, y: 55 });
+  const [showBookingLink, setShowBookingLink] = useState(false);
+  const [bookingLinkPos, setBookingLinkPos] = useState({ x: 50, y: 70 });
   const [scheduleType, setScheduleType] = useState('recurring'); // recurring, once
   const [selectedDays, setSelectedDays] = useState([]);
   const [selectedHours, setSelectedHours] = useState([]);
@@ -875,6 +878,81 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
     }
   };
 
+  const handleDragStart = (e, stickerType, currentPos, setPos) => {
+    e.preventDefault();
+    const container = e.currentTarget.parentElement;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    
+    const startLeft = (currentPos.x / 100) * rect.width;
+    const startTop = (currentPos.y / 100) * rect.height;
+    
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+      
+      let newLeft = startLeft + deltaX;
+      let newTop = startTop + deltaY;
+      
+      let xPct = (newLeft / rect.width) * 100;
+      let yPct = (newTop / rect.height) * 100;
+      
+      xPct = Math.max(5, Math.min(95, xPct));
+      yPct = Math.max(5, Math.min(95, yPct));
+      
+      setPos({ x: xPct, y: yPct });
+    };
+    
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleTouchStart = (e, stickerType, currentPos, setPos) => {
+    const touch = e.touches[0];
+    const container = e.currentTarget.parentElement;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    
+    const startLeft = (currentPos.x / 100) * rect.width;
+    const startTop = (currentPos.y / 100) * rect.height;
+    
+    const handleTouchMove = (moveEvent) => {
+      const currentTouch = moveEvent.touches[0];
+      const deltaX = currentTouch.clientX - startX;
+      const deltaY = currentTouch.clientY - startY;
+      
+      let newLeft = startLeft + deltaX;
+      let newTop = startTop + deltaY;
+      
+      let xPct = (newLeft / rect.width) * 100;
+      let yPct = (newTop / rect.height) * 100;
+      
+      xPct = Math.max(5, Math.min(95, xPct));
+      yPct = Math.max(5, Math.min(95, yPct));
+      
+      setPos({ x: xPct, y: yPct });
+    };
+    
+    const handleTouchEnd = () => {
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+    
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchEnd);
+  };
+
   const canSave = name.trim() && image && stickerText.trim() && (
     scheduleType === 'once' ? (singleDate && singleTime) : (selectedDays.length > 0 && selectedHours.length > 0)
   );
@@ -887,8 +965,10 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
       stickerText: stickerText.trim(),
       stickerColor,
       linkUrl: linkUrl.trim(),
-      stickerPosition,
-      linkPosition,
+      stickerPos,
+      linkPos,
+      showBookingLink,
+      bookingLinkPos,
       scheduleType,
       selectedDays,
       selectedHours,
@@ -908,8 +988,6 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
     'neon-cyan': { bg: '#00f2fe', text: '#000' },
     'white': { bg: '#ffffff', text: '#000' },
   };
-
-  const { stickerStyle, linkStyle } = getPositionStyles(stickerPosition, linkPosition);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" dir="rtl"
@@ -996,37 +1074,62 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מיקום מדבקת טקסט</label>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מיקום מדבקת טקסט (קיצור דרך)</label>
                   <div className="grid grid-cols-3 gap-1.5">
-                    {[['top', 'למעלה'], ['center', 'מרכז'], ['bottom', 'למטה']].map(([pos, label]) => (
-                      <button key={pos} type="button" onClick={() => setStickerPosition(pos)}
-                        className="font-semibold py-2 rounded-lg border text-center transition-all"
-                        style={{ cursor: 'pointer', fontSize: 11,
-                          background: stickerPosition === pos ? 'var(--accent-light)' : 'var(--bg-elevated)',
-                          borderColor: stickerPosition === pos ? 'var(--accent)' : 'var(--border)',
-                          color: stickerPosition === pos ? 'var(--accent)' : 'var(--text-primary)' }}>
-                        {label}
-                      </button>
-                    ))}
+                    {[['top', 'למעלה', 20], ['center', 'מרכז', 40], ['bottom', 'למטה', 65]].map(([pos, label, yVal]) => {
+                      const isActive = Math.abs(stickerPos.y - yVal) < 5 && Math.abs(stickerPos.x - 50) < 5;
+                      return (
+                        <button key={pos} type="button" onClick={() => setStickerPos({ x: 50, y: yVal })}
+                          className="font-semibold py-2 rounded-lg border text-center transition-all"
+                          style={{ cursor: 'pointer', fontSize: 11,
+                            background: isActive ? 'var(--accent-light)' : 'var(--bg-elevated)',
+                            borderColor: isActive ? 'var(--accent)' : 'var(--border)',
+                            color: isActive ? 'var(--accent)' : 'var(--text-primary)' }}>
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מיקום מדבקת קישור</label>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מיקום מדבקת קישור (קיצור דרך)</label>
                   <div className="grid grid-cols-3 gap-1.5">
-                    {[['top', 'למעלה'], ['center', 'מרכז'], ['bottom', 'למטה']].map(([pos, label]) => (
-                      <button key={pos} type="button" onClick={() => setLinkPosition(pos)}
-                        disabled={!linkUrl}
-                        className="font-semibold py-2 rounded-lg border text-center transition-all"
-                        style={{ cursor: 'pointer', fontSize: 11, opacity: linkUrl ? 1 : 0.5,
-                          background: linkPosition === pos ? 'var(--accent-light)' : 'var(--bg-elevated)',
-                          borderColor: linkPosition === pos ? 'var(--accent)' : 'var(--border)',
-                          color: linkPosition === pos ? 'var(--accent)' : 'var(--text-primary)' }}>
-                        {label}
-                      </button>
-                    ))}
+                    {[['top', 'למעלה', 30], ['center', 'מרכז', 50], ['bottom', 'למטה', 75]].map(([pos, label, yVal]) => {
+                      const isActive = Math.abs(linkPos.y - yVal) < 5 && Math.abs(linkPos.x - 50) < 5;
+                      return (
+                        <button key={pos} type="button" onClick={() => setLinkPos({ x: 50, y: yVal })}
+                          disabled={!linkUrl}
+                          className="font-semibold py-2 rounded-lg border text-center transition-all"
+                          style={{ cursor: 'pointer', fontSize: 11, opacity: linkUrl ? 1 : 0.5,
+                            background: isActive ? 'var(--accent-light)' : 'var(--bg-elevated)',
+                            borderColor: isActive ? 'var(--accent)' : 'var(--border)',
+                            color: isActive ? 'var(--accent)' : 'var(--text-primary)' }}>
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
+              </div>
+
+              <div className="border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+                <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={showBookingLink} 
+                    onChange={e => setShowBookingLink(e.target.checked)} 
+                    style={{ cursor: 'pointer', width: 15, height: 15, accentColor: 'var(--accent)' }}
+                  />
+                  <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+                    הוסיפי מדבקת "לתיאום תור" 📅
+                  </span>
+                </label>
+                {showBookingLink && (
+                  <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, marginRight: 24 }}>
+                    כפתור "לתיאום תור" יקשר לעמוד התורים שלך. תוכלי לגרור אותו לכל מקום בתצוגה המקדימה.
+                  </p>
+                )}
               </div>
 
               <div>
@@ -1122,7 +1225,8 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
 
             {/* Instagram Mobile Story Preview Side */}
             <div className="w-full md:w-[320px] p-6 flex flex-col items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
-              <span className="block text-xs font-bold mb-3 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>תצוגה מקדימה (סטורי)</span>
+              <span className="block text-xs font-bold mb-1 uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>תצוגה מקדימה (סטורי)</span>
+              <span className="block text-[10px] mb-3 text-center" style={{ color: 'var(--accent)' }}>💡 גררי את המדבקות כדי להזיז אותן על התמונה!</span>
               
               <div className="relative overflow-hidden flex flex-col"
                 style={{
@@ -1165,11 +1269,17 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
                 )}
 
                 {/* Sticker and Link overlays */}
-                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 4 }}>
+                <div className="absolute inset-0" style={{ zIndex: 4, pointerEvents: 'none' }}>
                   {stickerText && (
-                    <div className="text-center font-bold px-3.5 py-2 rounded-xl text-xs break-words max-w-[90%]"
+                    <div className="text-center font-bold px-3.5 py-2 rounded-xl text-xs break-words max-w-[90%] pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+                      onMouseDown={e => handleDragStart(e, 'sticker', stickerPos, setStickerPos)}
+                      onTouchStart={e => handleTouchStart(e, 'sticker', stickerPos, setStickerPos)}
                       style={{
-                        ...stickerStyle,
+                        position: 'absolute',
+                        left: `${stickerPos.x}%`,
+                        top: `${stickerPos.y}%`,
+                        transform: 'translate(-50%, -50%) rotate(-3deg)',
+                        zIndex: 4,
                         background: stickerColorsMap[stickerColor].bg,
                         color: stickerColorsMap[stickerColor].text,
                         boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
@@ -1180,17 +1290,49 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
                   )}
 
                   {linkUrl && (
-                    <div className="flex items-center gap-1.5 text-center font-black px-3.5 py-1.5 rounded-full text-[9px] tracking-wider"
+                    <a href={linkUrl.startsWith('http') ? linkUrl : `https://${linkUrl}`}
+                      onClick={e => e.preventDefault()}
+                      className="flex items-center gap-1.5 text-center font-black px-3.5 py-1.5 rounded-full text-[9px] tracking-wider pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+                      onMouseDown={e => handleDragStart(e, 'link', linkPos, setLinkPos)}
+                      onTouchStart={e => handleTouchStart(e, 'link', linkPos, setLinkPos)}
                       style={{
-                        ...linkStyle,
+                        position: 'absolute',
+                        left: `${linkPos.x}%`,
+                        top: `${linkPos.y}%`,
+                        transform: 'translate(-50%, -50%) rotate(2deg)',
+                        zIndex: 4,
                         background: 'rgba(255,255,255,0.95)',
                         color: '#3897f0',
                         boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
-                        fontFamily: 'Heebo, sans-serif'
+                        fontFamily: 'Heebo, sans-serif',
+                        textDecoration: 'none'
                       }}>
                       <span>🔗</span>
                       <span dir="ltr">{getDisplayLink(linkUrl)}</span>
-                    </div>
+                    </a>
+                  )}
+
+                  {showBookingLink && (
+                    <a href="/book" onClick={e => e.preventDefault()}
+                      className="flex items-center gap-1.5 text-center font-black px-3.5 py-1.5 rounded-full text-[9px] tracking-wider pointer-events-auto cursor-grab active:cursor-grabbing select-none"
+                      onMouseDown={e => handleDragStart(e, 'booking', bookingLinkPos, setBookingLinkPos)}
+                      onTouchStart={e => handleTouchStart(e, 'booking', bookingLinkPos, setBookingLinkPos)}
+                      style={{
+                        position: 'absolute',
+                        left: `${bookingLinkPos.x}%`,
+                        top: `${bookingLinkPos.y}%`,
+                        transform: 'translate(-50%, -50%) rotate(-1deg)',
+                        zIndex: 4,
+                        background: 'rgba(255,255,255,0.95)',
+                        color: 'var(--accent)',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
+                        fontFamily: 'Heebo, sans-serif',
+                        border: '1.5px solid var(--accent-border)',
+                        textDecoration: 'none'
+                      }}>
+                      <span>📅</span>
+                      <span>לתיאום תור</span>
+                    </a>
                   )}
                 </div>
 
@@ -2084,7 +2226,7 @@ export default function Campaigns() {
                      {selectedInstaForPreview.stickerText && (
                        <div className="text-center font-bold px-3 py-1.5 rounded-lg text-[10px] break-words max-w-[85%]"
                          style={{
-                           ...getPositionStyles(selectedInstaForPreview.stickerPosition, selectedInstaForPreview.linkPosition).stickerStyle,
+                            ...getStickerStyle(selectedInstaForPreview, 'sticker'),
                            background: {
                              'neon-green': '#25d366',
                              'hot-pink': '#e1306c',
@@ -2101,18 +2243,38 @@ export default function Campaigns() {
                      )}
  
                      {selectedInstaForPreview.linkUrl && (
-                       <div className="flex items-center gap-1 text-center font-black px-3 py-1 rounded-full text-[8px] tracking-wider"
+                       <a href={selectedInstaForPreview.linkUrl.startsWith('http') ? selectedInstaForPreview.linkUrl : `https://${selectedInstaForPreview.linkUrl}`}
+                         target="_blank" rel="noopener noreferrer"
+                         className="flex items-center gap-1 text-center font-black px-3 py-1 rounded-full text-[8px] tracking-wider pointer-events-auto cursor-pointer"
                          style={{
-                           ...getPositionStyles(selectedInstaForPreview.stickerPosition, selectedInstaForPreview.linkPosition).linkStyle,
+                           ...getStickerStyle(selectedInstaForPreview, 'link'),
                            background: 'rgba(255,255,255,0.95)',
                            color: '#3897f0',
                            boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-                           fontFamily: 'Heebo, sans-serif'
+                           fontFamily: 'Heebo, sans-serif',
+                           textDecoration: 'none'
                          }}>
                          <span>🔗</span>
                          <span dir="ltr">{getDisplayLink(selectedInstaForPreview.linkUrl)}</span>
-                       </div>
+                       </a>
                      )}
+
+                      {selectedInstaForPreview.showBookingLink && (
+                        <a href="/book" target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-center font-black px-3 py-1 rounded-full text-[8px] tracking-wider pointer-events-auto cursor-pointer"
+                          style={{
+                            ...getStickerStyle(selectedInstaForPreview, 'booking'),
+                            background: 'rgba(255,255,255,0.95)',
+                            color: 'var(--accent)',
+                            boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
+                            fontFamily: 'Heebo, sans-serif',
+                            border: '1.5px solid var(--accent-border)',
+                            textDecoration: 'none'
+                          }}>
+                          <span>📅</span>
+                          <span>לתיאום תור</span>
+                        </a>
+                      )}
                    </div>
 
                 </div>
