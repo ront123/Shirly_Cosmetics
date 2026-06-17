@@ -603,39 +603,39 @@ function MetaAuthModal({ onClose, onConnect }) {
       style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
       onClick={e => e.target === e.currentTarget && step !== 2 && onClose()}>
       <div className="w-full" style={{ maxWidth: 460, margin: '0 16px' }}>
-        <div className="card overflow-hidden" style={{ background: '#1877f2', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4" style={{ background: '#166fe5', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="flex items-center justify-between px-6 py-4" style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
             <div className="flex items-center gap-2">
-              <div style={{ width: 22, height: 22, borderRadius: 6, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: '#1877f2', fontWeight: 900, fontSize: 13, fontFamily: 'sans-serif' }}>∞</span>
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#fff', fontWeight: 900, fontSize: 13, fontFamily: 'sans-serif' }}>∞</span>
               </div>
-              <span className="font-black text-sm text-white">התחברות עם Meta</span>
+              <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>התחברות עם Meta</span>
             </div>
-            {step !== 2 && <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 18 }}>✕</button>}
+            {step !== 2 && <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 18 }}>✕</button>}
           </div>
 
           {/* Body */}
-          <div className="px-6 py-8 text-white">
+          <div className="px-6 py-8" style={{ color: 'var(--text-primary)' }}>
             {step === 1 && (
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="flex flex-col items-center space-y-2 mb-2">
-                  <div className="flex items-center justify-center font-bold text-white text-3xl" style={{ fontFamily: 'sans-serif', fontWeight: 800 }}>
+                  <div className="flex items-center justify-center font-bold text-[#1877f2] text-3xl" style={{ fontFamily: 'sans-serif', fontWeight: 800 }}>
                     facebook
                   </div>
-                  <p className="text-xs text-blue-100 text-center leading-relaxed">
+                  <p className="text-xs text-center leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     התחברי לחשבון הפייסבוק שמנהל את הדף העסקי שלך כדי לקשר את חשבון האינסטגרם
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="text-right">
-                    <label className="block text-xs font-bold text-blue-100 mb-1">אימייל או מספר טלפון</label>
+                    <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>אימייל או מספר טלפון</label>
                     <input 
                       type="text" 
                       required
                       placeholder="example@email.com"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 outline-none text-left" 
+                      className="input-dark text-left" 
                       style={{ direction: 'ltr' }}
                       value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -643,12 +643,12 @@ function MetaAuthModal({ onClose, onConnect }) {
                   </div>
 
                   <div className="text-right">
-                    <label className="block text-xs font-bold text-blue-100 mb-1">סיסמה</label>
+                    <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>סיסמה</label>
                     <input 
                       type="password" 
                       required
                       placeholder="••••••••"
-                      className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-white/30 outline-none text-left" 
+                      className="input-dark text-left" 
                       style={{ direction: 'ltr' }}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
@@ -659,7 +659,7 @@ function MetaAuthModal({ onClose, onConnect }) {
                 <button 
                   type="submit" 
                   disabled={!email.trim() || !password.trim()}
-                  className="w-full py-3 mt-4 bg-white text-[#1877f2] font-black text-sm rounded-xl hover:bg-blue-50 transition-all border-none cursor-pointer shadow-md"
+                  className="w-full btn-primary justify-center py-3 mt-4 text-sm font-black rounded-xl cursor-pointer"
                   style={{ opacity: (email.trim() && password.trim()) ? 1 : 0.6 }}
                 >
                   התחברי
@@ -669,13 +669,13 @@ function MetaAuthModal({ onClose, onConnect }) {
 
             {step === 2 && (
               <div className="py-8 text-center space-y-4">
-                <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                <div className="w-12 h-12 border-4 border-slate-700 border-t-[var(--accent)] rounded-full animate-spin mx-auto"></div>
                 <div className="space-y-1">
-                  <p className="font-bold text-sm">מאמת פרטי התחברות ב-Meta...</p>
-                  <p className="text-xs text-blue-200">אנא המתיני בזמן שמתבצע אימות מאובטח</p>
+                  <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>מאמת פרטי התחברות ב-Meta...</p>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>אנא המתיני בזמן שמתבצע אימות מאובטח</p>
                 </div>
-                <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden max-w-xs mx-auto">
-                  <div className="bg-white h-full transition-all duration-150" style={{ width: `${progress}%` }}></div>
+                <div className="w-full h-1.5 rounded-full overflow-hidden max-w-xs mx-auto" style={{ background: 'var(--bg-elevated)' }}>
+                  <div className="h-full transition-all duration-150" style={{ width: `${progress}%`, background: 'var(--accent)' }}></div>
                 </div>
               </div>
             )}
@@ -683,17 +683,24 @@ function MetaAuthModal({ onClose, onConnect }) {
             {step === 3 && (
               <div className="space-y-5">
                 <div className="flex flex-col items-center space-y-2 mb-2 text-center">
-                  <div className="flex items-center justify-center font-bold" style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
-                    <Instagram size={24} />
+                  <div className="flex items-center justify-center font-bold" style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                    <Instagram size={24} style={{ color: 'var(--accent)' }} />
                   </div>
-                  <h4 className="font-extrabold text-base">בחרי חשבון אינסטגרם עסקי</h4>
-                  <p className="text-xs text-blue-100 max-w-sm mx-auto leading-relaxed">
+                  <h4 className="font-extrabold text-base" style={{ color: 'var(--text-primary)' }}>בחרי חשבון אינסטגרם עסקי</h4>
+                  <p className="text-xs max-w-sm mx-auto leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     נמצאו החשבונות הבאים המקושרים לדפי הפייסבוק שבניהולך. בחרי את החשבון לקישור:
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="flex items-center justify-between p-3.5 rounded-xl bg-white/10 hover:bg-white/15 transition-all cursor-pointer border border-white/10">
+                  <label className="flex items-center justify-between p-3.5 rounded-xl transition-all cursor-pointer border"
+                    style={{
+                      background: 'var(--bg-elevated)',
+                      borderColor: 'var(--border)'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-hover)'; e.currentTarget.style.borderColor = 'var(--border-hover)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                  >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center font-black text-xs"
                         style={{ 
@@ -706,8 +713,8 @@ function MetaAuthModal({ onClose, onConnect }) {
                         ש
                       </div>
                       <div className="text-right">
-                        <span className="font-bold text-sm block">שירלי קוסמטיקס</span>
-                        <span className="text-xs text-blue-100 block" dir="ltr">@shirly_cosmetics</span>
+                        <span className="font-bold text-sm block" style={{ color: 'var(--text-primary)' }}>שירלי קוסמטיקס</span>
+                        <span className="text-xs block" style={{ color: 'var(--text-secondary)' }} dir="ltr">@shirly_cosmetics</span>
                       </div>
                     </div>
                     <input 
@@ -716,18 +723,23 @@ function MetaAuthModal({ onClose, onConnect }) {
                       value="shirly_cosmetics"
                       checked={selectedProfile === 'shirly_cosmetics'}
                       onChange={() => setSelectedProfile('shirly_cosmetics')}
-                      style={{ width: 18, height: 18, accentColor: '#fff', cursor: 'pointer' }}
+                      style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}
                     />
                   </label>
 
-                  <div className="rounded-xl bg-black/15 p-4 text-xs text-right space-y-1.5 text-blue-50 border border-white/5">
-                    <p className="font-bold text-white mb-1">הרשאות שיוענקו ל-Shirly Cosmetics:</p>
+                  <div className="rounded-xl p-4 text-xs text-right space-y-1.5 border"
+                    style={{
+                      background: 'var(--bg-base)',
+                      borderColor: 'var(--border)',
+                      color: 'var(--text-secondary)'
+                    }}>
+                    <p className="font-bold mb-1" style={{ color: 'var(--text-primary)' }}>הרשאות שיוענקו ל-Shirly Cosmetics:</p>
                     <div className="flex items-start gap-2">
-                      <span className="text-[10px] mt-0.5">✓</span>
+                      <span className="text-[10px] mt-0.5" style={{ color: 'var(--green)' }}>✓</span>
                       <span>ניהול ופרסום סטוריז ותוכן בחשבון האינסטגרם שלך</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-[10px] mt-0.5">✓</span>
+                      <span className="text-[10px] mt-0.5" style={{ color: 'var(--green)' }}>✓</span>
                       <span>קריאת נתוני עוקבים ופרופיל בסיסיים</span>
                     </div>
                   </div>
@@ -735,7 +747,7 @@ function MetaAuthModal({ onClose, onConnect }) {
 
                 <button 
                   onClick={handleConnect}
-                  className="w-full py-3 mt-4 bg-white text-[#1877f2] font-black text-sm rounded-xl hover:bg-blue-50 transition-all border-none cursor-pointer shadow-md"
+                  className="w-full btn-primary justify-center py-3.5 mt-4 text-sm font-black rounded-xl cursor-pointer"
                 >
                   אשר וקשר חשבון נבחר
                 </button>
@@ -745,8 +757,8 @@ function MetaAuthModal({ onClose, onConnect }) {
 
           {/* Footer */}
           {step === 1 && (
-            <div className="flex items-center justify-between px-6 py-4 bg-black/10" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <button onClick={onClose} className="text-white hover:underline bg-transparent border-none text-xs font-semibold cursor-pointer">
+            <div className="flex items-center justify-between px-6 py-4" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)' }}>
+              <button onClick={onClose} className="btn-ghost" style={{ fontSize: 13 }}>
                 ביטול
               </button>
             </div>
@@ -903,7 +915,7 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
           <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-x-reverse" style={{ borderColor: 'var(--border)' }}>
             
             {/* Form inputs side */}
-            <div className="flex-1 p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="w-full md:flex-1 p-6 space-y-4 max-h-[70vh] overflow-y-auto" style={{ minWidth: '320px' }}>
               
               {!connectedAccount && (
                 <div className="rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-right" style={{ background: 'var(--amber-light)', border: '1px solid var(--amber-border)' }}>
