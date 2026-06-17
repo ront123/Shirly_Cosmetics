@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Send, Calendar, Edit2, Trash2, CheckCircle, Clock, FileText, Search, Mail, Check, Users, Upload, Image } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { fetchClients } from '../utils/api';
 
 const Instagram = ({ size = 18, ...props }) => (
@@ -35,7 +36,7 @@ const INIT = [
 ];
 
 /* ─── Modal: New Campaign ──────────────────────────────────────────────── */
-function NewCampaignModal({ onClose, onSave, clients }) {
+function NewCampaignModal({ onClose, onSave, clients, customLists = [] }) {
   const [step,     setStep]     = useState(1);
   const [name,     setName]     = useState('');
   const [audience, setAudience] = useState('');
@@ -59,11 +60,18 @@ function NewCampaignModal({ onClose, onSave, clients }) {
   const recentCount = clients.filter(c => c.status === 'active').length;
   const birthdayCount = clients.filter(c => c.birthday && parseInt(c.birthday.slice(5, 7), 10) === thisMonth).length;
 
+  const customAudiences = customLists.map(list => ({
+    key: `custom_${list.id}`,
+    label: list.name,
+    count: list.clients.length
+  }));
+
   const dynamicAudiences = [
     { key: 'all',      label: 'כל הלקוחות',        count: totalClients },
     { key: 'inactive', label: 'לקוחות רדומות',    count: inactiveCount },
     { key: 'recent',   label: 'ביקרו לאחרונה',     count: recentCount   },
     { key: 'birthday', label: 'יום הולדת החודש',   count: birthdayCount },
+    ...customAudiences,
     { key: 'manual',   label: 'בחירה ידנית',       count: selectedManualIds.size }
   ];
 
@@ -71,6 +79,18 @@ function NewCampaignModal({ onClose, onSave, clients }) {
   const canNext1 = name && audience && (audience !== 'manual' || selectedManualIds.size > 0);
   const canNext2 = recipientIds.size > 0;
   const canNext3 = msg.length >= 10;
+
+  const getActiveClientPool = () => {
+    if (audience && audience.startsWith('custom_')) {
+      const listId = audience.replace('custom_', '');
+      const list = customLists.find(l => String(l.id) === String(listId));
+      if (list) {
+        return [...list.clients, ...clients];
+      }
+    }
+    return clients;
+  };
+  const activeClientPool = getActiveClientPool();
 
   const filteredClients = clients.filter(c => 
     c.name.toLowerCase().includes(clientSearch.toLowerCase()) || 
@@ -84,7 +104,7 @@ function NewCampaignModal({ onClose, onSave, clients }) {
     ...unselectedFiltered.slice(0, 50)
   ];
 
-  const filteredRecipientClients = clients.filter(c => 
+  const filteredRecipientClients = activeClientPool.filter(c => 
     c.name.toLowerCase().includes(recipientSearch.toLowerCase()) || 
     c.phone.includes(recipientSearch)
   );
@@ -106,6 +126,10 @@ function NewCampaignModal({ onClose, onSave, clients }) {
       return new Set(clients.filter(c => c.status === 'active').map(c => c.id));
     } else if (audience === 'birthday') {
       return new Set(clients.filter(c => c.birthday && parseInt(c.birthday.slice(5, 7), 10) === thisMonth).map(c => c.id));
+    } else if (audience && audience.startsWith('custom_')) {
+      const listId = audience.replace('custom_', '');
+      const list = customLists.find(l => String(l.id) === String(listId));
+      return new Set(list ? list.clients.map(c => c.id) : []);
     } else if (audience === 'manual') {
       return new Set(selectedManualIds);
     }
@@ -1193,13 +1217,263 @@ function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectPa
   );
 }
 
+/* ─── Modal: Upload Excel Clients List ────────────────────────────── */
+function UploadExcelModal({ onClose, onSave }) {
+  const [listName, setListName] = useState('');
+  const [file, setFile] = useState(null);
+  const [parsedData, setParsedData] = useState(null);
+  const [error, setError] = useState('');
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleChange = (e) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      processFile(e.target.files[0]);
+    }
+  };
+
+  const processFile = (file) => {
+    setFile(file);
+    setError('');
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    if (!listName) {
+      setListName(baseName);
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet);
+
+        if (rows.length === 0) {
+          setError('הקובץ ריק');
+          return;
+        }
+
+        const headers = Object.keys(rows[0]);
+        const nameKeys = ['name', 'שם', 'שם מלא', 'לקוח', 'customer', 'customer name', 'שם הלקוח', 'שם הלקוחה'];
+        const phoneKeys = ['mobile', 'phone', 'telephone', 'נייד', 'טלפון', 'טלפון נייד', 'mobilefirst', 'phone number', 'מספר נייד', 'מספר טלפון'];
+
+        const nameCol = headers.find(h => nameKeys.includes(h.toLowerCase().trim()));
+        const phoneCol = headers.find(h => phoneKeys.includes(h.toLowerCase().trim()));
+
+        if (!phoneCol) {
+          setError('לא נמצאה עמודת טלפון בקובץ האקסל. העמודה צריכה להיקרא "MobileFirst", "טלפון", "נייד" או "Phone".');
+          return;
+        }
+
+        const parsedClients = rows.map((row, idx) => {
+          let nameVal = '';
+          if (nameCol) {
+            nameVal = row[nameCol];
+          } else {
+            nameVal = row[headers[0]] || `לקוחה #${idx + 1}`;
+          }
+
+          let phoneVal = String(row[phoneCol] || '').trim();
+          phoneVal = phoneVal.replace(/\D/g, ''); // Keep digits only
+
+          return {
+            id: `custom_${Date.now()}_${idx}`,
+            name: String(nameVal).trim(),
+            phone: phoneVal,
+            status: 'active',
+            birthday: null
+          };
+        }).filter(c => c.name && c.phone);
+
+        if (parsedClients.length === 0) {
+          setError('לא נמצאו לקוחות תקינים בקובץ.');
+          return;
+        }
+
+        setParsedData(parsedClients);
+      } catch (err) {
+        console.error(err);
+        setError('שגיאה בפענוח קובץ האקסל: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleSave = () => {
+    if (!listName.trim() || !parsedData) return;
+    onSave({
+      id: String(Date.now()),
+      name: listName.trim(),
+      clients: parsedData,
+      createdAt: new Date().toLocaleDateString('he-IL')
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center" dir="rtl"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="w-full" style={{ maxWidth: 580, margin: '0 16px' }}>
+        <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+          
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+            <h3 className="font-black" style={{ color: 'var(--text-primary)' }}>יבוא רשימת לקוחות מאקסל</h3>
+            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          </div>
+
+          <div className="px-6 py-5 space-y-4 max-h-[75vh] overflow-y-auto">
+            <div>
+              <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שם הרשימה *</label>
+              <input 
+                className="input-dark" 
+                placeholder="לדוגמא: לקוחות טיפולי פנים מיוחד" 
+                value={listName} 
+                onChange={e => setListName(e.target.value)} 
+              />
+            </div>
+
+            <div 
+              onDragEnter={handleDrag}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
+                dragActive ? 'border-[var(--accent)] bg-black/20' : 'border-[var(--border)] hover:bg-black/10'
+              }`}
+              style={{ background: 'var(--bg-elevated)', minHeight: 140 }}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept=".xlsx,.xls,.csv" 
+                onChange={handleChange} 
+              />
+              <Upload size={32} style={{ color: file ? 'var(--green)' : 'var(--text-muted)', marginBottom: 10 }} />
+              
+              {file ? (
+                <div className="space-y-1">
+                  <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{file.name}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>לחצי להחלפת קובץ</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>גררי והשליכי קובץ אקסל כאן</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>או לחצי לבחירת קובץ מהמחשב (.xlsx, .xls, .csv)</p>
+                </div>
+              )}
+            </div>
+
+            {error && (
+              <div className="rounded-xl p-3 text-xs border border-red-500/20 bg-red-500/5" style={{ color: 'var(--red)' }}>
+                ⚠️ {error}
+              </div>
+            )}
+
+            {parsedData && (
+              <div className="space-y-3 pt-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span style={{ color: 'var(--text-secondary)' }}>לקוחות שפוענחו בהצלחה:</span>
+                  <span className="font-bold text-sm" style={{ color: 'var(--green)' }}>{parsedData.length}</span>
+                </div>
+
+                <div className="rounded-xl overflow-hidden border border-[var(--border)] max-h-40 overflow-y-auto">
+                  <table className="w-full text-right border-collapse text-xs">
+                    <thead>
+                      <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+                        <th className="p-2 font-bold" style={{ color: 'var(--text-secondary)' }}>שם</th>
+                        <th className="p-2 font-bold" style={{ color: 'var(--text-secondary)' }}>טלפון</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {parsedData.slice(0, 5).map((c, i) => (
+                        <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                          <td className="p-2 font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
+                          <td className="p-2" style={{ color: 'var(--text-muted)' }} dir="ltr">{c.phone}</td>
+                        </tr>
+                      ))}
+                      {parsedData.length > 5 && (
+                        <tr>
+                          <td colSpan={2} className="p-2 text-center" style={{ color: 'var(--text-faint)' }}>
+                            ועוד {parsedData.length - 5} לקוחות נוספים...
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <button onClick={onClose} className="btn-ghost">ביטול</button>
+            <button 
+              onClick={handleSave} 
+              disabled={!listName.trim() || !parsedData} 
+              className="btn-primary"
+              style={{ opacity: (listName.trim() && parsedData) ? 1 : 0.5 }}
+            >
+              שמור רשימה
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Campaigns Page ─────────────────────────────────────────────── */
 export default function Campaigns() {
-  const [activeTab, setActiveTab] = useState('whatsapp'); // whatsapp | instagram
+  const [activeTab, setActiveTab] = useState('whatsapp'); // whatsapp | instagram | lists
   const [campaigns, setCampaigns] = useState(INIT);
   const [showModal, setShowModal] = useState(false);
   const [filter,    setFilter]    = useState('all');
   const [clients,   setClients]   = useState([]);
+  
+  // Excel distribution lists state
+  const [customLists, setCustomLists] = useState(() => {
+    const saved = localStorage.getItem('custom_client_lists');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse custom client lists:', e);
+      }
+    }
+    return [];
+  });
+  const [showUploadExcelModal, setShowUploadExcelModal] = useState(false);
+  const [selectedListForPreview, setSelectedListForPreview] = useState(null);
+
+  const saveCustomLists = (lists) => {
+    setCustomLists(lists);
+    localStorage.setItem('custom_client_lists', JSON.stringify(lists));
+  };
   
   // Instagram Stories Campaigns state
   const [instaCampaigns, setInstaCampaigns] = useState(() => {
@@ -1296,9 +1570,11 @@ export default function Campaigns() {
 
     if (c.status === 'sent') {
       let targetList = [];
+      const allPossibleClients = [...clients, ...customLists.flatMap(l => l.clients)];
+      
       if (c.recipientIds && c.recipientIds.length > 0) {
         const idsSet = new Set(c.recipientIds);
-        targetList = clients.filter(x => idsSet.has(x.id));
+        targetList = allPossibleClients.filter(x => idsSet.has(x.id));
       } else {
         const thisMonth = new Date().getMonth() + 1;
         if (c.targetAudienceKey === 'all') {
@@ -1309,9 +1585,13 @@ export default function Campaigns() {
           targetList = clients.filter(x => x.status === 'active');
         } else if (c.targetAudienceKey === 'birthday') {
           targetList = clients.filter(x => x.birthday && parseInt(x.birthday.slice(5, 7), 10) === thisMonth);
+        } else if (c.targetAudienceKey && c.targetAudienceKey.startsWith('custom_')) {
+          const listId = c.targetAudienceKey.replace('custom_', '');
+          const list = customLists.find(l => String(l.id) === String(listId));
+          targetList = list ? list.clients : [];
         } else if (c.targetAudienceKey === 'manual') {
           const manualIdsSet = new Set(c.manualClientIds || []);
-          targetList = clients.filter(x => manualIdsSet.has(x.id));
+          targetList = allPossibleClients.filter(x => manualIdsSet.has(x.id));
         }
       }
 
@@ -1384,7 +1664,20 @@ export default function Campaigns() {
 
   return (
     <div dir="rtl" className="space-y-6">
-      {showModal && <NewCampaignModal onClose={() => setShowModal(false)} onSave={handleSaveCampaign} clients={clients} />}
+      {showModal && (
+        <NewCampaignModal 
+          onClose={() => setShowModal(false)} 
+          onSave={handleSaveCampaign} 
+          clients={clients} 
+          customLists={customLists} 
+        />
+      )}
+      {showUploadExcelModal && (
+        <UploadExcelModal 
+          onClose={() => setShowUploadExcelModal(false)} 
+          onSave={(newList) => saveCustomLists([newList, ...customLists])} 
+        />
+      )}
       {showInstaModal && (
         <NewInstagramStoryModal 
           onClose={() => setShowInstaModal(false)} 
@@ -1418,16 +1711,20 @@ export default function Campaigns() {
         <div>
           <h2 className="font-black text-xl" style={{ color: 'var(--text-primary)' }}>קמפיינים</h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {activeTab === 'whatsapp' ? 'ניהול הודעות WhatsApp ידניות' : 'ניהול ותזמון סטוריז באינסטגרם'}
+            {activeTab === 'whatsapp' ? 'ניהול הודעות WhatsApp ידניות' : activeTab === 'instagram' ? 'ניהול ותזמון סטוריז באינסטגרם' : 'ניהול רשימות לקוחות מיובאות מאקסל'}
           </p>
         </div>
         {activeTab === 'whatsapp' ? (
           <button className="btn-primary" onClick={() => setShowModal(true)}>
             <Plus size={15} /> קמפיין חדש
           </button>
-        ) : (
+        ) : activeTab === 'instagram' ? (
           <button className="btn-primary" onClick={() => setShowInstaModal(true)}>
             <Instagram size={15} /> סטורי מתוזמן חדש
+          </button>
+        ) : (
+          <button className="btn-primary" onClick={() => setShowUploadExcelModal(true)}>
+            <Plus size={15} /> העלאת רשימה מאקסל
           </button>
         )}
       </div>
@@ -1452,11 +1749,24 @@ export default function Campaigns() {
           }}>
           <Instagram size={16} /> סטוריז באינסטגרם
         </button>
+        <button onClick={() => { setActiveTab('lists'); setFilter('all'); }}
+          className="font-bold text-sm flex items-center gap-2 pb-2 transition-all"
+          style={{
+            background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'Heebo, sans-serif',
+            borderBottom: activeTab === 'lists' ? '2px solid var(--accent)' : '2px solid transparent',
+            color: activeTab === 'lists' ? 'var(--text-primary)' : 'var(--text-muted)'
+          }}>
+          <FileText size={16} /> רשימות לקוחות מאקסל
+        </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        {(activeTab === 'whatsapp' ? stats : instaStats).map((s, i) => (
+        {(activeTab === 'whatsapp' ? stats : activeTab === 'instagram' ? instaStats : [
+          { label: 'רשימות אקסל',      val: customLists.length,         color: 'var(--accent)' },
+          { label: 'לקוחות מיובאים',   val: customLists.reduce((acc, curr) => acc + curr.clients.length, 0), color: 'var(--green)' },
+          { label: 'לקוחות במערכת',    val: clients.length,             color: 'var(--violet)' },
+        ]).map((s, i) => (
           <div key={i} className="card p-5 text-center">
             <p className="font-black text-3xl" style={{ color: s.color }}>{s.val}</p>
             <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{s.label}</p>
@@ -1818,6 +2128,125 @@ export default function Campaigns() {
 
         </div>
       </div>
+      )}
+
+      {/* Excel Distribution Lists Tab Content */}
+      {activeTab === 'lists' && (
+        <div className="space-y-6">
+          <div className="card p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)',
+              borderColor: 'var(--accent-border)'
+            }}>
+            <div className="text-right">
+              <h4 className="font-black text-base" style={{ color: 'var(--text-primary)' }}>רשימות לקוחות מותאמות אישית מאקסל</h4>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                העלי קבצי Excel עם רשימות לקוחות ייעודיות לטיפולים מסוימים כדי ליצור עבורן קמפיינים בוואטסאפ.
+              </p>
+            </div>
+            <button 
+              onClick={() => setShowUploadExcelModal(true)}
+              className="btn-primary"
+            >
+              <Plus size={15} /> העלאת רשימה מאקסל
+            </button>
+          </div>
+
+          {customLists.length === 0 ? (
+            <div className="card flex flex-col items-center justify-center py-20">
+              <p className="font-semibold" style={{ color: 'var(--text-muted)' }}>אין רשימות לקוחות שהועלו עדיין</p>
+              <button 
+                onClick={() => setShowUploadExcelModal(true)}
+                className="btn-ghost mt-4 font-bold text-xs"
+              >
+                העלי את קובץ האקסל הראשון שלך
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {customLists.map(list => (
+                <div key={list.id} className="card p-5 space-y-4 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-black text-base" style={{ color: 'var(--text-primary)' }}>{list.name}</h4>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
+                        {list.clients.length} לקוחות
+                      </span>
+                    </div>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      תאריך העלאה: {list.createdAt}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+                    <button 
+                      onClick={() => setSelectedListForPreview(list)}
+                      className="btn-ghost"
+                      style={{ fontSize: 12, padding: '4px 10px' }}
+                    >
+                      צפי בלקוחות
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (confirm(`האם את בטוחה שברצונך למחוק את הרשימה "${list.name}"?`)) {
+                          const next = customLists.filter(x => x.id !== list.id);
+                          saveCustomLists(next);
+                          if (selectedListForPreview?.id === list.id) setSelectedListForPreview(null);
+                        }
+                      }}
+                      style={{ 
+                        width: 32, height: 32, borderRadius: 8, 
+                        background: 'var(--red-light)', border: '1px solid var(--red-border)', 
+                        color: 'var(--red)', cursor: 'pointer', 
+                        display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* List Clients Preview Panel */}
+          {selectedListForPreview && (
+            <div className="card p-5 space-y-4">
+              <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: 'var(--border)' }}>
+                <div>
+                  <h4 className="font-black text-base" style={{ color: 'var(--text-primary)' }}>צפייה בלקוחות הרשימה: {selectedListForPreview.name}</h4>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)', marginTop: 2 }}>מציג {selectedListForPreview.clients.length} נמענים</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedListForPreview(null)}
+                  className="btn-ghost"
+                  style={{ padding: '4px 10px', fontSize: 12 }}
+                >
+                  סגור תצוגה
+                </button>
+              </div>
+
+              <div className="rounded-xl overflow-hidden border border-[var(--border)] max-h-80 overflow-y-auto">
+                <table className="w-full text-right border-collapse text-sm">
+                  <thead>
+                    <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border)' }}>
+                      <th className="p-3 font-bold" style={{ color: 'var(--text-secondary)' }}>שם לקוחה</th>
+                      <th className="p-3 font-bold" style={{ color: 'var(--text-secondary)' }}>טלפון</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedListForPreview.clients.map((c, i) => (
+                      <tr key={i} className="hover-bg-elevated" style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td className="p-3 font-medium" style={{ color: 'var(--text-primary)' }}>{c.name}</td>
+                        <td className="p-3 text-sm" style={{ color: 'var(--text-muted)' }} dir="ltr">{c.phone}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
