@@ -1,40 +1,42 @@
 [
   {
-    "id": 999996,
+    "id": "appt_1781602533592_0",
     "clientId": "",
     "clientName": "אירוע כללי",
     "clientPhone": "",
     "treatmentName": "אירוע כללי",
+    "therapistName": "שירלי",
+    "startTime": "2026-06-16T09:35:33.592Z",
+    "endTime": "2026-06-16T09:35:33.592Z",
+    "status": "scheduled",
+    "notes": "",
+    "isExplicitBreak": true
+  },
+  {
+    "id": "appt_1781602533592_1",
+    "clientId": "",
+    "clientName": "אירוע כללי",
+    "clientPhone": "",
+    "treatmentName": "אירוע כללי",
+    "therapistName": "שירלי",
+    "startTime": "2026-06-16T09:35:33.592Z",
+    "endTime": "2026-06-16T09:35:33.592Z",
+    "status": "scheduled",
+    "notes": "",
+    "isExplicitBreak": true
+  },
+  {
+    "id": 999996,
+    "clientId": "",
+    "clientName": "אירוע כללי",
+    "clientPhone": "",
+    "treatmentName": "טיפול כללי",
     "therapistName": "שירלי",
     "startTime": "2026-06-15T13:23:20.110Z",
     "endTime": "2026-06-15T13:23:20.111Z",
     "status": "scheduled",
     "notes": "",
     "isExplicitBreak": true
-  },
-  {
-    "id": "appt_1781446006026_0",
-    "clientId": "",
-    "clientName": "אירוע כללי",
-    "clientPhone": "",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-14T14:06:46.026Z",
-    "endTime": "2026-06-14T14:06:46.026Z",
-    "status": "scheduled",
-    "notes": ""
-  },
-  {
-    "id": "appt_1781446006026_1",
-    "clientId": "",
-    "clientName": "אירוע כללי",
-    "clientPhone": "",
-    "treatmentName": "טיפול כללי",
-    "therapistName": "שירלי",
-    "startTime": "2026-06-14T14:06:46.026Z",
-    "endTime": "2026-06-14T14:06:46.026Z",
-    "status": "scheduled",
-    "notes": ""
   },
   {
     "id": 106585,

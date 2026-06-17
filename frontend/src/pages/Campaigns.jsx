@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Send, Calendar, Edit2, Trash2, CheckCircle, Clock, FileText, Search, Mail, Check, Users, Upload, Image } from 'lucide-react';
 import { fetchClients } from '../utils/api';
 
@@ -556,13 +556,177 @@ const getDisplayLink = (url) => {
   }
 };
 
+/* ─── Modal: Meta Authorization Simulator ─────────────────────────── */
+function MetaAuthModal({ onClose, onConnect }) {
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [username, setUsername] = useState('shirly_cosmetics');
+
+  const handleConnect = () => {
+    setLoading(true);
+    setProgress(10);
+  };
+
+  useEffect(() => {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            onConnect({
+              username: username.trim().toLowerCase().replace(/^@/, ''),
+              name: username.toLowerCase().includes('shirly') ? 'שירלי קוסמטיקס' : username,
+              avatar: null,
+              followers: 1247
+            });
+            onClose();
+          }, 400);
+          return 100;
+        }
+        return prev + 15;
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, [loading, username]);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center" dir="rtl"
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+      onClick={e => e.target === e.currentTarget && !loading && onClose()}>
+      <div className="w-full" style={{ maxWidth: 460, margin: '0 16px' }}>
+        <div className="card overflow-hidden" style={{ background: '#1877f2', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4" style={{ background: '#166fe5', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="flex items-center gap-2">
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#1877f2', fontWeight: 900, fontSize: 13, fontFamily: 'sans-serif' }}>∞</span>
+              </div>
+              <span className="font-black text-sm text-white">התחברות עם Meta</span>
+            </div>
+            {!loading && <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 18 }}>✕</button>}
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-8 text-center text-white space-y-6">
+            {!loading ? (
+              <>
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="flex items-center justify-center font-bold" style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <Instagram size={28} />
+                  </div>
+                  <h4 className="font-extrabold text-lg">קישור חשבון אינסטגרם עסקי</h4>
+                  <p className="text-xs text-blue-100 max-w-sm mx-auto leading-relaxed">
+                    כדי לתזמן ולפרסם סטוריז באופן אוטומטי, יש להעניק הרשאות ניהול ל-Shirly Cosmetics דרך Meta Business Suite.
+                  </p>
+                </div>
+
+                <div className="space-y-2 text-right">
+                  <label className="block text-xs font-bold text-blue-100">שם משתמש באינסטגרם (Username) *</label>
+                  <div className="relative">
+                    <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>@</span>
+                    <input 
+                      type="text" 
+                      className="w-full bg-black/20 border border-white/10 rounded-xl px-3 py-2.5 pl-3 text-white placeholder-white/30 outline-none text-left" 
+                      style={{ paddingRight: 28, direction: 'ltr' }}
+                      value={username}
+                      onChange={e => setUsername(e.target.value)}
+                      placeholder="username"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-black/15 p-4 text-xs text-right space-y-2 text-blue-50 border border-white/5">
+                  <p className="font-bold text-white mb-1">הרשאות מבוקשות:</p>
+                  <div className="flex items-start gap-2">
+                    <span className="text-[10px] mt-0.5">✓</span>
+                    <span>ניהול ופרסום סטוריז ותוכן בחשבון האינסטגרם שלך</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-[10px] mt-0.5">✓</span>
+                    <span>גישה לפרטי הפרופיל (שם משתמש, תמונת פרופיל)</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="py-8 space-y-4">
+                <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
+                <div className="space-y-1">
+                  <p className="font-bold text-sm">מתחבר ל-Meta API...</p>
+                  <p className="text-xs text-blue-200">יוצר חיבור מאובטח ומאמת הרשאות</p>
+                </div>
+                <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden max-w-xs mx-auto">
+                  <div className="bg-white h-full transition-all duration-150" style={{ width: `${progress}%` }}></div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          {!loading && (
+            <div className="flex items-center justify-between px-6 py-4 bg-black/10" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <button onClick={onClose} className="text-white hover:underline bg-transparent border-none text-xs font-semibold cursor-pointer">
+                ביטול
+              </button>
+              <button 
+                onClick={handleConnect}
+                disabled={!username.trim()}
+                className="px-5 py-2.5 bg-white text-[#1877f2] font-black text-xs rounded-xl hover:bg-blue-50 transition-all border-none cursor-pointer shadow-md"
+                style={{ opacity: username.trim() ? 1 : 0.6 }}
+              >
+                אישור והתחברות
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Helper: Get sticker positioning style ───────────────────────── */
+const getPositionStyles = (stickerPos, linkPos) => {
+  let stickerStyle = { position: 'absolute', left: '50%', transform: 'translateX(-50%) rotate(-3deg)', zIndex: 4 };
+  let linkStyle = { position: 'absolute', left: '50%', transform: 'translateX(-50%) rotate(2deg)', zIndex: 4 };
+
+  // Sticker text positioning
+  if (stickerPos === 'top') {
+    stickerStyle.top = '14%';
+  } else if (stickerPos === 'bottom') {
+    stickerStyle.bottom = '22%';
+  } else {
+    stickerStyle.top = '44%';
+  }
+
+  // Link sticker positioning
+  if (linkPos === 'top') {
+    linkStyle.top = stickerPos === 'top' ? '25%' : '14%';
+  } else if (linkPos === 'bottom') {
+    linkStyle.bottom = '14%';
+    if (stickerPos === 'bottom') {
+      stickerStyle.bottom = '25%'; // Offset sticker upwards if in same position
+    }
+  } else {
+    if (stickerPos === 'center') {
+      stickerStyle.top = '34%';
+      linkStyle.top = '48%';
+    } else {
+      linkStyle.top = '44%';
+    }
+  }
+
+  return { stickerStyle, linkStyle };
+};
+
 /* ─── Modal: New Instagram Story Campaign ─────────────────────────── */
-function NewInstagramStoryModal({ onClose, onSave }) {
+function NewInstagramStoryModal({ onClose, onSave, connectedAccount, onConnectParent }) {
   const [name, setName] = useState('');
   const [image, setImage] = useState('');
   const [stickerText, setStickerText] = useState('');
   const [stickerColor, setStickerColor] = useState('neon-green'); // neon-green, hot-pink, amber, neon-cyan, white
   const [linkUrl, setLinkUrl] = useState(''); // Link URL
+  const [stickerPosition, setStickerPosition] = useState('center'); // top, center, bottom
+  const [linkPosition, setLinkPosition] = useState('center'); // top, center, bottom
   const [scheduleType, setScheduleType] = useState('recurring'); // recurring, once
   const [selectedDays, setSelectedDays] = useState([]);
   const [selectedHours, setSelectedHours] = useState([]);
@@ -570,6 +734,9 @@ function NewInstagramStoryModal({ onClose, onSave }) {
   const [singleDate, setSingleDate] = useState('');
   const [singleTime, setSingleTime] = useState('12:00');
   
+  const [showMetaAuth, setShowMetaAuth] = useState(false);
+  const fileInputRef = useRef(null);
+
   const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
   const toggleDay = (d) => {
@@ -611,6 +778,8 @@ function NewInstagramStoryModal({ onClose, onSave }) {
       stickerText: stickerText.trim(),
       stickerColor,
       linkUrl: linkUrl.trim(),
+      stickerPosition,
+      linkPosition,
       scheduleType,
       selectedDays,
       selectedHours,
@@ -631,11 +800,23 @@ function NewInstagramStoryModal({ onClose, onSave }) {
     'white': { bg: '#ffffff', text: '#000' },
   };
 
+  const { stickerStyle, linkStyle } = getPositionStyles(stickerPosition, linkPosition);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" dir="rtl"
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="w-full" style={{ maxWidth: 840, margin: '0 16px' }}>
+      
+      {showMetaAuth && (
+        <MetaAuthModal 
+          onClose={() => setShowMetaAuth(false)} 
+          onConnect={(acc) => {
+            onConnectParent(acc);
+          }}
+        />
+      )}
+
+      <div className="w-full" style={{ maxWidth: 880, margin: '0 16px' }}>
         <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           
           <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -650,6 +831,19 @@ function NewInstagramStoryModal({ onClose, onSave }) {
             
             {/* Form inputs side */}
             <div className="flex-1 p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              
+              {!connectedAccount && (
+                <div className="rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-right" style={{ background: 'var(--amber-light)', border: '1px solid var(--amber-border)' }}>
+                  <div>
+                    <p className="font-bold text-xs" style={{ color: 'var(--amber)' }}>לא מחובר חשבון אינסטגרם</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>עליך לחבר חשבון אינסטגרם עסקי על מנת שתוכלי לתזמן ולפרסם סטוריז.</p>
+                  </div>
+                  <button type="button" onClick={() => setShowMetaAuth(true)} className="btn-primary" style={{ background: 'var(--amber)', color: '#000', boxShadow: 'none', padding: '6px 12px', fontSize: 12 }}>
+                    חברי חשבון
+                  </button>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שם הקמפיין *</label>
                 <input className="input-dark" placeholder="לדוגמא: מבצע שבועות 2026" value={name} onChange={e => setName(e.target.value)} />
@@ -657,14 +851,15 @@ function NewInstagramStoryModal({ onClose, onSave }) {
 
               <div>
                 <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>העלאת תמונת סטורי *</label>
-                <label className="flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-dashed hover:bg-black/10"
+                <div onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center justify-center rounded-xl transition-all cursor-pointer border border-dashed hover:bg-black/10"
                   style={{ height: 100, background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                  <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileChange} />
                   <Upload size={20} style={{ color: 'var(--text-muted)', marginBottom: 6 }} />
                   <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
                     {image ? 'לחצי להחלפת תמונה' : 'בחרי תמונה מהמחשב'}
                   </span>
-                </label>
+                </div>
               </div>
 
               <div>
@@ -677,13 +872,48 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                 <input className="input-dark" placeholder="לדוגמא: www.shirly-cosmetics.co.il" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מיקום מדבקת טקסט</label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[['top', 'למעלה'], ['center', 'מרכז'], ['bottom', 'למטה']].map(([pos, label]) => (
+                      <button key={pos} type="button" onClick={() => setStickerPosition(pos)}
+                        className="font-semibold py-2 rounded-lg border text-center transition-all"
+                        style={{ cursor: 'pointer', fontSize: 11,
+                          background: stickerPosition === pos ? 'var(--accent-light)' : 'var(--bg-elevated)',
+                          borderColor: stickerPosition === pos ? 'var(--accent)' : 'var(--border)',
+                          color: stickerPosition === pos ? 'var(--accent)' : 'var(--text-primary)' }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>מיקום מדבקת קישור</label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[['top', 'למעלה'], ['center', 'מרכז'], ['bottom', 'למטה']].map(([pos, label]) => (
+                      <button key={pos} type="button" onClick={() => setLinkPosition(pos)}
+                        disabled={!linkUrl}
+                        className="font-semibold py-2 rounded-lg border text-center transition-all"
+                        style={{ cursor: 'pointer', fontSize: 11, opacity: linkUrl ? 1 : 0.5,
+                          background: linkPosition === pos ? 'var(--accent-light)' : 'var(--bg-elevated)',
+                          borderColor: linkPosition === pos ? 'var(--accent)' : 'var(--border)',
+                          color: linkPosition === pos ? 'var(--accent)' : 'var(--text-primary)' }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>עיצוב מדבקה</label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {Object.keys(stickerColorsMap).map(k => (
-                    <button key={k} onClick={() => setStickerColor(k)}
+                    <button key={k} type="button" onClick={() => setStickerColor(k)}
                       style={{
-                        padding: '4px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                        padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer',
                         background: stickerColorsMap[k].bg,
                         color: stickerColorsMap[k].text,
                         border: stickerColor === k ? '2px solid var(--accent)' : '1px solid transparent',
@@ -698,7 +928,7 @@ function NewInstagramStoryModal({ onClose, onSave }) {
               <div className="border-t pt-4" style={{ borderColor: 'var(--border)' }}>
                 <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>תצורת תזמון</label>
                 <div className="grid grid-cols-2 gap-2 mb-3">
-                  <button onClick={() => setScheduleType('recurring')}
+                  <button type="button" onClick={() => setScheduleType('recurring')}
                     className="font-bold text-xs py-2 px-3 rounded-lg border text-center transition-all"
                     style={{ cursor: 'pointer',
                       background: scheduleType === 'recurring' ? 'var(--accent-light)' : 'var(--bg-elevated)',
@@ -706,7 +936,7 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                       color: scheduleType === 'recurring' ? 'var(--accent)' : 'var(--text-muted)' }}>
                     תזמון מחזורי (ימי שבוע)
                   </button>
-                  <button onClick={() => setScheduleType('once')}
+                  <button type="button" onClick={() => setScheduleType('once')}
                     className="font-bold text-xs py-2 px-3 rounded-lg border text-center transition-all"
                     style={{ cursor: 'pointer',
                       background: scheduleType === 'once' ? 'var(--accent-light)' : 'var(--bg-elevated)',
@@ -720,9 +950,9 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                   <div className="space-y-3">
                     <div>
                       <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>ימים בשבוע *</label>
-                      <div className="flex gap-1.5">
+                      <div className="flex flex-wrap gap-1.5">
                         {DAYS_HE.map(d => (
-                          <button key={d} onClick={() => toggleDay(d)}
+                          <button key={d} type="button" onClick={() => toggleDay(d)}
                             style={{
                               width: 32, height: 32, borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'Heebo',
                               background: selectedDays.includes(d) ? 'var(--accent)' : 'var(--bg-elevated)',
@@ -739,14 +969,14 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                       <label className="block text-xs font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>שעות שליחה *</label>
                       <div className="flex gap-2">
                         <input type="time" className="input-dark" style={{ maxWidth: 100 }} value={hourInput} onChange={e => setHourInput(e.target.value)} />
-                        <button className="btn-ghost" style={{ padding: '6px 12px' }} onClick={addHour}>+</button>
+                        <button type="button" className="btn-ghost" style={{ padding: '6px 12px' }} onClick={addHour}>+</button>
                       </div>
                       {selectedHours.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {selectedHours.map(h => (
                             <span key={h} className="badge badge-violet gap-1" style={{ padding: '4px 8px', fontSize: 11 }}>
                               {h}
-                              <button onClick={() => removeHour(h)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', fontWeight: 'bold' }}>✕</button>
+                              <button type="button" onClick={() => removeHour(h)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', fontWeight: 'bold' }}>✕</button>
                             </span>
                           ))}
                         </div>
@@ -785,10 +1015,19 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                 <div className="absolute top-4 left-3 right-3 flex items-center justify-between" style={{ zIndex: 5 }}>
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center justify-center font-black"
-                      style={{ width: 18, height: 18, borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff', fontSize: 7 }}>
-                      ש
+                      style={{ 
+                        width: 18, 
+                        height: 18, 
+                        borderRadius: '50%', 
+                        background: connectedAccount ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : '#475569', 
+                        color: '#fff', 
+                        fontSize: 7 
+                      }}>
+                      {connectedAccount ? (connectedAccount.username[0]?.toUpperCase() || 'ש') : '✕'}
                     </div>
-                    <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>shirly_cosmetics</span>
+                    <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.5)', direction: 'ltr' }}>
+                      {connectedAccount ? `@${connectedAccount.username}` : 'לא מחובר'}
+                    </span>
                     <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 7, textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>12ש׳</span>
                   </div>
                   <div style={{ color: '#fff', fontSize: 10, letterSpacing: 1, textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>•••</div>
@@ -804,14 +1043,14 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                 )}
 
                 {/* Sticker and Link overlays */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-3 pointer-events-none space-y-3" style={{ zIndex: 4 }}>
+                <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 4 }}>
                   {stickerText && (
                     <div className="text-center font-bold px-3.5 py-2 rounded-xl text-xs break-words max-w-[90%]"
                       style={{
+                        ...stickerStyle,
                         background: stickerColorsMap[stickerColor].bg,
                         color: stickerColorsMap[stickerColor].text,
                         boxShadow: '0 4px 15px rgba(0,0,0,0.25)',
-                        transform: 'rotate(-4deg)',
                         fontFamily: 'Heebo, sans-serif'
                       }}>
                       {stickerText}
@@ -821,10 +1060,10 @@ function NewInstagramStoryModal({ onClose, onSave }) {
                   {linkUrl && (
                     <div className="flex items-center gap-1.5 text-center font-black px-3.5 py-1.5 rounded-full text-[9px] tracking-wider"
                       style={{
+                        ...linkStyle,
                         background: 'rgba(255,255,255,0.95)',
                         color: '#3897f0',
                         boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
-                        transform: 'rotate(2deg)',
                         fontFamily: 'Heebo, sans-serif'
                       }}>
                       <span>🔗</span>
@@ -845,7 +1084,7 @@ function NewInstagramStoryModal({ onClose, onSave }) {
 
           <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
             <button onClick={onClose} className="btn-ghost">ביטול</button>
-            <button onClick={save} className="btn-primary" disabled={!canSave} style={{ opacity: canSave ? 1 : 0.5 }}>
+            <button onClick={save} className="btn-primary" disabled={!canSave || !connectedAccount} style={{ opacity: (canSave && connectedAccount) ? 1 : 0.5 }}>
               תזמן סטורי
             </button>
           </div>
@@ -878,6 +1117,20 @@ export default function Campaigns() {
   });
   const [showInstaModal, setShowInstaModal] = useState(false);
   const [selectedInstaForPreview, setSelectedInstaForPreview] = useState(null);
+
+  // Instagram simulated authorization
+  const [connectedAccount, setConnectedAccount] = useState(() => {
+    const saved = localStorage.getItem('instagram_connected_account');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse instagram connected account:', e);
+      }
+    }
+    return null;
+  });
+  const [showMetaAuth, setShowMetaAuth] = useState(false);
 
   // Group sending state
   const [groupClients, setGroupClients] = useState([]);
@@ -1034,7 +1287,26 @@ export default function Campaigns() {
   return (
     <div dir="rtl" className="space-y-6">
       {showModal && <NewCampaignModal onClose={() => setShowModal(false)} onSave={handleSaveCampaign} clients={clients} />}
-      {showInstaModal && <NewInstagramStoryModal onClose={() => setShowInstaModal(false)} onSave={handleSaveInstaCampaign} />}
+      {showInstaModal && (
+        <NewInstagramStoryModal 
+          onClose={() => setShowInstaModal(false)} 
+          onSave={handleSaveInstaCampaign} 
+          connectedAccount={connectedAccount}
+          onConnectParent={(acc) => {
+            localStorage.setItem('instagram_connected_account', JSON.stringify(acc));
+            setConnectedAccount(acc);
+          }}
+        />
+      )}
+      {showMetaAuth && (
+        <MetaAuthModal 
+          onClose={() => setShowMetaAuth(false)} 
+          onConnect={(acc) => {
+            localStorage.setItem('instagram_connected_account', JSON.stringify(acc));
+            setConnectedAccount(acc);
+          }} 
+        />
+      )}
       {showGroupSender && (
         <SendGroupMessageModal 
           selectedClients={groupClients} 
@@ -1171,7 +1443,86 @@ export default function Campaigns() {
 
       {/* Instagram Stories Tab Content */}
       {activeTab === 'instagram' && (
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="space-y-6">
+          {/* Connection Profile Card or Warning Banner */}
+          {!connectedAccount ? (
+            <div className="card p-6 flex flex-col md:flex-row items-center justify-between gap-4"
+              style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)',
+                borderColor: 'var(--accent-border)'
+              }}>
+              <div className="flex items-center gap-4">
+                <div style={{
+                  width: 48, height: 48, borderRadius: 14,
+                  background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff'
+                }}>
+                  <Instagram size={24} />
+                </div>
+                <div className="text-right">
+                  <h4 className="font-black text-base" style={{ color: 'var(--text-primary)' }}>חברי את חשבון האינסטגרם העסקי שלך</h4>
+                  <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                    חברי את חשבונך כדי לתזמן סטוריז שיפורסמו אוטומטית בימים ובשעות המבוקשים עם מדבקות קישור וטקסט.
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowMetaAuth(true)}
+                className="btn-primary"
+                style={{
+                  background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                  boxShadow: '0 4px 15px rgba(220,39,67,0.3)'
+                }}
+              >
+                התחברי עם Meta
+              </button>
+            </div>
+          ) : (
+            <div className="card p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-right" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div style={{
+                    width: 42, height: 42, borderRadius: '50%',
+                    background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                    fontWeight: 900, fontSize: 16
+                  }}>
+                    {connectedAccount.username[0]?.toUpperCase() || 'ש'}
+                  </div>
+                  <div className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-green-500 border-2" style={{ borderColor: 'var(--bg-elevated)', backgroundColor: 'var(--green)' }} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>{connectedAccount.name}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'var(--green-light)', color: 'var(--green)', border: '1px solid var(--green-border)' }}>
+                      מחובר ומתוזמן
+                    </span>
+                  </div>
+                  <p className="text-xs" style={{ color: 'var(--text-secondary)', marginTop: 2, direction: 'ltr' }}>@{connectedAccount.username}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="text-center sm:text-right">
+                  <span className="text-xxs block" style={{ color: 'var(--text-muted)' }}>עוקבים</span>
+                  <span className="font-bold text-xs" style={{ color: 'var(--text-primary)' }}>{connectedAccount.followers?.toLocaleString() || '1,247'}</span>
+                </div>
+                <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('instagram_connected_account');
+                    setConnectedAccount(null);
+                  }}
+                  className="btn-ghost"
+                  style={{ padding: '4px 10px', fontSize: 11, borderColor: 'var(--red-border)', color: 'var(--red)', cursor: 'pointer' }}
+                >
+                  נתק חשבון
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col lg:flex-row gap-6">
           
           {/* Table area */}
           <div className="flex-1 space-y-4">
@@ -1300,10 +1651,18 @@ export default function Campaigns() {
                   <div className="absolute top-3 left-2 right-2 flex items-center justify-between" style={{ zIndex: 5 }}>
                     <div className="flex items-center gap-1">
                       <div className="flex items-center justify-center font-black text-[6px]"
-                        style={{ width: 14, height: 14, borderRadius: '50%', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: '#fff' }}>
-                        ש
+                        style={{ 
+                          width: 14, 
+                          height: 14, 
+                          borderRadius: '50%', 
+                          background: connectedAccount ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : '#475569', 
+                          color: '#fff' 
+                        }}>
+                        {connectedAccount ? (connectedAccount.username[0]?.toUpperCase() || 'ש') : '✕'}
                       </div>
-                      <span style={{ color: '#fff', fontSize: 8, fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>shirly_cosmetics</span>
+                      <span style={{ color: '#fff', fontSize: 8, fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.5)', direction: 'ltr' }}>
+                        {connectedAccount ? `@${connectedAccount.username}` : 'לא מחובר'}
+                      </span>
                       {selectedInstaForPreview.status === 'published' && (
                         <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 6, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>· פורסם</span>
                       )}
@@ -1313,10 +1672,11 @@ export default function Campaigns() {
                    <img src={selectedInstaForPreview.image} alt="Selected Story" className="w-full h-full object-cover" />
  
                    {/* Sticker and Link overlays */}
-                   <div className="absolute inset-0 flex flex-col items-center justify-center p-2 pointer-events-none space-y-2.5" style={{ zIndex: 4 }}>
+                   <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 4 }}>
                      {selectedInstaForPreview.stickerText && (
                        <div className="text-center font-bold px-3 py-1.5 rounded-lg text-[10px] break-words max-w-[85%]"
                          style={{
+                           ...getPositionStyles(selectedInstaForPreview.stickerPosition, selectedInstaForPreview.linkPosition).stickerStyle,
                            background: {
                              'neon-green': '#25d366',
                              'hot-pink': '#e1306c',
@@ -1326,7 +1686,6 @@ export default function Campaigns() {
                            }[selectedInstaForPreview.stickerColor || 'neon-green'],
                            color: (selectedInstaForPreview.stickerColor === 'hot-pink') ? '#fff' : '#000',
                            boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                           transform: 'rotate(-3deg)',
                            fontFamily: 'Heebo, sans-serif'
                          }}>
                          {selectedInstaForPreview.stickerText}
@@ -1336,10 +1695,10 @@ export default function Campaigns() {
                      {selectedInstaForPreview.linkUrl && (
                        <div className="flex items-center gap-1 text-center font-black px-3 py-1 rounded-full text-[8px] tracking-wider"
                          style={{
+                           ...getPositionStyles(selectedInstaForPreview.stickerPosition, selectedInstaForPreview.linkPosition).linkStyle,
                            background: 'rgba(255,255,255,0.95)',
                            color: '#3897f0',
                            boxShadow: '0 3px 8px rgba(0,0,0,0.2)',
-                           transform: 'rotate(2deg)',
                            fontFamily: 'Heebo, sans-serif'
                          }}>
                          <span>🔗</span>
@@ -1360,6 +1719,7 @@ export default function Campaigns() {
           </div>
 
         </div>
+      </div>
       )}
     </div>
   );
