@@ -461,50 +461,83 @@ function NewCampaignModal({ onClose, onSave, clients, customLists = [] }) {
 }
 
 /* ─── Modal: WhatsApp Group Sender ─────────────────────────────────────────────── */
+const API_BASE = import.meta.env.MODE === 'development'
+  ? 'http://127.0.0.1:5001/api'
+  : 'https://shirly-cosmetics-api.onrender.com/api';
+
 function SendGroupMessageModal({ selectedClients, messageTemplate, onClose }) {
-  const [template, setTemplate] = useState(messageTemplate || '');
-  const [sentStatus, setSentStatus] = useState({}); // client.id -> boolean
+  const [template, setTemplate]     = useState(messageTemplate || '');
+  const [sentStatus, setSentStatus] = useState({}); // id -> 'sending' | 'sent' | 'error'
+  const [isSendingAll, setIsSendingAll] = useState(false);
+  const [bulkDone, setBulkDone]         = useState(false);
 
-  const handleSendSingle = (client) => {
-    const cleanPhone = client.phone.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
-    const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
-    const url = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msgText)}`;
-    window.open(url, '_blank');
-    setSentStatus(prev => ({ ...prev, [client.id]: true }));
+  const sendOne = async (client) => {
+    setSentStatus(prev => ({ ...prev, [client.id]: 'sending' }));
+    try {
+      const res = await fetch(`${API_BASE}/whatsapp/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: client.phone, name: client.name, message: template }),
+      });
+      const data = await res.json();
+      setSentStatus(prev => ({ ...prev, [client.id]: data.success ? 'sent' : 'error' }));
+    } catch {
+      setSentStatus(prev => ({ ...prev, [client.id]: 'error' }));
+    }
   };
 
-  const handleSendAll = () => {
-    let delay = 0;
-    selectedClients.forEach(client => {
-      setTimeout(() => {
-        const cleanPhone = client.phone.replace(/\D/g, '');
-        const formattedPhone = cleanPhone.startsWith('0') ? '972' + cleanPhone.slice(1) : cleanPhone;
-        const msgText = template.replace(/\[שם(?:[ _]ה?לקוחה?)?\]/g, client.name);
-        const url = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msgText)}`;
-        window.open(url, '_blank');
-        setSentStatus(prev => ({ ...prev, [client.id]: true }));
-      }, delay);
-      delay += 1200; // 1.2s delay to prevent browser blockages
-    });
+  const handleSendAll = async () => {
+    setIsSendingAll(true);
+    setBulkDone(false);
+    try {
+      const res = await fetch(`${API_BASE}/whatsapp/send-bulk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clients: selectedClients, message: template }),
+      });
+      const data = await res.json();
+      if (data.results) {
+        const newStatus = {};
+        data.results.forEach(r => { newStatus[r.id] = r.success ? 'sent' : 'error'; });
+        setSentStatus(newStatus);
+      }
+      setBulkDone(true);
+    } catch {
+      selectedClients.forEach(c =>
+        setSentStatus(prev => ({ ...prev, [c.id]: 'error' }))
+      );
+    } finally {
+      setIsSendingAll(false);
+    }
   };
+
+  const sentCount  = Object.values(sentStatus).filter(s => s === 'sent').length;
+  const errorCount = Object.values(sentStatus).filter(s => s === 'error').length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
+      onClick={e => e.target === e.currentTarget && !isSendingAll && onClose()}>
       <div className="w-full" style={{ maxWidth: 560, margin: '0 16px' }}>
         <div className="card overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
+
+          {/* Header */}
           <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
             <div className="flex items-center gap-3">
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--accent-light)', border: '1px solid var(--accent-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Mail size={16} style={{ color: 'var(--accent)' }} />
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
               </div>
               <h3 className="font-black" style={{ color: 'var(--text-primary)' }}>שליחת קמפיין ב-WhatsApp</h3>
             </div>
-            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>✕</button>
+            <button onClick={onClose} disabled={isSendingAll}
+              style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: isSendingAll ? 'not-allowed' : 'pointer', fontSize: 16 }}>✕</button>
           </div>
+
           <div className="px-6 py-5 space-y-4">
+
+            {/* Message textarea */}
             <div>
               <label className="block text-sm font-bold mb-1.5" style={{ color: 'var(--text-secondary)' }}>תוכן ההודעה</label>
               <textarea className="input-dark resize-none font-sans" rows={5}
@@ -512,48 +545,105 @@ function SendGroupMessageModal({ selectedClients, messageTemplate, onClose }) {
                 onChange={e => setTemplate(e.target.value)}
                 placeholder="הקלד את ההודעה כאן..."
                 style={{ direction: 'rtl', width: '100%' }}
+                disabled={isSendingAll}
               />
-              <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>💡 השתמש בתג <b>[שם_הלקוחה]</b> כדי להחליף אוטומטית בשם הלקוחה.</p>
+              <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 4 }}>
+                💡 השתמש בתג <b>[שם_הלקוחה]</b> כדי להחליף אוטומטית בשם הלקוחה.
+              </p>
             </div>
-            
+
+            {/* Progress bar during bulk send */}
+            {isSendingAll && (
+              <div>
+                <div className="flex justify-between text-xs mb-1" style={{ color: 'var(--text-muted)' }}>
+                  <span>שולח הודעות...</span>
+                  <span>{sentCount + errorCount} / {selectedClients.length}</span>
+                </div>
+                <div style={{ height: 6, borderRadius: 99, background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${((sentCount + errorCount) / selectedClients.length) * 100}%`,
+                    background: '#25d366',
+                    borderRadius: 99,
+                    transition: 'width 0.4s ease'
+                  }} />
+                </div>
+              </div>
+            )}
+
+            {/* Summary after bulk done */}
+            {bulkDone && (
+              <div className="rounded-xl p-3 text-sm font-semibold flex items-center gap-3"
+                style={{
+                  background: errorCount === 0 ? 'rgba(37,211,102,0.08)' : 'rgba(245,158,11,0.08)',
+                  border: `1px solid ${errorCount === 0 ? 'rgba(37,211,102,0.25)' : 'rgba(245,158,11,0.25)'}`,
+                  color: errorCount === 0 ? '#25d366' : 'var(--amber)'
+                }}>
+                {errorCount === 0 ? '✅' : '⚠️'}
+                <span>נשלחו {sentCount} הודעות{errorCount > 0 ? `, ${errorCount} נכשלו` : ' בהצלחה!'}</span>
+              </div>
+            )}
+
+            {/* Recipients list */}
             <div>
               <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-secondary)' }}>
                 רשימת נמענים ({selectedClients.length})
               </label>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {selectedClients.map(client => (
-                  <div key={client.id} className="flex items-center justify-between p-2.5 rounded-xl" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
-                    <div>
-                      <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{client.name}</span>
-                      <span className="text-xs block" style={{ color: 'var(--text-muted)', marginTop: 2 }} dir="ltr">{client.phone}</span>
+                {selectedClients.map(client => {
+                  const st = sentStatus[client.id];
+                  return (
+                    <div key={client.id} className="flex items-center justify-between p-2.5 rounded-xl"
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+                      <div>
+                        <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{client.name}</span>
+                        <span className="text-xs block" style={{ color: 'var(--text-muted)', marginTop: 2 }} dir="ltr">{client.phone}</span>
+                      </div>
+                      <button
+                        onClick={() => !st && sendOne(client)}
+                        disabled={!!st || isSendingAll}
+                        className="btn-ghost"
+                        style={{
+                          fontSize: 12, padding: '4px 10px', height: 'auto',
+                          cursor: st || isSendingAll ? 'default' : 'pointer',
+                          background:   st === 'sent' ? 'rgba(37,211,102,0.1)' : st === 'error' ? 'rgba(239,68,68,0.1)' : 'transparent',
+                          color:        st === 'sent' ? '#25d366' : st === 'error' ? '#ef4444' : st === 'sending' ? 'var(--text-faint)' : 'var(--text-secondary)',
+                          borderColor:  st === 'sent' ? 'rgba(37,211,102,0.3)' : st === 'error' ? 'rgba(239,68,68,0.3)' : 'var(--border)',
+                        }}>
+                        {st === 'sending' ? '⏳ שולח...' : st === 'sent' ? '✓ נשלח' : st === 'error' ? '✗ שגיאה' : 'שלח'}
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => handleSendSingle(client)}
-                      className="btn-ghost"
-                      style={{ fontSize: 12, padding: '4px 10px', height: 'auto', background: sentStatus[client.id] ? 'var(--green-light)' : 'transparent', color: sentStatus[client.id] ? 'var(--green)' : 'var(--text-secondary)', borderColor: sentStatus[client.id] ? 'var(--green-border)' : 'var(--border)' }}
-                    >
-                      {sentStatus[client.id] ? '✓ נפתח' : 'פתח צ\'אט'}
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-            
-            <div className="rounded-xl p-3 text-xs" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', color: 'var(--amber)', lineHeight: 1.5 }}>
-              ⚠️ שים לב: פתיחת מספר צ'אטים במקביל תפתח כרטיסיות חדשות בדפדפן. אם הדפדפן חוסם חלונות קופצים (Pop-ups), יש לאשר פתיחת פופ-אפים מהאתר הנוכחי.
+
+            {/* Info */}
+            <div className="rounded-xl p-3 text-xs"
+              style={{ background: 'rgba(37,211,102,0.05)', border: '1px solid rgba(37,211,102,0.15)', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              📡 ההודעות נשלחות דרך <b>Twilio WhatsApp API</b> ישירות לנייד של הלקוחה.
             </div>
           </div>
+
+          {/* Footer */}
           <div className="flex items-center justify-between px-6 py-4" style={{ borderTop: '1px solid var(--border)' }}>
-            <button onClick={onClose} className="btn-ghost">סגור</button>
-            <div className="flex gap-2">
-              <button 
-                onClick={handleSendAll}
-                className="btn-primary" 
-                style={{ background: '#25d366', color: '#fff', border: 'none', boxShadow: '0 2px 10px rgba(37,211,102,0.3)' }}
-              >
-                פתח את כל הצ'אטים
-              </button>
-            </div>
+            <button onClick={onClose} className="btn-ghost" disabled={isSendingAll}>סגור</button>
+            <button
+              onClick={handleSendAll}
+              disabled={isSendingAll || !template.trim() || bulkDone}
+              className="btn-primary"
+              style={{
+                background: '#25d366', color: '#fff', border: 'none',
+                boxShadow: '0 2px 10px rgba(37,211,102,0.3)',
+                opacity: (isSendingAll || !template.trim() || bulkDone) ? 0.6 : 1,
+                cursor: (isSendingAll || !template.trim() || bulkDone) ? 'not-allowed' : 'pointer',
+              }}>
+              {isSendingAll
+                ? `שולח... (${sentCount + errorCount}/${selectedClients.length})`
+                : bulkDone
+                ? '✓ הסתיים'
+                : `📤 שלח לכולם (${selectedClients.length})`}
+            </button>
           </div>
         </div>
       </div>
@@ -586,13 +676,41 @@ function MetaAuthModal({ onClose, onConnect }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [progress, setProgress] = useState(0);
-  const [selectedProfile, setSelectedProfile] = useState('shirly_cosmetics');
+  const [profile, setProfile] = useState(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
     setStep(2);
     setProgress(10);
+
+    try {
+      const res = await fetch(`${API_BASE}/instagram/profile`);
+      const data = await res.json();
+      if (data.success) {
+        setProfile({
+          username: data.username,
+          name: data.name,
+          avatar: data.profile_picture,
+          followers: data.followers
+        });
+      } else {
+        setProfile({
+          username: 'shirly_beauty_complex',
+          name: 'שירלי קוסמטיקס',
+          avatar: null,
+          followers: 1247
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch Instagram profile on login:', err);
+      setProfile({
+        username: 'shirly_beauty_complex',
+        name: 'שירלי קוסמטיקס',
+        avatar: null,
+        followers: 1247
+      });
+    }
   };
 
   useEffect(() => {
@@ -613,12 +731,9 @@ function MetaAuthModal({ onClose, onConnect }) {
   }, [step]);
 
   const handleConnect = () => {
-    onConnect({
-      username: selectedProfile.trim().toLowerCase().replace(/^@/, ''),
-      name: selectedProfile.toLowerCase().includes('shirly') ? 'שירלי קוסמטיקס' : selectedProfile,
-      avatar: null,
-      followers: 1247
-    });
+    if (profile) {
+      onConnect(profile);
+    }
     onClose();
   };
 
@@ -704,7 +819,7 @@ function MetaAuthModal({ onClose, onConnect }) {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 3 && profile && (
               <div className="space-y-5">
                 <div className="flex flex-col items-center space-y-2 mb-2 text-center">
                   <div className="flex items-center justify-center font-bold" style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
@@ -726,27 +841,31 @@ function MetaAuthModal({ onClose, onConnect }) {
                     onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center font-black text-xs"
-                        style={{ 
-                          width: 32, 
-                          height: 32, 
-                          borderRadius: '50%', 
-                          background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', 
-                          color: '#fff' 
-                        }}>
-                        ש
-                      </div>
+                      {profile.avatar ? (
+                        <img src={profile.avatar} alt={profile.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        <div className="flex items-center justify-center font-black text-xs"
+                          style={{ 
+                            width: 32, 
+                            height: 32, 
+                            borderRadius: '50%', 
+                            background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', 
+                            color: '#fff' 
+                          }}>
+                          {profile.name[0]?.toUpperCase() || 'ש'}
+                        </div>
+                      )}
                       <div className="text-right">
-                        <span className="font-bold text-sm block" style={{ color: 'var(--text-primary)' }}>שירלי קוסמטיקס</span>
-                        <span className="text-xs block" style={{ color: 'var(--text-secondary)' }} dir="ltr">@shirly_cosmetics</span>
+                        <span className="font-bold text-sm block" style={{ color: 'var(--text-primary)' }}>{profile.name}</span>
+                        <span className="text-xs block" style={{ color: 'var(--text-secondary)' }} dir="ltr">@{profile.username}</span>
                       </div>
                     </div>
                     <input 
                       type="radio" 
                       name="insta_profile" 
-                      value="shirly_cosmetics"
-                      checked={selectedProfile === 'shirly_cosmetics'}
-                      onChange={() => setSelectedProfile('shirly_cosmetics')}
+                      value={profile.username}
+                      checked={true}
+                      readOnly
                       style={{ width: 18, height: 18, accentColor: 'var(--accent)', cursor: 'pointer' }}
                     />
                   </label>
@@ -1671,6 +1790,23 @@ export default function Campaigns() {
         }
       })
       .catch(err => console.error('Failed to fetch clients:', err));
+
+    // Fetch updated Instagram profile and follower count on page load
+    fetch(`${API_BASE}/instagram/profile`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const profile = {
+            username: data.username,
+            name: data.name,
+            avatar: data.profile_picture,
+            followers: data.followers
+          };
+          setConnectedAccount(profile);
+          localStorage.setItem('instagram_connected_account', JSON.stringify(profile));
+        }
+      })
+      .catch(err => console.error('Failed to fetch Instagram profile on load:', err));
   }, []);
 
   // Live simulation of story posting

@@ -38,6 +38,8 @@ runMigrations();
 const treatmentsRoutes = require('./routes/treatments');
 const appointmentsRoutes = require('./routes/appointments');
 const clientsRoutes = require('./routes/clients');
+const whatsappRoutes = require('./routes/whatsapp');
+const instagramRoutes = require('./routes/instagram');
 
 app.use('/api/treatments', treatmentsRoutes);
 app.use('/api/appointments', appointmentsRoutes);
@@ -61,6 +63,8 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 app.use('/api/clients', clientsRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/instagram', instagramRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Shirly Cosmetics API is running', version: '1.2.0', deployedAt: new Date().toISOString() });
